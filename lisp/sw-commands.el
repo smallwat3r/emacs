@@ -32,16 +32,52 @@
 
 ;;; Formatting
 
+(defun sw/format-region-with-command (beg end cmd args msg)
+  "Format region BEG to END with CMD and ARGS. MSG names the formatter."
+  (let ((input (buffer-substring-no-properties beg end)))
+    (if-let ((output (with-temp-buffer
+                       (insert input)
+                       (when (zerop (apply #'call-process-region
+                                           (point-min) (point-max) cmd t t nil args))
+                         (buffer-string)))))
+        (save-excursion
+          (delete-region beg end)
+          (goto-char beg)
+          (insert output)
+          (message "Formatted region (%s)" msg))
+      (message "%s formatting failed" msg))))
+
+(defun sw/format-region-with-black (beg end)
+  "Format region between BEG and END using black."
+  (sw/format-region-with-command beg end "black" '("--quiet" "-") "black"))
+
+(defun sw/format-region-with-gofmt (beg end)
+  "Format region between BEG and END using gofmt."
+  (sw/format-region-with-command beg end "gofmt" nil "gofmt"))
+
+(defun sw/format-region-with-shfmt (beg end)
+  "Format region between BEG and END using shfmt."
+  (sw/format-region-with-command beg end "shfmt" '("-i" "2" "-ci" "-bn" "-") "shfmt"))
+
 (defun sw/format-buffer-or-region ()
   "Format the current region if active, otherwise format the buffer.
-Uses eglot for region formatting when available, apheleia for buffer."
+Region formatting uses language-specific tools or eglot. Buffer formatting uses apheleia."
   (interactive)
-  (if (and (use-region-p)
-           (fboundp 'eglot-managed-p)
-           (eglot-managed-p))
-      (progn
-        (eglot-format (region-beginning) (region-end))
-        (message "Formatted region"))
+  (if (use-region-p)
+      (let ((beg (region-beginning))
+            (end (region-end)))
+        (cond
+         ((derived-mode-p 'python-mode 'python-ts-mode)
+          (sw/format-region-with-black beg end))
+         ((derived-mode-p 'go-mode 'go-ts-mode)
+          (sw/format-region-with-gofmt beg end))
+         ((derived-mode-p 'sh-mode 'bash-ts-mode)
+          (sw/format-region-with-shfmt beg end))
+         ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
+          (eglot-format beg end)
+          (message "Formatted region (eglot)"))
+         (t
+          (message "No region formatter available"))))
     (require 'apheleia)
     (call-interactively #'apheleia-format-buffer)
     (message "Formatted buffer")))
