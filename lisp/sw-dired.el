@@ -37,18 +37,19 @@
 (use-package dired-subtree
   :after dired
   :custom
-  (dired-subtree-use-backgrounds nil)
-  :config
-  (with-eval-after-load 'evil
-    (evil-define-key 'normal dired-mode-map
-      (kbd "TAB") #'dired-subtree-toggle
-      (kbd "<backtab>") #'dired-subtree-remove)))
+  (dired-subtree-use-backgrounds nil))
 
 ;; Narrow dired buffer
 (use-package dired-narrow
-  :after dired
-  :config
-  (with-eval-after-load 'evil
+  :after dired)
+
+;; Evil keybindings for dired extensions
+(with-eval-after-load 'evil
+  (with-eval-after-load 'dired-subtree
+    (evil-define-key 'normal dired-mode-map
+      (kbd "TAB") #'dired-subtree-toggle
+      (kbd "<backtab>") #'dired-subtree-remove))
+  (with-eval-after-load 'dired-narrow
     (evil-define-key 'normal dired-mode-map
       "/" #'dired-narrow-fuzzy)))
 

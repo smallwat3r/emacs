@@ -226,18 +226,20 @@ For remote directories, returns the remote default-directory."
             (eat-exec buffer buf-name shell nil nil)))
         buffer))))
 
+(defun sw/eat--determine-directory (here)
+  "Return directory for eat buffer. If HERE, use buffer's directory."
+  (if here
+      (or (and buffer-file-name (file-name-directory buffer-file-name))
+          default-directory)
+    (sw/eat--project-root)))
+
 (defun sw/eat-here (&optional here)
   "Open a new eat buffer at the project root, replacing the current buffer.
 If HERE is non-nil, open at current buffer's directory.
 For remote directories, opens a shell on the remote host."
   (interactive "P")
   (require 'eat)
-  (let* ((dir (if here
-                  (or (and buffer-file-name (file-name-directory buffer-file-name))
-                      default-directory)
-                (sw/eat--project-root)))
-         (buf (sw/eat--new-buffer dir)))
-    (switch-to-buffer buf)))
+  (switch-to-buffer (sw/eat--new-buffer (sw/eat--determine-directory here))))
 
 (defun sw/eat-toggle (&optional here)
   "Toggle eat buffer visibility.
@@ -245,12 +247,8 @@ If HERE is non-nil, use buffer-specific directory.
 For remote directories, opens a shell on the remote host."
   (interactive "P")
   (require 'eat)
-  (let* ((dir (if here
-                  (or (and buffer-file-name (file-name-directory buffer-file-name))
-                      default-directory)
-                (sw/eat--project-root)))
-         (buf-name (sw/eat--buffer-for-dir dir))
-         (buf (get-buffer buf-name)))
+  (let* ((dir (sw/eat--determine-directory here))
+         (buf (get-buffer (sw/eat--buffer-for-dir dir))))
     (if-let ((win (and buf (get-buffer-window buf))))
         (delete-window win)
       (pop-to-buffer (sw/eat--get-buffer dir)))))

@@ -165,20 +165,15 @@ If a workspace for the project already exists, switch to it."
   "Return live buffers for current workspace."
   (seq-filter #'buffer-live-p (sw/workspace--get-buffers)))
 
-(defun sw/workspace-switch-buffer ()
-  "Switch to a buffer in the current workspace with preview."
-  (interactive)
+(defun sw/workspace--read-buffer (buffers prompt)
+  "Select a buffer from BUFFERS with PROMPT and preview."
   (require 'consult)
-  (let ((workspace-buffers (sw/workspace-buffer-list)))
-    (if workspace-buffers
-        (when-let ((buf (consult--read
-                         (mapcar #'buffer-name workspace-buffers)
-                         :prompt "Switch to buffer: "
-                         :category 'buffer
-                         :state (consult--buffer-state)
-                         :require-match t)))
-          (switch-to-buffer buf))
-      (call-interactively #'consult-buffer))))
+  (consult--read
+   (mapcar #'buffer-name buffers)
+   :prompt prompt
+   :category 'buffer
+   :state (consult--buffer-state)
+   :require-match t))
 
 (defun sw/workspace--find-buffer-workspace (buffer)
   "Return workspace index containing BUFFER, or nil if not found."
@@ -187,19 +182,23 @@ If a workspace for the project already exists, switch to it."
              when (memq buf buffers)
              return idx)))
 
+(defun sw/workspace-switch-buffer ()
+  "Switch to a buffer in the current workspace with preview."
+  (interactive)
+  (let ((workspace-buffers (sw/workspace-buffer-list)))
+    (if workspace-buffers
+        (when-let ((buf (sw/workspace--read-buffer workspace-buffers
+                                                    "Switch to buffer: ")))
+          (switch-to-buffer buf))
+      (call-interactively #'consult-buffer))))
+
 (defun sw/switch-buffer-global ()
   "Switch to any buffer, switching workspace if needed."
   (interactive)
-  (require 'consult)
   (let* ((all-buffers (cl-remove-if
                        (lambda (b) (string-prefix-p " " (buffer-name b)))
                        (buffer-list)))
-         (buf (consult--read
-               (mapcar #'buffer-name all-buffers)
-               :prompt "Switch to buffer (global): "
-               :category 'buffer
-               :state (consult--buffer-state)
-               :require-match t)))
+         (buf (sw/workspace--read-buffer all-buffers "Switch to buffer (global): ")))
     (when buf
       (when-let ((workspace-idx (sw/workspace--find-buffer-workspace buf)))
         (unless (= workspace-idx (sw/workspace--current-index))
