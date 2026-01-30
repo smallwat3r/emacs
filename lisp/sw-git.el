@@ -21,6 +21,7 @@
   -o ControlMaster=no")
 
 (use-package magit
+  :commands (magit-status magit-dispatch magit-file-dispatch)
   :custom
   ;; Performance
   (magit-refresh-status-buffer nil)

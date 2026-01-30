@@ -9,11 +9,8 @@
   :straight nil
   :demand t
   :hook (python-ts-mode . eglot-ensure)
-  :hook (python-mode . eglot-ensure)
   :hook (go-ts-mode . eglot-ensure)
-  :hook (go-mode . eglot-ensure)
   :hook (rust-ts-mode . eglot-ensure)
-  :hook (rust-mode . eglot-ensure)
   :hook (typescript-ts-mode . eglot-ensure)
   :hook (js-ts-mode . eglot-ensure)
   :hook (terraform-mode . eglot-ensure)

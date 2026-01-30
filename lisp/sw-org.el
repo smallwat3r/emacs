@@ -5,6 +5,9 @@
 
 ;;; Code:
 
+(defvar org-directory "~/org"
+  "Directory for org files.")
+
 (use-package org
   :straight nil
   :custom

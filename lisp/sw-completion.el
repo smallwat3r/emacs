@@ -108,9 +108,11 @@
 (use-package cape
   :demand t
   :config
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  ;; Add in reverse order since add-to-list pushes to front
+  ;; Final order: dabbrev, file, keyword
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
   (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-keyword))
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev))
 
 ;; Yasnippet
 (use-package yasnippet
