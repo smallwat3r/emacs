@@ -35,8 +35,8 @@
   "Render the dashboard content in the current buffer."
   (with-silent-modifications
     (erase-buffer)
-    (let* ((width (window-width))
-           (height (window-height))
+    (let* ((width (window-body-width))
+           (height (window-body-height))
            (content-lines 7)
            (top-padding (max 0 (/ (- height content-lines) 2)))
            (center (lambda (s)
@@ -57,10 +57,18 @@
               cursor-type nil
               truncate-lines t))
 
+(defun sw/dashboard--on-resize (&optional _frame)
+  "Re-render dashboard when window size changes."
+  (when-let ((buf (get-buffer sw/dashboard-buffer-name)))
+    (when (get-buffer-window buf)
+      (with-current-buffer buf
+        (sw/dashboard-render)))))
+
 (defun sw/dashboard-display ()
   "Create and switch to the dashboard buffer."
   (switch-to-buffer (get-buffer-create sw/dashboard-buffer-name))
-  (sw/dashboard-render))
+  (sw/dashboard-render)
+  (add-hook 'window-size-change-functions #'sw/dashboard--on-resize))
 
 (defun sw/dashboard-refresh ()
   "Refresh the dashboard buffer."
