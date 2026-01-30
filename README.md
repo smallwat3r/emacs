@@ -2,6 +2,8 @@
 
 Personal Emacs configuration in vanilla elisp. Requires Emacs 30+.
 
+![Emacs screenshot](images/emacs.png)
+
 After years of using [Doom Emacs](https://github.com/doomemacs/doomemacs), many
 keybindings and workflows here are influenced by it.
 
