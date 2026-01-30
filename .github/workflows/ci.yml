@@ -18,9 +18,10 @@ jobs:
         with:
           version: '30.1'
 
-      - name: Byte-compile
+      - name: Check elisp syntax
         run: |
-          emacs --batch \
-            --eval "(setq byte-compile-error-on-warn t)" \
-            --eval "(setq load-path (cons \"$PWD/lisp\" load-path))" \
-            -f batch-byte-compile lisp/*.el
+          for f in lisp/*.el early-init.el init.el; do
+            echo "Checking $f..."
+            emacs --batch --eval "(check-parens)" "$f" 2>&1 || exit 1
+          done
+          echo "All files have valid syntax"

@@ -101,10 +101,9 @@ If a workspace for the project already exists, switch to it."
 ;; Tab-bar configuration
 (setq tab-bar-show nil
       tab-bar-new-tab-choice #'sw/fallback-buffer
-      tab-bar-close-button-show nil
-      tab-bar-new-button-show nil
       tab-bar-tab-hints t
-      tab-bar-tab-name-function (lambda () ""))
+      tab-bar-tab-name-function (lambda () "")
+      tab-bar-format '(tab-bar-format-tabs))
 (tab-bar-mode 1)
 
 ;; Show workspaces on startup
