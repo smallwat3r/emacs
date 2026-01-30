@@ -146,6 +146,15 @@
   "TAB r" '(tab-bar-rename-tab :wk "Rename workspace")
   "TAB ]" '(tab-bar-switch-to-next-tab :wk "Next workspace")
   "TAB [" '(tab-bar-switch-to-prev-tab :wk "Prev workspace")
+  "TAB 1" '(sw/workspace-switch-to-1 :wk "Workspace 1")
+  "TAB 2" '(sw/workspace-switch-to-2 :wk "Workspace 2")
+  "TAB 3" '(sw/workspace-switch-to-3 :wk "Workspace 3")
+  "TAB 4" '(sw/workspace-switch-to-4 :wk "Workspace 4")
+  "TAB 5" '(sw/workspace-switch-to-5 :wk "Workspace 5")
+  "TAB 6" '(sw/workspace-switch-to-6 :wk "Workspace 6")
+  "TAB 7" '(sw/workspace-switch-to-7 :wk "Workspace 7")
+  "TAB 8" '(sw/workspace-switch-to-8 :wk "Workspace 8")
+  "TAB 9" '(sw/workspace-switch-to-9 :wk "Workspace 9")
 
   ;; Window
   "w" '(:ignore t :wk "Window")
@@ -228,14 +237,6 @@
 
   ;; Local/Mode (placeholder for which-key)
   "m" '(:ignore t :wk "Local mode"))
-
-;; Workspace number bindings (TAB 1-9)
-(dotimes (i 9)
-  (let* ((n (1+ i))
-         (fn (intern (format "sw/workspace-switch-to-%d" n))))
-    (eval `(sw/leader
-            ,(format "TAB %d" n)
-            '(,fn :wk ,(format "Workspace %d" n))))))
 
 ;;; Evil normal state bindings
 
