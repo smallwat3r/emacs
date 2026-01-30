@@ -15,6 +15,7 @@
   (evil-want-Y-yank-to-eol t)
   (evil-want-fine-undo t)
   (evil-undo-system 'undo-redo)
+  (evil-symbol-word-search t)
   (evil-split-window-below t)
   (evil-vsplit-window-right t)
   (evil-respect-visual-line-mode t)
@@ -72,6 +73,15 @@
   :demand t
   :config
   (global-evil-surround-mode 1))
+
+;; Search for visual selection with * and #
+(use-package evil-visualstar
+  :after evil
+  :demand t
+  :config
+  (evil-define-key* 'visual 'global
+    "*" #'evil-visualstar/begin-search-forward
+    "#" #'evil-visualstar/begin-search-backward))
 
 ;; Better escape with jk
 (use-package evil-escape
