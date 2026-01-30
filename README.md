@@ -23,6 +23,7 @@ Run `make` to see available commands:
 ```
 $ make
   help       Show this help
+  link       Symlink this directory to ~/.emacs.d
   install    Install packages (first run or from lockfile)
   update     Pull latest versions and freeze
   freeze     Save current package versions to lockfile
