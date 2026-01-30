@@ -62,6 +62,7 @@
   "fD" '(sw/delete-this-file :wk "Delete this file")
   "fy" '(sw/copy-file-path :wk "Yank file path")
   "f." '(sw/find-dotfiles :wk "Find in dotfiles")
+  "fe" '(sw/find-emacs-config :wk "Find in .emacs.d")
 
   ;; Project
   "p" '(:ignore t :wk "Project")
@@ -319,11 +320,27 @@
     (kill-new path)
     (message "Copied: %s" path)))
 
+(defun sw/find-in-directory (dir name)
+  "Find file in DIR, switching to or creating workspace NAME."
+  (let ((existing (member name (sw/workspace--get-names))))
+    (if existing
+        (tab-bar-switch-to-tab name)
+      (let ((tab-bar-new-tab-choice #'sw/fallback-buffer))
+        (tab-bar-new-tab)
+        (tab-bar-rename-tab name)
+        (delete-other-windows)))
+    (let ((default-directory dir))
+      (project-find-file))))
+
 (defun sw/find-dotfiles ()
-  "Find file in dotfiles directory like project-find-file."
+  "Find file in dotfiles directory, with dedicated workspace."
   (interactive)
-  (let ((default-directory "~/dotfiles/"))
-    (project-find-file)))
+  (sw/find-in-directory "~/dotfiles/" "dotfiles"))
+
+(defun sw/find-emacs-config ()
+  "Find file in Emacs config directory, with dedicated workspace."
+  (interactive)
+  (sw/find-in-directory user-emacs-directory ".emacs.d"))
 
 (defun sw/delete-this-file ()
   "Delete the current file and kill the buffer."
