@@ -10,13 +10,8 @@
 
 ;;; Bootstrap
 
-;; Add lisp/ and site-lisp/ to load path
+;; Add lisp/ to load path
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
-(let ((site-lisp (expand-file-name "site-lisp" user-emacs-directory)))
-  (when (file-directory-p site-lisp)
-    (dolist (dir (directory-files site-lisp t "^[^.]"))
-      (when (file-directory-p dir)
-        (add-to-list 'load-path dir)))))
 
 ;; Bootstrap straight.el
 (defvar bootstrap-version)

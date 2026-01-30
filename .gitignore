@@ -32,10 +32,6 @@ places
 # Tree-sitter grammars
 tree-sitter/
 
-# Site-lisp (manually cloned packages)
-site-lisp/*
-!site-lisp/.gitkeep
-
 # Misc
 .DS_Store
 url/
