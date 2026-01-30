@@ -2,6 +2,9 @@
 
 Personal Emacs configuration in vanilla elisp. Requires Emacs 30+.
 
+After years of using [Doom Emacs](https://github.com/doomemacs/doomemacs), many
+keybindings and workflows here are influenced by it.
+
 ## Installation
 
 Clone or symlink to `~/.emacs.d` and start Emacs. Packages install automatically
