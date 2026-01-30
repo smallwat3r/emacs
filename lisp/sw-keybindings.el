@@ -65,7 +65,7 @@
   ;; Project
   "p" '(:ignore t :wk "Project")
   "pp" '(project-switch-project :wk "Switch project")
-  "pf" '(project-find-file :wk "Find file in project")
+  "pf" '(sw/project-find-file :wk "Find file in project")
   "pg" '(sw/consult-ripgrep-project :wk "Grep project")
   "pd" '(project-find-dir :wk "Find dir")
   "pb" '(project-switch-to-buffer :wk "Project buffer")

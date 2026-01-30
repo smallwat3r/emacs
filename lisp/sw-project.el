@@ -39,7 +39,15 @@
              (> (file-attribute-size (file-attributes project-list-file)) 10))
   (run-with-idle-timer 2 nil #'sw/project-discover))
 
-;; Search in project with consult
+(defun sw/project-find-file ()
+  "Find file in current project using fd."
+  (interactive)
+  (require 'consult)
+  (let ((dir (if (project-current)
+                 (project-root (project-current))
+               default-directory)))
+    (consult-fd dir)))
+
 (defun sw/consult-ripgrep-project ()
   "Search in current project with ripgrep."
   (interactive)
