@@ -104,14 +104,6 @@
   :config
   (global-corfu-mode 1))
 
-;; Corfu popup info
-(use-package corfu-popupinfo
-  :straight nil
-  :after corfu
-  :hook (corfu-mode . corfu-popupinfo-mode)
-  :custom
-  (corfu-popupinfo-delay '(0.5 . 0.2)))
-
 ;; Cape - completion at point extensions
 (use-package cape
   :demand t

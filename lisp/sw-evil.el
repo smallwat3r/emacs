@@ -98,8 +98,9 @@
     :prefix "SPC m"
     :global-prefix "C-SPC m"))
 
-;; Which-key for discoverability
+;; Which-key for discoverability (built-in since Emacs 30)
 (use-package which-key
+  :straight nil
   :demand t
   :custom
   (which-key-idle-delay 0.3)

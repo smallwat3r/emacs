@@ -103,6 +103,11 @@
   (global-auto-revert-mode 1)
   (save-place-mode 1)
   (recentf-mode 1)
+  (pixel-scroll-precision-mode 1)
+  (repeat-mode 1)
+  (global-so-long-mode 1)
+
+  ;; Disable blinking cursor
   (blink-cursor-mode -1)
 
   ;; Clean up whitespace on save
