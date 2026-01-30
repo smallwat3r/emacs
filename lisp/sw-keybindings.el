@@ -186,7 +186,6 @@
   "ov" '(sw/eat-toggle-current-buffer :wk "Toggle eat at buffer")
   "o." '(sw/tramp-connect :wk "TRAMP SSH")
   "os" '(sw/ssh-external :wk "SSH external term")
-  "oi" '(sw/ssh-invalidate-cache :wk "Refresh SSH hosts")
   "od" '(dired-jump :wk "Dired")
   "op" '(pass :wk "Pass")
   "ol" '(browse-url-at-point :wk "Open URL")

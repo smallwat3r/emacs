@@ -18,11 +18,9 @@
 
 ;;; SSH helpers
 
-(defvar sw/ssh-config-hosts-cache nil
-  "Cached list of SSH hosts. Use `sw/ssh-invalidate-cache' to refresh.")
-
-(defun sw/ssh-config--parse-hosts ()
-  "Parse SSH hosts from config files in `sw/ssh-config-files'."
+(defun sw/ssh-config-hosts ()
+  "Return a list of SSH host aliases from `sw/ssh-config-files'.
+Parses config files fresh each call (fast enough that caching is unnecessary)."
   (let ((hosts '()))
     (dolist (file sw/ssh-config-files)
       (setq file (expand-file-name file))
@@ -36,18 +34,6 @@
                 (unless (string-match-p "[*?]" h)
                   (push h hosts))))))))
     (delete-dups hosts)))
-
-(defun sw/ssh-config-hosts ()
-  "Return a list of SSH host aliases from `sw/ssh-config-files'.
-Results are cached on first call. Use `sw/ssh-invalidate-cache' to refresh."
-  (or sw/ssh-config-hosts-cache
-      (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))))
-
-(defun sw/ssh-invalidate-cache ()
-  "Invalidate SSH config hosts cache and re-parse immediately."
-  (interactive)
-  (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))
-  (message "SSH config cache refreshed (%d hosts)" (length sw/ssh-config-hosts-cache)))
 
 (defun sw/zsh-history-candidates (&optional limit)
   "Return recent unique zsh history lines (most recent first).
