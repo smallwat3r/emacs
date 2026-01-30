@@ -42,7 +42,7 @@
 (defvar sw/required-packages
   '(;; Core
     evil evil-collection evil-goggles evil-snipe evil-surround
-    evil-escape evil-nerd-commenter evil-visualstar evil-anzu anzu general which-key
+    evil-nerd-commenter evil-visualstar evil-anzu anzu general which-key
     ;; Completion
     vertico orderless consult marginalia embark embark-consult corfu cape
     ;; Theme & UI

@@ -83,16 +83,6 @@
     "*" #'evil-visualstar/begin-search-forward
     "#" #'evil-visualstar/begin-search-backward))
 
-;; Better escape with jk
-(use-package evil-escape
-  :after evil
-  :demand t
-  :custom
-  (evil-escape-key-sequence "jk")
-  (evil-escape-delay 0.2)
-  :config
-  (evil-escape-mode 1))
-
 ;; Leader key support
 (use-package general
   :demand t
