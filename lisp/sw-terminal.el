@@ -185,11 +185,7 @@ clear\n" prefix))))
 (defun sw/eat--project-root ()
   "Return the project root directory or `default-directory'.
 For remote directories, returns the remote default-directory."
-  (if (file-remote-p default-directory)
-      default-directory
-    (or (when-let ((proj (project-current)))
-          (project-root proj))
-        default-directory)))
+  (sw/project-root-or-default t))
 
 (defun sw/eat--buffer-for-dir (dir)
   "Return buffer name for eat in DIR."

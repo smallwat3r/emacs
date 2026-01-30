@@ -39,33 +39,32 @@
              (> (file-attribute-size (file-attributes project-list-file)) 10))
   (run-with-idle-timer 2 nil #'sw/project-discover))
 
+(defun sw/project-root-or-default (&optional prefer-remote)
+  "Return project root or `default-directory'.
+When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
+  (if (and prefer-remote (file-remote-p default-directory))
+      default-directory
+    (or (when-let ((proj (project-current)))
+          (project-root proj))
+        default-directory)))
+
 (defun sw/project-find-file ()
   "Find file in current project using fd."
   (interactive)
   (require 'consult)
-  (let ((dir (if (project-current)
-                 (project-root (project-current))
-               default-directory)))
-    (consult-fd dir)))
+  (consult-fd (sw/project-root-or-default)))
 
 (defun sw/consult-ripgrep-project ()
   "Search in current project with ripgrep."
   (interactive)
   (require 'consult)
-  (let ((dir (if (project-current)
-                 (project-root (project-current))
-               default-directory)))
-    (consult-ripgrep dir)))
+  (consult-ripgrep (sw/project-root-or-default)))
 
 (defun sw/consult-ripgrep-project-symbol ()
   "Search for symbol at point in project."
   (interactive)
   (require 'consult)
-  (let ((dir (if (project-current)
-                 (project-root (project-current))
-               default-directory))
-        (symbol (thing-at-point 'symbol t)))
-    (consult-ripgrep dir symbol)))
+  (consult-ripgrep (sw/project-root-or-default) (thing-at-point 'symbol t)))
 
 (provide 'sw-project)
 ;;; sw-project.el ends here
