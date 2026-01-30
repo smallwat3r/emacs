@@ -69,7 +69,7 @@
   "pb" '(project-switch-to-buffer :wk "Project buffer")
   "pk" '(project-kill-buffers :wk "Kill project buffers")
   "pm" '(sw/project-make :wk "Run make")
-  "pi" '(sw/project-invalidate-cache :wk "Invalidate cache")
+  "pi" '(sw/project-refresh :wk "Refresh projects")
 
   ;; Search
   "s" '(:ignore t :wk "Search")
