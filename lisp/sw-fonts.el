@@ -34,23 +34,22 @@ SPEC are additional arguments passed to `font-spec'."
 (defun sw/configure-fonts (&optional frame)
   "Configure fonts when a graphical display is available.
 FRAME is the frame to check for display capability."
-  (when (and (not sw/fonts-configured)
-             (display-graphic-p (or frame (selected-frame))))
-    (let* ((fonts (cond (sw/is-linux '("MonacoB" "Monospace"))
-                        (sw/is-mac '("Monaco"))
-                        (t '("Monospace"))))
-           (font-spec (sw/safe-font fonts :size (sw/get-font-size))))
-      (when font-spec
-        (dolist (face '(default fixed-pitch variable-pitch))
-          (set-face-attribute face nil :font font-spec))))
-    (setq sw/fonts-configured t)
-    ;; Remove hooks after configuration (only needed once)
-    (remove-function after-focus-change-function #'sw/configure-fonts)
-    (remove-hook 'window-setup-hook #'sw/configure-fonts)))
+  (let ((frame (or frame (selected-frame))))
+    (when (display-graphic-p frame)
+      (let* ((fonts (cond (sw/is-linux '("MonacoB" "Monospace"))
+                          (sw/is-mac '("Monaco"))
+                          (t '("Monospace"))))
+             (font-spec (sw/safe-font fonts :size (sw/get-font-size))))
+        (when font-spec
+          (set-face-attribute 'default frame :font font-spec)
+          (unless sw/fonts-configured
+            (dolist (face '(default fixed-pitch variable-pitch))
+              (set-face-attribute face nil :font font-spec))
+            (setq sw/fonts-configured t)))))))
 
-;; Defer font configuration until the frame is ready
+;; Configure fonts when frames are created
 (if (daemonp)
-    (add-function :after after-focus-change-function #'sw/configure-fonts)
+    (add-hook 'server-after-make-frame-hook #'sw/configure-fonts)
   (add-hook 'window-setup-hook #'sw/configure-fonts))
 
 ;; Line spacing
