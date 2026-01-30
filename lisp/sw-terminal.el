@@ -301,8 +301,7 @@ For remote directories, opens a shell on the remote host."
   "Pick which terminal to use for this system."
   (cond
    (sw/is-mac "alacritty")
-   (sw/is-fedora "foot")
-   (t "st")))
+   (t "foot")))
 
 (defun sw/terminal-here--command ()
   "Build the shell command to launch the chosen terminal here."

@@ -9,6 +9,11 @@
 
 ;;; Code:
 
+;;; System detection (available early for font/frame setup)
+
+(defconst sw/is-linux (eq system-type 'gnu/linux))
+(defconst sw/is-mac (eq system-type 'darwin))
+
 ;; Increase gc threshold during startup for faster loading
 (setq gc-cons-threshold most-positive-fixnum
       gc-cons-percentage 0.6)
@@ -38,6 +43,13 @@
                 (internal-border-width . 0)
                 (fullscreen . maximized))
               default-frame-alist))
+
+;; Set font early to prevent random sizing
+(defvar sw/font-family (if sw/is-mac "Monaco" "MonacoB"))
+(defvar sw/font-height (if sw/is-mac 130 100))
+
+(set-face-attribute 'default nil :family sw/font-family :height sw/font-height)
+(push `(font . ,(format "%s-%d" sw/font-family (/ sw/font-height 10))) default-frame-alist)
 
 ;; Prevent flickering during resize
 (setq frame-inhibit-implied-resize t)

@@ -5,7 +5,11 @@
 
 ;;; Code:
 
-;; Frame appearance
+;;; Fonts (primary font set in early-init.el)
+
+(setq-default line-spacing 2)
+
+;;; Frame appearance
 (setq-default left-fringe-width 8
               right-fringe-width 8)
 

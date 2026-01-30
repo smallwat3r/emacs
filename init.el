@@ -35,26 +35,6 @@
       use-package-expand-minimally t
       use-package-compute-statistics nil)
 
-;;; System detection
-
-(defconst sw/is-linux (eq system-type 'gnu/linux))
-(defconst sw/is-mac (eq system-type 'darwin))
-
-(defconst sw/is-fedora
-  (and sw/is-linux
-       (when-let ((os-release (ignore-errors
-                                (shell-command-to-string "cat /etc/os-release"))))
-         (and (string-match-p "fedora" (downcase os-release)) t))))
-
-(defconst sw/is-gpd
-  (and sw/is-linux
-       (equal "GPD"
-              (ignore-errors
-                (string-trim
-                 (with-temp-buffer
-                   (insert-file-contents "/sys/devices/virtual/dmi/id/board_vendor")
-                   (buffer-string)))))))
-
 ;;; Personal info
 
 (defconst sw/full-name "Matt Petiteau")
@@ -136,7 +116,6 @@
 
 ;;; Load modules
 
-(require 'sw-fonts)
 (require 'sw-theme)
 (require 'sw-modeline)
 (require 'sw-evil)
