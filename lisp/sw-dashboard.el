@@ -55,7 +55,6 @@
     (goto-char (point-min)))
   (setq-local buffer-read-only t
               cursor-type nil
-              mode-line-format nil
               truncate-lines t))
 
 (defun sw/dashboard-display ()
