@@ -69,6 +69,7 @@
   "pb" '(project-switch-to-buffer :wk "Project buffer")
   "pk" '(project-kill-buffers :wk "Kill project buffers")
   "pm" '(sw/project-make :wk "Run make")
+  "pi" '(sw/project-invalidate-cache :wk "Invalidate cache")
 
   ;; Search
   "s" '(:ignore t :wk "Search")
@@ -185,6 +186,7 @@
   "ov" '(sw/eat-toggle-current-buffer :wk "Toggle eat at buffer")
   "o." '(sw/tramp-connect :wk "TRAMP SSH")
   "os" '(sw/ssh-external :wk "SSH external term")
+  "oi" '(sw/ssh-invalidate-cache :wk "Refresh SSH hosts")
   "od" '(dired-jump :wk "Dired")
   "op" '(pass :wk "Pass")
   "ol" '(browse-url-at-point :wk "Open URL")

@@ -72,5 +72,14 @@ When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
   (let ((default-directory (sw/project-root-or-default)))
     (call-interactively #'compile)))
 
+(defun sw/project-invalidate-cache ()
+  "Invalidate project-related caches.
+Removes zombie projects and cleans up recentf."
+  (interactive)
+  (project-forget-zombie-projects)
+  (when (boundp 'recentf-list)
+    (recentf-cleanup))
+  (message "Project cache invalidated"))
+
 (provide 'sw-project)
 ;;; sw-project.el ends here

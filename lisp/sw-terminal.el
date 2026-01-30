@@ -73,6 +73,14 @@ Results are cached and only re-parsed when files change."
     (sw/ssh-config--update-mtimes))
   sw/ssh-config-hosts-cache)
 
+(defun sw/ssh-invalidate-cache ()
+  "Invalidate SSH config hosts cache.
+Next call to `sw/ssh-config-hosts' will re-parse config files."
+  (interactive)
+  (setq sw/ssh-config-hosts-cache nil)
+  (setq sw/ssh-config-files-mtime nil)
+  (message "SSH config cache invalidated"))
+
 (defun sw/zsh-history-candidates (&optional limit)
   "Return recent unique zsh history lines (most recent first).
 LIMIT defaults to 10000."
