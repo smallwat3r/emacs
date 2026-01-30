@@ -39,9 +39,12 @@ Uses eglot for region formatting when available, apheleia for buffer."
   (if (and (use-region-p)
            (fboundp 'eglot-managed-p)
            (eglot-managed-p))
-      (eglot-format (region-beginning) (region-end))
+      (progn
+        (eglot-format (region-beginning) (region-end))
+        (message "Formatted region"))
     (require 'apheleia)
-    (call-interactively #'apheleia-format-buffer)))
+    (call-interactively #'apheleia-format-buffer)
+    (message "Formatted buffer")))
 
 ;;; Insert commands
 
