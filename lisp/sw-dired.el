@@ -7,6 +7,7 @@
 
 (use-package dired
   :ensure nil
+  :hook (dired-mode . dired-hide-details-mode)
   :custom
   (dired-listing-switches "-alh --group-directories-first")
   (dired-dwim-target t)
@@ -15,7 +16,6 @@
   (dired-kill-when-opening-new-dired-buffer t)
   (dired-auto-revert-buffer t)
   :config
-  ;; Enable extra features
   (put 'dired-find-alternate-file 'disabled nil))
 
 (use-package dired-x
@@ -28,6 +28,10 @@
 ;; Icons in dired
 (use-package nerd-icons-dired
   :hook (dired-mode . nerd-icons-dired-mode))
+
+;; Colorful file names by type
+(use-package diredfl
+  :hook (dired-mode . diredfl-mode))
 
 ;; Subtree expansion
 (use-package dired-subtree

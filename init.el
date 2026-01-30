@@ -57,7 +57,7 @@
     helpful eat restart-emacs restclient pdf-tools
     pass password-store
     ;; Dired
-    dired-narrow dired-subtree nerd-icons-dired
+    dired-narrow dired-subtree nerd-icons-dired diredfl
     ;; Org
     org-modern org-journal toc-org
     ;; Eglot
