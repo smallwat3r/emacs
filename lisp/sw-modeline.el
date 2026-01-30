@@ -34,21 +34,21 @@
 ;; Custom mode-line format
 ;; Displays: buffer status, buffer name, buffer count, position, VC info, major mode
 (setq-default mode-line-format
-              (list "%e"
-                    'mode-line-front-space
-                    'mode-line-client
-                    'mode-line-modified
-                    'mode-line-remote
-                    'mode-line-frame-identification
-                    'mode-line-buffer-identification
-                    '(:eval (format "  b(%s)" (sw/number-of-buffers)))
-                    " %p %l,%c  "
-                    '(vc-mode vc-mode)
-                    " "
-                    'mode-name
-                    " "
-                    'mode-line-misc-info
-                    'mode-line-end-spaces))
+              `("%e"
+                ,mode-line-front-space
+                ,mode-line-client
+                ,mode-line-modified
+                ,mode-line-remote
+                ,mode-line-frame-identification
+                ,mode-line-buffer-identification
+                (:eval (format "  b(%s)" (sw/number-of-buffers)))
+                " %p %l,%c  "
+                (vc-mode vc-mode)
+                " "
+                ,mode-name
+                " "
+                ,mode-line-misc-info
+                ,mode-line-end-spaces))
 
 ;; Orange modeline for active window
 (set-face-attribute 'mode-line nil
