@@ -24,21 +24,6 @@
   :straight (:host github :repo "stevemolitor/claude-code.el")
   :when (executable-find "claude")
   :after inheritenv
-  :commands (claude-code
-             claude-code-continue
-             claude-code-resume
-             claude-code-new-instance
-             claude-code-start-in-directory
-             claude-code-switch-to-buffer
-             claude-code-toggle
-             claude-code-send-region
-             claude-code-send-command
-             claude-code-send-command-with-context
-             claude-code-send-buffer-file
-             claude-code-fix-error-at-point
-             claude-code-cycle-mode
-             claude-code-transient
-             claude-code-kill)
   :init
   (setq claude-code-terminal-backend 'eat
         claude-code-notification-function #'sw/claude-notify

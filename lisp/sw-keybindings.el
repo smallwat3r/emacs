@@ -196,7 +196,7 @@
   "rR" '(claude-code-resume :wk "Claude resume")
   "rn" '(claude-code-new-instance :wk "New instance")
   "rd" '(claude-code-start-in-directory :wk "Start in directory")
-  "rs" '(claude-code-switch-to-buffer :wk "Switch buffer")
+  "rs" '(claude-code-select-buffer :wk "Switch buffer")
   "rt" '(sw/claude-code-toggle :wk "Toggle Claude")
   "rr" '(claude-code-send-region :wk "Send region")
   "rp" '(claude-code-send-command :wk "Send command")
