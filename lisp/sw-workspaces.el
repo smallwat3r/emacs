@@ -111,18 +111,30 @@ If a workspace for the project already exists, switch to it."
   (sw/workspace-find-in-directory user-emacs-directory ".emacs.d"))
 
 ;; Display after workspace operations
+(defvar sw/workspace--last-kill-count nil
+  "Temporary storage for buffer kill count during workspace close.")
+
 (defun sw/workspace--display-after (&rest _)
   "Display workspaces after tab operations."
   (sw/workspace-display))
+
+(defun sw/workspace--display-after-close (&rest _)
+  "Display workspaces after closing, including buffer kill count."
+  (let ((count sw/workspace--last-kill-count))
+    (setq sw/workspace--last-kill-count nil)
+    (let (message-log-max)
+      (message "%s | Closed workspace, killed %d buffer(s)"
+               (sw/workspace--tabline) (or count 0)))))
 
 (dolist (fn '(tab-bar-new-tab
               tab-bar-switch-to-tab
               tab-bar-switch-to-next-tab
               tab-bar-switch-to-prev-tab
               tab-bar-select-tab
-              tab-bar-close-tab
               tab-bar-rename-tab))
   (advice-add fn :after #'sw/workspace--display-after))
+
+(advice-add 'tab-bar-close-tab :after #'sw/workspace--display-after-close)
 
 ;; Tab-bar configuration
 (setq tab-bar-show nil
@@ -165,6 +177,27 @@ Intended for use in `kill-buffer-hook'."
 
 (add-hook 'kill-buffer-hook #'sw/workspace--remove-killed-buffer)
 
+(defun sw/workspace--kill-buffers (buffers)
+  "Kill BUFFERS, skipping scratch. Return count of killed buffers."
+  (let ((count 0))
+    (dolist (buf buffers)
+      (when (and (buffer-live-p buf)
+                 (not (eq buf (sw/fallback-buffer))))
+        (kill-buffer buf)
+        (cl-incf count)))
+    count))
+
+(defun sw/workspace--kill-buffers-on-close (&optional tab-number &rest _)
+  "Kill buffers associated with the workspace being closed.
+TAB-NUMBER is the 1-based tab number, or nil for current tab."
+  (let* ((idx (if tab-number (1- tab-number) (sw/workspace--current-index)))
+         (buffers (alist-get idx sw/workspace-buffer-alist)))
+    (setq sw/workspace--last-kill-count (sw/workspace--kill-buffers buffers))
+    (setq sw/workspace-buffer-alist
+          (assq-delete-all idx sw/workspace-buffer-alist))))
+
+(advice-add 'tab-bar-close-tab :before #'sw/workspace--kill-buffers-on-close)
+
 (defun sw/workspace--track-buffer (&rest _)
   "Track current buffer in workspace buffer list.
 Intended for use in `window-buffer-change-functions'.
@@ -195,6 +228,17 @@ Ignores minibuffers."
     (cl-loop for (idx . buffers) in sw/workspace-buffer-alist
              when (memq buf buffers)
              return idx)))
+
+(defun sw/workspace-kill-all-buffers ()
+  "Kill all buffers in the current workspace.
+Switches to scratch buffer after killing."
+  (interactive)
+  (let ((buffers (sw/workspace-buffer-list)))
+    (when (yes-or-no-p (format "Kill %d buffer(s) in this workspace? " (length buffers)))
+      (let ((count (sw/workspace--kill-buffers buffers)))
+        (switch-to-buffer (sw/fallback-buffer))
+        (delete-other-windows)
+        (message "Killed %d buffer(s)" count)))))
 
 (defun sw/workspace-switch-buffer ()
   "Switch to a buffer in the current workspace with preview."

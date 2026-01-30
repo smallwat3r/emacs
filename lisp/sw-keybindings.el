@@ -36,6 +36,7 @@
   "bb" '(sw/workspace-switch-buffer :wk "Switch buffer")
   "bB" '(sw/switch-buffer-global :wk "Switch buffer (all)")
   "bd" '(kill-current-buffer :wk "Kill buffer")
+  "bD" '(sw/workspace-kill-all-buffers :wk "Kill workspace buffers")
   "bi" '(ibuffer :wk "Ibuffer")
   "bl" '(evil-switch-to-windows-last-buffer :wk "Last buffer")
   "bm" '(bookmark-set :wk "Set bookmark")
