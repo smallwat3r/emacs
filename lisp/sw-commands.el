@@ -59,28 +59,25 @@
   "Format region between BEG and END using shfmt."
   (sw/format-region-with-command beg end "shfmt" '("-i" "2" "-ci" "-bn" "-") "shfmt"))
 
-(defun sw/format-buffer-or-region ()
-  "Format the current region if active, otherwise format the buffer.
-Region formatting uses language-specific tools or eglot. Buffer formatting uses apheleia."
+(defun sw/format-region ()
+  "Format the current region using language-specific tools or eglot."
   (interactive)
-  (if (use-region-p)
-      (let ((beg (region-beginning))
-            (end (region-end)))
-        (cond
-         ((derived-mode-p 'python-mode 'python-ts-mode)
-          (sw/format-region-with-black beg end))
-         ((derived-mode-p 'go-mode 'go-ts-mode)
-          (sw/format-region-with-gofmt beg end))
-         ((derived-mode-p 'sh-mode 'bash-ts-mode)
-          (sw/format-region-with-shfmt beg end))
-         ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
-          (eglot-format beg end)
-          (message "Formatted region (eglot)"))
-         (t
-          (message "No region formatter available"))))
-    (require 'apheleia)
-    (call-interactively #'apheleia-format-buffer)
-    (message "Formatted buffer")))
+  (unless (use-region-p)
+    (user-error "No region selected"))
+  (let ((beg (region-beginning))
+        (end (region-end)))
+    (cond
+     ((derived-mode-p 'python-mode 'python-ts-mode)
+      (sw/format-region-with-black beg end))
+     ((derived-mode-p 'go-mode 'go-ts-mode)
+      (sw/format-region-with-gofmt beg end))
+     ((derived-mode-p 'sh-mode 'bash-ts-mode)
+      (sw/format-region-with-shfmt beg end))
+     ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
+      (eglot-format beg end)
+      (message "Formatted region (eglot)"))
+     (t
+      (message "No region formatter available")))))
 
 ;;; Insert commands
 

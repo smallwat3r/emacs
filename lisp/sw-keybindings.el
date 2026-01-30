@@ -89,7 +89,7 @@
   "c" '(:ignore t :wk "Code")
   "ca" '(eglot-code-actions :wk "Code actions")
   "cr" '(eglot-rename :wk "Rename")
-  "cf" '(sw/format-buffer-or-region :wk "Format")
+  "cf" '(apheleia-format-buffer :wk "Format buffer")
   "cd" '(xref-find-definitions :wk "Go to definition")
   "cD" '(xref-find-references :wk "Find references")
   "ci" '(eglot-find-implementation :wk "Find impl")
@@ -268,7 +268,6 @@
  "gc" 'evilnc-comment-operator
 
  ;; Quick commands with ;
- ";f" 'sw/format-buffer-or-region
  ";w" 'save-buffer)
 
 ;;; Evil visual state bindings
@@ -276,7 +275,7 @@
 (general-define-key
  :states 'visual
  "gc" 'evilnc-comment-operator
- ";f" 'sw/format-buffer-or-region)
+ ";f" 'sw/format-region)
 
 ;;; Emacs Lisp mode bindings
 
