@@ -1,0 +1,37 @@
+# Installed packages
+elpa/
+
+# Native compilation cache
+eln-cache/
+
+# Byte-compiled files
+*.elc
+
+# Auto-generated files
+custom.el
+projects
+recentf
+bookmarks
+history
+transient/
+auto-save-list/
+tramp
+tramp-autosave/
+places
+
+# Backup files
+*~
+\#*\#
+.\#*
+
+# Tree-sitter grammars
+tree-sitter/
+
+# Site-lisp (manually cloned packages)
+site-lisp/*
+!site-lisp/.gitkeep
+
+# Misc
+.DS_Store
+url/
+network-security.data

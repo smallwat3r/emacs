@@ -1,0 +1,63 @@
+;;; sw-org.el --- Org mode configuration -*- lexical-binding: t -*-
+
+;;; Commentary:
+;; Org mode and related packages.
+
+;;; Code:
+
+(use-package org
+  :ensure nil
+  :custom
+  ;; Directories
+  (org-directory "~/org")
+  (org-default-notes-file (expand-file-name "notes.org" org-directory))
+
+  ;; Display
+  (org-startup-indented t)
+  (org-startup-folded 'content)
+  (org-hide-emphasis-markers t)
+  (org-pretty-entities t)
+  (org-ellipsis " ▼")
+
+  ;; Source blocks
+  (org-src-fontify-natively t)
+  (org-src-tab-acts-natively t)
+  (org-src-preserve-indentation t)
+  (org-edit-src-content-indentation 0)
+
+  ;; Export
+  (org-export-with-smart-quotes t)
+  (org-export-preserve-breaks nil)
+
+  ;; TODO settings
+  (org-todo-keywords
+   '((sequence "TODO(t)" "INPROGRESS(i)" "WAITING(w)" "|" "DONE(d)" "CANCELLED(c)")))
+
+  :config
+  ;; Babel languages
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (python . t)
+     (shell . t))))
+
+;; Modern Org appearance
+(use-package org-modern
+  :after org
+  :hook ((org-mode . org-modern-mode)
+         (org-agenda-finalize . org-modern-agenda)))
+
+;; Org journal
+(use-package org-journal
+  :custom
+  (org-journal-dir (expand-file-name "journal" org-directory))
+  (org-journal-date-format "%A, %d %B %Y")
+  (org-journal-file-format "%Y-%m-%d.org")
+  (org-journal-file-type 'daily))
+
+;; Table of contents
+(use-package toc-org
+  :hook (org-mode . toc-org-mode))
+
+(provide 'sw-org)
+;;; sw-org.el ends here

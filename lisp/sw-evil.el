@@ -1,0 +1,112 @@
+;;; sw-evil.el --- Evil mode configuration -*- lexical-binding: t -*-
+
+;;; Commentary:
+;; Vim emulation with Evil mode and related packages.
+
+;;; Code:
+
+(use-package evil
+  :demand t
+  :custom
+  (evil-want-integration t)
+  (evil-want-keybinding nil)
+  (evil-want-C-u-scroll t)
+  (evil-want-C-i-jump t)
+  (evil-want-Y-yank-to-eol t)
+  (evil-want-fine-undo t)
+  (evil-undo-system 'undo-redo)
+  (evil-split-window-below t)
+  (evil-vsplit-window-right t)
+  (evil-respect-visual-line-mode t)
+  (evil-search-module 'evil-search)
+  :config
+  (evil-mode 1)
+
+  ;; Cursor colors by state
+  (setq evil-default-state-cursor  '(box "cyan3")
+        evil-normal-state-cursor   '(box "cyan3")
+        evil-insert-state-cursor   '(bar "green3")
+        evil-visual-state-cursor   '(box "OrangeRed2")
+        evil-replace-state-cursor  '(hbar "red2")
+        evil-operator-state-cursor '(box "red2")))
+
+;; Evil keybindings for many modes
+(use-package evil-collection
+  :after evil
+  :demand t
+  :custom
+  (evil-collection-magit-want-horizontal-movement t)
+  :config
+  (evil-collection-init))
+
+;; Visual hints for operations
+(use-package evil-goggles
+  :after evil
+  :demand t
+  :custom
+  (evil-goggles-duration 0.15)
+  (evil-goggles-pulse nil)
+  :config
+  (evil-goggles-mode 1)
+  (evil-goggles-use-diff-refine-faces))
+
+;; Two-character search
+(use-package evil-snipe
+  :after evil
+  :demand t
+  :custom
+  (evil-snipe-scope 'visible)
+  (evil-snipe-repeat-scope 'visible)
+  (evil-snipe-spillover-scope nil)
+  :config
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+
+;; Comment with gc
+(use-package evil-nerd-commenter
+  :after evil)
+
+;; Surround text objects
+(use-package evil-surround
+  :after evil
+  :demand t
+  :config
+  (global-evil-surround-mode 1))
+
+;; Better escape with jk
+(use-package evil-escape
+  :after evil
+  :demand t
+  :custom
+  (evil-escape-key-sequence "jk")
+  (evil-escape-delay 0.2)
+  :config
+  (evil-escape-mode 1))
+
+;; Leader key support
+(use-package general
+  :demand t
+  :config
+  (general-create-definer sw/leader
+    :states '(normal visual motion)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+
+  (general-create-definer sw/local-leader
+    :states '(normal visual motion)
+    :prefix "SPC m"
+    :global-prefix "C-SPC m"))
+
+;; Which-key for discoverability
+(use-package which-key
+  :demand t
+  :custom
+  (which-key-idle-delay 0.3)
+  (which-key-idle-secondary-delay 0.05)
+  (which-key-add-column-padding 2)
+  :config
+  (which-key-mode 1))
+
+(provide 'sw-evil)
+;;; sw-evil.el ends here

@@ -1,0 +1,75 @@
+;;; sw-tools.el --- Miscellaneous tools -*- lexical-binding: t -*-
+
+;;; Commentary:
+;; Various utilities and tools.
+
+;;; Code:
+
+;;; Nerd icons (required by other packages)
+
+(use-package nerd-icons
+  :demand t)
+
+;;; Restart Emacs
+
+(use-package restart-emacs
+  :commands restart-emacs)
+
+;;; PDF viewing
+
+(use-package pdf-tools
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :custom
+  (pdf-view-display-size 'fit-page)
+  :config
+  (pdf-tools-install :no-query))
+
+;;; Password management
+
+(use-package pass
+  :commands pass)
+
+(use-package password-store
+  :commands (password-store-copy
+             password-store-get))
+
+;; Auth source for pass
+(use-package auth-source-pass
+  :ensure nil
+  :demand t
+  :config
+  (auth-source-pass-enable))
+
+;;; Rest client
+
+(use-package restclient
+  :mode ("\\.http\\'" . restclient-mode))
+
+;;; Imenu list
+
+(use-package imenu-list
+  :custom
+  (imenu-list-focus-after-activation t)
+  (imenu-list-size 0.2)
+  :commands imenu-list-smart-toggle)
+
+;;; Pinentry for GPG
+;; Install from GNU ELPA: M-: (package-install 'pinentry)
+
+(use-package pinentry
+  :ensure nil
+  :demand t
+  :config
+  (setenv "GPG_AGENT_INFO" nil)
+  (pinentry-start))
+
+;;; Helpful - better help buffers
+
+(use-package helpful
+  :commands (helpful-callable
+             helpful-variable
+             helpful-key
+             helpful-at-point))
+
+(provide 'sw-tools)
+;;; sw-tools.el ends here
