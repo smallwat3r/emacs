@@ -22,7 +22,9 @@
   "Cached count of buffers in current workspace.")
 
 (defun sw/update-buffer-count ()
-  "Update the cached buffer counts."
+  "Update the cached buffer counts for modeline display.
+Updates both `sw/buffer-count-cache' (all user-visible buffers) and
+`sw/workspace-buffer-count-cache' (buffers in current workspace)."
   (setq sw/buffer-count-cache
         (cl-count-if
          (lambda (b)

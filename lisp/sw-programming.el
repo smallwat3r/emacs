@@ -25,23 +25,48 @@
 ;;; Formatting
 
 (defvar sw/python-line-length 88
-  "Default Python line length for formatters.")
+  "Default Python line length for formatters when no project config exists.")
 
 (defvar sw/python-target-version "py310"
-  "Target Python version for black formatter.")
+  "Default Python version for black when no project config exists.")
+
+(defun sw/python--project-has-config-p (tool)
+  "Check if current project has pyproject.toml with TOOL config.
+TOOL should be a string like \"black\" or \"isort\"."
+  (when-let* ((root (or (when (project-current)
+                          (project-root (project-current)))
+                        default-directory))
+              (pyproject (expand-file-name "pyproject.toml" root)))
+    (when (file-exists-p pyproject)
+      (with-temp-buffer
+        (insert-file-contents pyproject)
+        (re-search-forward (format "^\\[tool\\.%s\\]" (regexp-quote tool))
+                           nil t)))))
+
+(defun sw/python--black-command ()
+  "Return black formatter command, using project config if available."
+  (if (sw/python--project-has-config-p "black")
+      '("black" "--quiet" "-")
+    `("black" "--quiet"
+      "--line-length" ,(number-to-string sw/python-line-length)
+      "--target-version" ,sw/python-target-version
+      "-")))
+
+(defun sw/python--isort-command ()
+  "Return isort formatter command, using project config if available."
+  (if (sw/python--project-has-config-p "isort")
+      '("isort" "-")
+    `("isort" "--profile" "black" "--trailing-comma" "--use-parentheses"
+      "-l" ,(number-to-string sw/python-line-length) "-")))
 
 (use-package apheleia
   :demand t
   :config
-  ;; Custom formatter configurations
-  (setf (alist-get 'black apheleia-formatters)
-        `("black" "--quiet"
-          "--line-length" ,(number-to-string sw/python-line-length)
-          "--target-version" ,sw/python-target-version
-          "-"))
-  (setf (alist-get 'isort apheleia-formatters)
-        `("isort" "--profile" "black" "--trailing-comma" "--use-parentheses"
-          "-l" ,(number-to-string sw/python-line-length) "-"))
+  ;; Python formatters - project-aware
+  (setf (alist-get 'black apheleia-formatters) #'sw/python--black-command)
+  (setf (alist-get 'isort apheleia-formatters) #'sw/python--isort-command)
+
+  ;; Other formatters
   (setf (alist-get 'shfmt apheleia-formatters)
         '("shfmt" "-i" "2" "-ci" "-bn" "-"))
   (setf (alist-get 'prettier-js apheleia-formatters)
@@ -63,7 +88,9 @@
   (python-shell-completion-native-enable nil)
   :config
   (defun sw/python-toggle-fstring ()
-    "Toggle f-string prefix on the current Python string literal."
+    "Toggle f-string prefix on the current Python string literal.
+When point is inside a string, adds or removes the `f' prefix.
+Handles combined prefixes like `rf' or `fr' correctly."
     (interactive)
     (let* ((ppss (syntax-ppss))
            (in-string (nth 3 ppss))

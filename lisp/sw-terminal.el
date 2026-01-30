@@ -18,8 +18,38 @@
 
 ;;; SSH helpers
 
-(defun sw/ssh-config-hosts ()
-  "Return a list of SSH host aliases from the files in `sw/ssh-config-files'."
+(defvar sw/ssh-config-hosts-cache nil
+  "Cached list of SSH hosts.")
+
+(defvar sw/ssh-config-files-mtime nil
+  "Alist of SSH config files to their last modification times.")
+
+(defun sw/ssh-config--files-changed-p ()
+  "Return non-nil if any SSH config file has been modified since last parse."
+  (cl-some
+   (lambda (file)
+     (let* ((expanded (expand-file-name file))
+            (current-mtime (and (file-readable-p expanded)
+                                (file-attribute-modification-time
+                                 (file-attributes expanded))))
+            (cached-mtime (alist-get expanded sw/ssh-config-files-mtime
+                                     nil nil #'string=)))
+       (not (equal current-mtime cached-mtime))))
+   sw/ssh-config-files))
+
+(defun sw/ssh-config--update-mtimes ()
+  "Update the cached modification times for SSH config files."
+  (setq sw/ssh-config-files-mtime
+        (mapcar (lambda (file)
+                  (let ((expanded (expand-file-name file)))
+                    (cons expanded
+                          (and (file-readable-p expanded)
+                               (file-attribute-modification-time
+                                (file-attributes expanded))))))
+                sw/ssh-config-files)))
+
+(defun sw/ssh-config--parse-hosts ()
+  "Parse SSH hosts from config files."
   (let ((hosts '()))
     (dolist (file sw/ssh-config-files)
       (setq file (expand-file-name file))
@@ -33,6 +63,15 @@
                 (unless (string-match-p "[*?]" h)
                   (push h hosts))))))))
     (delete-dups hosts)))
+
+(defun sw/ssh-config-hosts ()
+  "Return a list of SSH host aliases from `sw/ssh-config-files'.
+Results are cached and only re-parsed when files change."
+  (when (or (null sw/ssh-config-hosts-cache)
+            (sw/ssh-config--files-changed-p))
+    (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))
+    (sw/ssh-config--update-mtimes))
+  sw/ssh-config-hosts-cache)
 
 (defun sw/zsh-history-candidates (&optional limit)
   "Return recent unique zsh history lines (most recent first).
@@ -152,6 +191,30 @@ LIMIT defaults to 10000."
 
   (add-to-list 'eat-message-handler-alist '("find-file" . sw/eat-find-file-handler))
 
+  (defvar-local sw/eat-tramp-initialized nil
+    "Non-nil if TRAMP shell initialization has been sent for this buffer.")
+
+  (defun sw/eat--tramp-init-string (prefix)
+    "Return shell initialization string for TRAMP with PREFIX."
+    (format "export TERM=xterm-256color
+e() { local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
+printf '\\033]51;e;M;%%s;%%s\\033\\\\' \"$(printf 'find-file' | base64)\" \
+\"$(printf '%s%%s' \"$f\" | base64)\"; }
+clear\n" prefix))
+
+  (defun sw/eat--try-send-tramp-init (proc tramp-prefix)
+    "Try to send TRAMP initialization to PROC if ready.
+TRAMP-PREFIX is the remote prefix for the `e` function."
+    (when (and (process-live-p proc)
+               (buffer-live-p (process-buffer proc)))
+      (with-current-buffer (process-buffer proc)
+        (unless sw/eat-tramp-initialized
+          ;; Check if terminal has received any output (shell is ready)
+          (when (and (bound-and-true-p eat-terminal)
+                     (> (buffer-size) 0))
+            (setq sw/eat-tramp-initialized t)
+            (process-send-string proc (sw/eat--tramp-init-string tramp-prefix)))))))
+
   (defun sw/eat-setup-tramp (proc)
     "Configure eat for TRAMP: rename buffer, set TERM, inject `e` file opener."
     (when-let* ((buf (process-buffer proc))
@@ -161,19 +224,21 @@ LIMIT defaults to 10000."
       (with-current-buffer buf
         (rename-buffer (format "*eat@%s*" tramp-prefix) t)
         (setq-local eat-enable-shell-integration nil)
-        (run-at-time
-         0.5 nil
-         (lambda (process prefix)
-           (when (and (process-live-p process)
-                      (buffer-live-p (process-buffer process)))
-             (process-send-string
-              process
-              (format "export TERM=xterm-256color
-e() { local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
-printf '\\033]51;e;M;%%s;%%s\\033\\\\' \"$(printf 'find-file' | base64)\" \
-\"$(printf '%s%%s' \"$f\" | base64)\"; }
-clear\n" prefix))))
-         proc tramp-prefix))))
+        (setq-local sw/eat-tramp-initialized nil)
+        ;; Use a repeating timer that stops once initialization succeeds
+        (let ((timer nil)
+              (attempts 0)
+              (max-attempts 20))  ; 2 seconds max (20 * 100ms)
+          (setq timer
+                (run-with-timer
+                 0.1 0.1
+                 (lambda ()
+                   (setq attempts (1+ attempts))
+                   (if (or sw/eat-tramp-initialized
+                           (>= attempts max-attempts)
+                           (not (process-live-p proc)))
+                       (cancel-timer timer)
+                     (sw/eat--try-send-tramp-init proc tramp-prefix)))))))))
 
   (add-hook 'eat-exec-hook #'sw/eat-setup-tramp))
 
@@ -185,20 +250,24 @@ For remote directories, returns the remote default-directory."
   (sw/project-root-or-default t))
 
 (defun sw/eat--buffer-for-dir (dir)
-  "Return buffer name for eat in DIR."
+  "Return buffer name for eat terminal in DIR.
+Remote directories use format `*eat@<remote>*', local use `*eat:<path>*'."
   (if (file-remote-p dir)
       (format "*eat@%s*" (file-remote-p dir))
     (format "*eat:%s*" (abbreviate-file-name dir))))
 
 (defun sw/eat--get-buffer (dir)
-  "Get or create an eat buffer for DIR."
+  "Get existing or create new eat buffer for DIR.
+Returns existing buffer if one exists for DIR, otherwise creates a new one."
   (require 'eat)
   (let ((buf-name (sw/eat--buffer-for-dir dir)))
     (or (get-buffer buf-name)
         (sw/eat--new-buffer dir buf-name))))
 
 (defun sw/eat--new-buffer (dir &optional name)
-  "Create a new eat buffer for DIR with optional NAME."
+  "Create a new eat terminal buffer for DIR with optional NAME.
+For remote directories, uses TRAMP to connect.
+For local directories, uses the user's default shell."
   (require 'eat)
   (let* ((default-directory dir)
          (buf-name (or name (generate-new-buffer-name (sw/eat--buffer-for-dir dir)))))
@@ -227,7 +296,9 @@ For remote directories, returns the remote default-directory."
         buffer))))
 
 (defun sw/eat--determine-directory (here)
-  "Return directory for eat buffer. If HERE, use buffer's directory."
+  "Return directory for eat buffer.
+If HERE is non-nil, use current buffer's directory.
+Otherwise, use project root or default-directory."
   (if here
       (or (and buffer-file-name (file-name-directory buffer-file-name))
           default-directory)
@@ -290,19 +361,22 @@ For remote directories, opens a shell on the remote host."
 ;;; External terminal helpers
 
 (defun sw/terminal-here--default-directory ()
-  "Directory where the terminal should start."
+  "Return directory where external terminal should start.
+Uses current file's directory if visiting a file, otherwise home."
   (or (when buffer-file-name
         (file-name-directory buffer-file-name))
       (expand-file-name "~")))
 
 (defun sw/terminal-here--pick-terminal ()
-  "Pick which terminal to use for this system."
+  "Return terminal emulator name for this system.
+Uses alacritty on macOS, foot on Linux."
   (cond
    (sw/is-mac "alacritty")
    (t "foot")))
 
 (defun sw/terminal-here--command ()
-  "Build the shell command to launch the chosen terminal here."
+  "Build shell command to launch external terminal in current directory.
+Sets INSIDE_EMACS environment variable to indicate Emacs context."
   (let* ((term (sw/terminal-here--pick-terminal))
          (dir (sw/terminal-here--default-directory)))
     (unless (executable-find term)
@@ -319,7 +393,8 @@ For remote directories, opens a shell on the remote host."
   (message "Terminal is ready!"))
 
 (defun sw/terminal-ssh--command (host)
-  "Build shell command to open an external terminal and SSH to HOST."
+  "Build shell command to open external terminal with SSH connection to HOST.
+Configures terminal with xterm-256color TERM for foot compatibility."
   (let* ((term (sw/terminal-here--pick-terminal))
          (extra-flags (if (string= term "foot") "-t xterm-256color" ""))
          (ssh-cmd (format "ssh %s" (shell-quote-argument host))))

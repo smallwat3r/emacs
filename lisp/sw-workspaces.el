@@ -21,12 +21,15 @@
   (get-buffer-create "*scratch*"))
 
 (defun sw/workspace--get-names ()
-  "Return list of all workspace names."
+  "Return list of all workspace names from tab-bar.
+Names may be nil for unnamed workspaces."
   (mapcar (lambda (tab) (alist-get 'name tab))
           (funcall tab-bar-tabs-function)))
 
 (defun sw/workspace--format-tab (index name is-current)
-  "Format a single tab with INDEX, NAME, and IS-CURRENT status."
+  "Format a single tab for echo area display.
+INDEX is the 0-based tab position, NAME is the workspace name (may be nil),
+and IS-CURRENT indicates if this is the active workspace."
   (let* ((num (1+ index))
          (has-name (and name (not (string-empty-p name))))
          (label (if has-name (format "[%d] %s" num name) (number-to-string num)))
@@ -137,7 +140,7 @@ If a workspace for the project already exists, switch to it."
   "Alist mapping tab indices to their buffer lists.")
 
 (defun sw/workspace--current-index ()
-  "Return current workspace index."
+  "Return current workspace index (0-based)."
   (tab-bar--current-tab-index))
 
 (defun sw/workspace--get-buffers ()
@@ -153,8 +156,19 @@ If a workspace for the project already exists, switch to it."
       (setf (alist-get idx sw/workspace-buffer-alist)
             (cons buffer buffers)))))
 
+(defun sw/workspace--remove-killed-buffer ()
+  "Remove the current buffer from all workspace buffer lists.
+Intended for use in `kill-buffer-hook'."
+  (let ((buf (current-buffer)))
+    (dolist (entry sw/workspace-buffer-alist)
+      (setcdr entry (delq buf (cdr entry))))))
+
+(add-hook 'kill-buffer-hook #'sw/workspace--remove-killed-buffer)
+
 (defun sw/workspace--track-buffer (&rest _)
-  "Track current buffer in workspace."
+  "Track current buffer in workspace buffer list.
+Intended for use in `window-buffer-change-functions'.
+Ignores minibuffers."
   (when-let ((buf (current-buffer)))
     (unless (minibufferp buf)
       (sw/workspace--add-buffer buf))))
