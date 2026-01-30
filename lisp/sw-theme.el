@@ -26,11 +26,11 @@
   :hook (prog-mode . hl-todo-mode)
   :custom
   (hl-todo-keyword-faces
-   '(("TODO" . "#cc9393")
-     ("FIXME" . "#cc9393")
-     ("HACK" . "#d0bf8f")
-     ("NOTE" . "#7cb8bb")
-     ("DEPRECATED" . "#afd8af"))))
+   '(("TODO" . "#ff6c6b")
+     ("FIXME" . "#ff6c6b")
+     ("HACK" . "#b8860b")
+     ("NOTE" . "#4682b4")
+     ("DEPRECATED" . "#2e8b57"))))
 
 ;; Rainbow delimiters for better paren visibility
 (use-package rainbow-delimiters
