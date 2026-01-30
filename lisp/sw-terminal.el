@@ -19,37 +19,10 @@
 ;;; SSH helpers
 
 (defvar sw/ssh-config-hosts-cache nil
-  "Cached list of SSH hosts.")
-
-(defvar sw/ssh-config-files-mtime nil
-  "Alist of SSH config files to their last modification times.")
-
-(defun sw/ssh-config--files-changed-p ()
-  "Return non-nil if any SSH config file has been modified since last parse."
-  (cl-some
-   (lambda (file)
-     (let* ((expanded (expand-file-name file))
-            (current-mtime (and (file-readable-p expanded)
-                                (file-attribute-modification-time
-                                 (file-attributes expanded))))
-            (cached-mtime (alist-get expanded sw/ssh-config-files-mtime
-                                     nil nil #'string=)))
-       (not (equal current-mtime cached-mtime))))
-   sw/ssh-config-files))
-
-(defun sw/ssh-config--update-mtimes ()
-  "Update the cached modification times for SSH config files."
-  (setq sw/ssh-config-files-mtime
-        (mapcar (lambda (file)
-                  (let ((expanded (expand-file-name file)))
-                    (cons expanded
-                          (and (file-readable-p expanded)
-                               (file-attribute-modification-time
-                                (file-attributes expanded))))))
-                sw/ssh-config-files)))
+  "Cached list of SSH hosts. Use `sw/ssh-invalidate-cache' to refresh.")
 
 (defun sw/ssh-config--parse-hosts ()
-  "Parse SSH hosts from config files."
+  "Parse SSH hosts from config files in `sw/ssh-config-files'."
   (let ((hosts '()))
     (dolist (file sw/ssh-config-files)
       (setq file (expand-file-name file))
@@ -66,20 +39,15 @@
 
 (defun sw/ssh-config-hosts ()
   "Return a list of SSH host aliases from `sw/ssh-config-files'.
-Results are cached and only re-parsed when files change."
-  (when (or (null sw/ssh-config-hosts-cache)
-            (sw/ssh-config--files-changed-p))
-    (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))
-    (sw/ssh-config--update-mtimes))
-  sw/ssh-config-hosts-cache)
+Results are cached on first call. Use `sw/ssh-invalidate-cache' to refresh."
+  (or sw/ssh-config-hosts-cache
+      (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))))
 
 (defun sw/ssh-invalidate-cache ()
-  "Invalidate SSH config hosts cache.
-Next call to `sw/ssh-config-hosts' will re-parse config files."
+  "Invalidate SSH config hosts cache and re-parse immediately."
   (interactive)
-  (setq sw/ssh-config-hosts-cache nil)
-  (setq sw/ssh-config-files-mtime nil)
-  (message "SSH config cache invalidated"))
+  (setq sw/ssh-config-hosts-cache (sw/ssh-config--parse-hosts))
+  (message "SSH config cache refreshed (%d hosts)" (length sw/ssh-config-hosts-cache)))
 
 (defun sw/zsh-history-candidates (&optional limit)
   "Return recent unique zsh history lines (most recent first).
