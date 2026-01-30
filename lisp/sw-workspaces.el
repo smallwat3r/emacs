@@ -166,19 +166,45 @@ If a workspace for the project already exists, switch to it."
   (seq-filter #'buffer-live-p (sw/workspace--get-buffers)))
 
 (defun sw/workspace-switch-buffer ()
-  "Switch to a buffer in the current workspace."
+  "Switch to a buffer in the current workspace with preview."
   (interactive)
-  (let* ((workspace-buffers (sw/workspace-buffer-list))
-         (buffer-names (mapcar #'buffer-name workspace-buffers)))
-    (if buffer-names
-        (switch-to-buffer
-         (completing-read "Switch to buffer: " buffer-names nil t))
+  (require 'consult)
+  (let ((workspace-buffers (sw/workspace-buffer-list)))
+    (if workspace-buffers
+        (when-let ((buf (consult--read
+                         (mapcar #'buffer-name workspace-buffers)
+                         :prompt "Switch to buffer: "
+                         :category 'buffer
+                         :state (consult--buffer-state)
+                         :require-match t)))
+          (switch-to-buffer buf))
       (call-interactively #'consult-buffer))))
 
+(defun sw/workspace--find-buffer-workspace (buffer)
+  "Return workspace index containing BUFFER, or nil if not found."
+  (let ((buf (get-buffer buffer)))
+    (cl-loop for (idx . buffers) in sw/workspace-buffer-alist
+             when (memq buf buffers)
+             return idx)))
+
 (defun sw/switch-buffer-global ()
-  "Switch to any buffer (all workspaces)."
+  "Switch to any buffer, switching workspace if needed."
   (interactive)
-  (consult-buffer))
+  (require 'consult)
+  (let* ((all-buffers (cl-remove-if
+                       (lambda (b) (string-prefix-p " " (buffer-name b)))
+                       (buffer-list)))
+         (buf (consult--read
+               (mapcar #'buffer-name all-buffers)
+               :prompt "Switch to buffer (global): "
+               :category 'buffer
+               :state (consult--buffer-state)
+               :require-match t)))
+    (when buf
+      (when-let ((workspace-idx (sw/workspace--find-buffer-workspace buf)))
+        (unless (= workspace-idx (sw/workspace--current-index))
+          (tab-bar-select-tab (1+ workspace-idx))))
+      (switch-to-buffer buf))))
 
 ;; Generates `sw/workspace-switch-to-1' through `sw/workspace-switch-to-9'.
 ;; Each function switches to the corresponding workspace index, or displays
