@@ -47,7 +47,6 @@ LIMIT defaults to 10000."
                (shell-quote-argument histfile) limit)))
     (split-string (shell-command-to-string cmd) "\n" t)))
 
-;;;###autoload
 (defun sw/tramp-connect ()
   "Open remote SSH connection with TRAMP."
   (interactive)
@@ -227,7 +226,6 @@ For remote directories, returns the remote default-directory."
             (eat-exec buffer buf-name shell nil nil)))
         buffer))))
 
-;;;###autoload
 (defun sw/eat-here (&optional here)
   "Open a new eat buffer at the project root, replacing the current buffer.
 If HERE is non-nil, open at current buffer's directory.
@@ -241,7 +239,6 @@ For remote directories, opens a shell on the remote host."
          (buf (sw/eat--new-buffer dir)))
     (switch-to-buffer buf)))
 
-;;;###autoload
 (defun sw/eat-toggle (&optional here)
   "Toggle eat buffer visibility.
 If HERE is non-nil, use buffer-specific directory.
@@ -258,19 +255,16 @@ For remote directories, opens a shell on the remote host."
         (delete-window win)
       (pop-to-buffer (sw/eat--get-buffer dir)))))
 
-;;;###autoload
 (defun sw/eat-here-current-buffer ()
   "Open an eat buffer from the current directory."
   (interactive)
   (sw/eat-here t))
 
-;;;###autoload
 (defun sw/eat-toggle-current-buffer ()
   "Toggle an eat buffer from the current directory."
   (interactive)
   (sw/eat-toggle t))
 
-;;;###autoload
 (defun sw/eat-zsh-history-pick ()
   "Prompt from zsh history and insert into eat (recency preserved)."
   (interactive)
@@ -290,7 +284,6 @@ For remote directories, opens a shell on the remote host."
       (eat-term-send-string eat-terminal "\C-w"))
     (eat-term-send-string eat-terminal choice)))
 
-;;;###autoload
 (defun sw/eat-project ()
   "Open eat terminal in project root."
   (interactive)
@@ -320,7 +313,6 @@ For remote directories, opens a shell on the remote host."
     (format "sh -lc 'cd %s && INSIDE_EMACS=%s %s' >/dev/null 2>&1"
             (shell-quote-argument dir) term term)))
 
-;;;###autoload
 (defun sw/terminal-here ()
   "Open a terminal window in the current directory."
   (interactive "@")
@@ -341,7 +333,6 @@ For remote directories, opens a shell on the remote host."
             extra-flags
             (shell-quote-argument ssh-cmd))))
 
-;;;###autoload
 (defun sw/ssh-external (host)
   "Open an external terminal and SSH to HOST."
   (interactive
