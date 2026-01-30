@@ -81,5 +81,14 @@
              helpful-key
              helpful-at-point))
 
+;;; Persistent undo history
+
+(use-package undo-fu-session
+  :demand t
+  :custom
+  (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
+  :config
+  (undo-fu-session-global-mode 1))
+
 (provide 'sw-tools)
 ;;; sw-tools.el ends here
