@@ -22,7 +22,6 @@ transient/
 auto-save-list/
 tramp
 tramp-autosave/
-undo-fu-session/
 places
 
 # Backup files

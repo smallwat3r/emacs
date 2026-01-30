@@ -65,7 +65,8 @@
 
 ;; Comment with gc
 (use-package evil-nerd-commenter
-  :after evil)
+  :after evil
+  :demand t)
 
 ;; Surround text objects
 (use-package evil-surround
