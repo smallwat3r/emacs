@@ -102,14 +102,7 @@
         ("S-TAB" . corfu-previous)
         ([backtab] . corfu-previous))
   :config
-  (global-corfu-mode 1)
-
-  ;; Enable in minibuffer
-  (defun sw/corfu-enable-in-minibuffer ()
-    "Enable Corfu in the minibuffer if completion is active."
-    (when (local-variable-p 'completion-at-point-functions)
-      (corfu-mode 1)))
-  (add-hook 'minibuffer-setup-hook #'sw/corfu-enable-in-minibuffer))
+  (global-corfu-mode 1))
 
 ;; Corfu popup info
 (use-package corfu-popupinfo
