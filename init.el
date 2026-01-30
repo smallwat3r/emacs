@@ -115,6 +115,7 @@
   ;; General behavior (startup settings in early-init.el)
   (ring-bell-function 'ignore)
   (use-short-answers t)
+  (use-dialog-box nil)
   (confirm-kill-emacs 'y-or-n-p)
 
   ;; Files and backups
@@ -192,15 +193,10 @@
 (require 'sw-tools)
 (require 'sw-claude)
 (require 'sw-keybindings)
+(require 'sw-dashboard)
 
-;;; Display startup time
+;;; Dashboard setup
 
-(add-hook 'emacs-startup-hook
-          (lambda ()
-            (message "Emacs loaded in %s with %d garbage collections."
-                     (format "%.2f seconds"
-                             (float-time
-                              (time-subtract after-init-time before-init-time)))
-                     gcs-done)))
+(sw/dashboard-setup)
 
 ;;; init.el ends here

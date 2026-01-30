@@ -8,6 +8,7 @@ eln-cache/
 *.elc
 
 # Auto-generated files
+.local
 custom.el
 projects
 recentf
