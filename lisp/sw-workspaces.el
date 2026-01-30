@@ -90,13 +90,14 @@ If a workspace for the project already exists, switch to it."
   "Display workspaces after tab operations."
   (sw/workspace-display))
 
-(advice-add 'tab-bar-new-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-switch-to-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-switch-to-next-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-switch-to-prev-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-select-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-close-tab :after #'sw/workspace--display-after)
-(advice-add 'tab-bar-rename-tab :after #'sw/workspace--display-after)
+(dolist (fn '(tab-bar-new-tab
+              tab-bar-switch-to-tab
+              tab-bar-switch-to-next-tab
+              tab-bar-switch-to-prev-tab
+              tab-bar-select-tab
+              tab-bar-close-tab
+              tab-bar-rename-tab))
+  (advice-add fn :after #'sw/workspace--display-after))
 
 ;; Tab-bar configuration
 (setq tab-bar-show nil

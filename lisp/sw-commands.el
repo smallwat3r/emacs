@@ -98,5 +98,17 @@ Uses eglot for region formatting when available, apheleia for buffer."
                              default-directory)))
     (call-interactively #'compile)))
 
+;;; Workspace commands
+
+(defun sw/workspace-switch-to-1 () "Switch to workspace 1." (interactive) (tab-bar-select-tab 1))
+(defun sw/workspace-switch-to-2 () "Switch to workspace 2." (interactive) (tab-bar-select-tab 2))
+(defun sw/workspace-switch-to-3 () "Switch to workspace 3." (interactive) (tab-bar-select-tab 3))
+(defun sw/workspace-switch-to-4 () "Switch to workspace 4." (interactive) (tab-bar-select-tab 4))
+(defun sw/workspace-switch-to-5 () "Switch to workspace 5." (interactive) (tab-bar-select-tab 5))
+(defun sw/workspace-switch-to-6 () "Switch to workspace 6." (interactive) (tab-bar-select-tab 6))
+(defun sw/workspace-switch-to-7 () "Switch to workspace 7." (interactive) (tab-bar-select-tab 7))
+(defun sw/workspace-switch-to-8 () "Switch to workspace 8." (interactive) (tab-bar-select-tab 8))
+(defun sw/workspace-switch-to-9 () "Switch to workspace 9." (interactive) (tab-bar-select-tab 9))
+
 (provide 'sw-commands)
 ;;; sw-commands.el ends here

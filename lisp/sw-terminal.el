@@ -51,9 +51,7 @@ LIMIT defaults to 10000."
 (defun sw/tramp-connect ()
   "Open remote SSH connection with TRAMP."
   (interactive)
-  (let ((tramp-path "/ssh:")
-        (prompt "Pick target: "))
-    (find-file (read-file-name prompt tramp-path))))
+  (find-file (read-file-name "SSH target: " "/ssh:")))
 
 ;;; Eat - Emulate A Terminal
 
@@ -70,23 +68,23 @@ LIMIT defaults to 10000."
                       ("docker" . "/bin/sh")))
   :config
   ;; Terminal colors optimized for light backgrounds
-  (custom-set-faces
-   '(eat-term-color-0 ((t (:foreground "#000000"))))
-   '(eat-term-color-1 ((t (:foreground "#aa0000"))))
-   '(eat-term-color-2 ((t (:foreground "#00aa00"))))
-   '(eat-term-color-3 ((t (:foreground "#aa5500"))))
-   '(eat-term-color-4 ((t (:foreground "#0000aa"))))
-   '(eat-term-color-5 ((t (:foreground "#aa00aa"))))
-   '(eat-term-color-6 ((t (:foreground "#00aaaa"))))
-   '(eat-term-color-7 ((t (:foreground "#555555"))))
-   '(eat-term-color-8 ((t (:foreground "#444444"))))
-   '(eat-term-color-9 ((t (:foreground "#cc0000"))))
-   '(eat-term-color-10 ((t (:foreground "#00cc00"))))
-   '(eat-term-color-11 ((t (:foreground "#cc7700"))))
-   '(eat-term-color-12 ((t (:foreground "#0000cc"))))
-   '(eat-term-color-13 ((t (:foreground "#cc00cc"))))
-   '(eat-term-color-14 ((t (:foreground "#00cccc"))))
-   '(eat-term-color-15 ((t (:foreground "#333333")))))
+  (dolist (spec '((eat-term-color-0 . "#000000")
+                  (eat-term-color-1 . "#aa0000")
+                  (eat-term-color-2 . "#00aa00")
+                  (eat-term-color-3 . "#aa5500")
+                  (eat-term-color-4 . "#0000aa")
+                  (eat-term-color-5 . "#aa00aa")
+                  (eat-term-color-6 . "#00aaaa")
+                  (eat-term-color-7 . "#555555")
+                  (eat-term-color-8 . "#444444")
+                  (eat-term-color-9 . "#cc0000")
+                  (eat-term-color-10 . "#00cc00")
+                  (eat-term-color-11 . "#cc7700")
+                  (eat-term-color-12 . "#0000cc")
+                  (eat-term-color-13 . "#cc00cc")
+                  (eat-term-color-14 . "#00cccc")
+                  (eat-term-color-15 . "#333333")))
+    (set-face-attribute (car spec) nil :foreground (cdr spec)))
 
   ;; Evil integration: switch eat modes based on evil state
   (defun sw/eat-evil-insert-enter ()

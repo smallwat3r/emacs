@@ -18,10 +18,9 @@
   (goto-address-url-face 'link)
   (goto-address-mail-face 'link))
 
-;;; Nerd icons (required by other packages)
+;;; Nerd icons
 
-(use-package nerd-icons
-  :demand t)
+(use-package nerd-icons)
 
 ;;; Restart Emacs
 
@@ -49,7 +48,7 @@
 ;; Auth source for pass
 (use-package auth-source-pass
   :straight nil
-  :demand t
+  :defer 2
   :config
   (auth-source-pass-enable))
 
@@ -69,7 +68,7 @@
 ;;; Pinentry for GPG
 
 (use-package pinentry
-  :demand t
+  :defer 2
   :config
   (setenv "GPG_AGENT_INFO" nil)
   (pinentry-start))
