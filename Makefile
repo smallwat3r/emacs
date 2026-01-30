@@ -1,11 +1,18 @@
 EMACS ?= emacs
 INIT := ~/.emacs.d/init.el
 
-.PHONY: help install update freeze thaw rebuild clean
+.PHONY: help link install update freeze thaw rebuild clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-10s %s\n", $$1, $$2}'
+
+link: ## Symlink this directory to ~/.emacs.d
+	@if [ -e ~/.emacs.d ]; then \
+		echo "~/.emacs.d already exists, remove it first"; exit 1; \
+	fi
+	ln -s $(CURDIR) ~/.emacs.d
+	@echo "Linked $(CURDIR) -> ~/.emacs.d"
 
 install: ## Install packages (first run or from lockfile)
 	$(EMACS) --batch -l $(INIT)
