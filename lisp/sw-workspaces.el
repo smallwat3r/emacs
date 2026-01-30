@@ -246,7 +246,7 @@ Switches to scratch buffer after killing."
   (let ((workspace-buffers (sw/workspace-buffer-list)))
     (if workspace-buffers
         (when-let ((buf (sw/workspace--read-buffer workspace-buffers
-                                                    "Switch to buffer: ")))
+                                                   "Switch to buffer: ")))
           (switch-to-buffer buf))
       (call-interactively #'consult-buffer))))
 
