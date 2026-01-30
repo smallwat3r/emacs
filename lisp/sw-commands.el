@@ -49,7 +49,7 @@
 (defun sw/find-dotfiles ()
   "Find file in dotfiles directory, with dedicated workspace."
   (interactive)
-  (sw/find-in-directory "~/dotfiles/" "dotfiles"))
+  (sw/find-in-directory sw/dotfiles-directory "dotfiles"))
 
 (defun sw/find-emacs-config ()
   "Find file in Emacs config directory, with dedicated workspace."

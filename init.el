@@ -60,6 +60,7 @@
 (defconst sw/full-name "Matt Petiteau")
 (defconst sw/email-addresses '("mpetiteau.pro@gmail.com" "matt@smallwat3r.com"))
 (defconst sw/email (car sw/email-addresses))
+(defconst sw/dotfiles-directory "~/dotfiles/")
 
 ;;; Core settings
 
