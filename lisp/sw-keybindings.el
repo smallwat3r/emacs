@@ -57,8 +57,8 @@
   "fS" '(write-file :wk "Save file as")
   "fD" '(sw/delete-this-file :wk "Delete this file")
   "fy" '(sw/copy-file-path :wk "Yank file path")
-  "f." '(sw/find-dotfiles :wk "Find in dotfiles")
-  "fe" '(sw/find-emacs-config :wk "Find in .emacs.d")
+  "f." '(sw/workspace-find-dotfiles :wk "Find in dotfiles")
+  "fe" '(sw/workspace-find-emacs-config :wk "Find in .emacs.d")
 
   ;; Project
   "p" '(:ignore t :wk "Project")

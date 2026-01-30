@@ -85,6 +85,28 @@ If a workspace for the project already exists, switch to it."
                (file (completing-read "Find file: " files nil t)))
           (find-file file))))))
 
+(defun sw/workspace-find-in-directory (dir name)
+  "Find file in DIR, switching to or creating workspace NAME."
+  (let ((existing (member name (sw/workspace--get-names))))
+    (if existing
+        (tab-bar-switch-to-tab name)
+      (let ((tab-bar-new-tab-choice #'sw/fallback-buffer))
+        (tab-bar-new-tab)
+        (tab-bar-rename-tab name)
+        (delete-other-windows)))
+    (let ((default-directory dir))
+      (project-find-file))))
+
+(defun sw/workspace-find-dotfiles ()
+  "Find file in dotfiles directory, with dedicated workspace."
+  (interactive)
+  (sw/workspace-find-in-directory sw/dotfiles-directory "dotfiles"))
+
+(defun sw/workspace-find-emacs-config ()
+  "Find file in Emacs config directory, with dedicated workspace."
+  (interactive)
+  (sw/workspace-find-in-directory user-emacs-directory ".emacs.d"))
+
 ;; Display after workspace operations
 (defun sw/workspace--display-after (&rest _)
   "Display workspaces after tab operations."
@@ -157,6 +179,23 @@ If a workspace for the project already exists, switch to it."
   "Switch to any buffer (all workspaces)."
   (interactive)
   (consult-buffer))
+
+;; Generates `sw/workspace-switch-to-1' through `sw/workspace-switch-to-9'.
+;; Each function switches to the corresponding workspace index, or displays
+;; an error if the workspace does not exist.
+(defmacro sw/workspace--define-switchers ()
+  "Define workspace switching functions 1-9."
+  `(progn
+     ,@(mapcar (lambda (n)
+                 `(defun ,(intern (format "sw/workspace-switch-to-%d" n)) ()
+                    ,(format "Switch to workspace %d." n)
+                    (interactive)
+                    (if (<= ,n (length (tab-bar-tabs)))
+                        (tab-bar-select-tab ,n)
+                      (message "Workspace %d does not exist" ,n))))
+               (number-sequence 1 9))))
+
+(sw/workspace--define-switchers)
 
 (provide 'sw-workspaces)
 ;;; sw-workspaces.el ends here

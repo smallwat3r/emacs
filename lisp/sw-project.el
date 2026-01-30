@@ -66,5 +66,11 @@ When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
   (require 'consult)
   (consult-ripgrep (sw/project-root-or-default) (thing-at-point 'symbol t)))
 
+(defun sw/project-make ()
+  "Run make in project root."
+  (interactive)
+  (let ((default-directory (sw/project-root-or-default)))
+    (call-interactively #'compile)))
+
 (provide 'sw-project)
 ;;; sw-project.el ends here

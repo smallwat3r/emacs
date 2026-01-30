@@ -5,8 +5,6 @@
 
 ;;; Code:
 
-(require 'sw-workspaces)
-
 ;;; Buffer/File commands
 
 (defun sw/show-buffer-path ()
@@ -31,30 +29,6 @@
         (delete-file file)
         (kill-buffer)
         (message "Deleted %s" file)))))
-
-;;; Navigation commands
-
-(defun sw/find-in-directory (dir name)
-  "Find file in DIR, switching to or creating workspace NAME."
-  (let ((existing (member name (sw/workspace--get-names))))
-    (if existing
-        (tab-bar-switch-to-tab name)
-      (let ((tab-bar-new-tab-choice #'sw/fallback-buffer))
-        (tab-bar-new-tab)
-        (tab-bar-rename-tab name)
-        (delete-other-windows)))
-    (let ((default-directory dir))
-      (project-find-file))))
-
-(defun sw/find-dotfiles ()
-  "Find file in dotfiles directory, with dedicated workspace."
-  (interactive)
-  (sw/find-in-directory sw/dotfiles-directory "dotfiles"))
-
-(defun sw/find-emacs-config ()
-  "Find file in Emacs config directory, with dedicated workspace."
-  (interactive)
-  (sw/find-in-directory user-emacs-directory ".emacs.d"))
 
 ;;; Formatting
 
@@ -87,35 +61,6 @@ Uses eglot for region formatting when available, apheleia for buffer."
   (insert (if (cdr sw/email-addresses)
               (completing-read "Email: " sw/email-addresses nil t)
             sw/email)))
-
-;;; Project commands
-
-(defun sw/project-make ()
-  "Run make in project root."
-  (interactive)
-  (let ((default-directory (if (project-current)
-                               (project-root (project-current))
-                             default-directory)))
-    (call-interactively #'compile)))
-
-;;; Workspace commands
-
-;; Generates `sw/workspace-switch-to-1' through `sw/workspace-switch-to-9'.
-;; Each function switches to the corresponding workspace index, or displays
-;; an error if the workspace does not exist.
-(defmacro sw/--define-workspace-switchers ()
-  "Define workspace switching functions 1-9."
-  `(progn
-     ,@(mapcar (lambda (n)
-                 `(defun ,(intern (format "sw/workspace-switch-to-%d" n)) ()
-                    ,(format "Switch to workspace %d." n)
-                    (interactive)
-                    (if (<= ,n (length (tab-bar-tabs)))
-                        (tab-bar-select-tab ,n)
-                      (message "Workspace %d does not exist" ,n))))
-               (number-sequence 1 9))))
-
-(sw/--define-workspace-switchers)
 
 (provide 'sw-commands)
 ;;; sw-commands.el ends here
