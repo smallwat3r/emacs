@@ -55,7 +55,6 @@
 ;; Native compilation settings
 (setq native-comp-async-report-warnings-errors 'silent
       native-comp-jit-compilation t
-      native-comp-deferred-compilation t
       warning-suppress-log-types '((comp))
       warning-suppress-types '((comp)))
 

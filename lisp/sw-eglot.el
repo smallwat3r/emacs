@@ -7,7 +7,6 @@
 
 (use-package eglot
   :straight nil
-  :demand t
   :hook (python-ts-mode . eglot-ensure)
   :hook (python-mode . eglot-ensure)
   :hook (go-ts-mode . eglot-ensure)
