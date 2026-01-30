@@ -276,6 +276,16 @@
  "gc" 'evilnc-comment-operator
  ";f" 'sw/format-buffer-or-region)
 
+;;; Emacs Lisp mode bindings
+
+(sw/local-leader
+  :keymaps '(emacs-lisp-mode-map lisp-interaction-mode-map)
+  "e" '(:ignore t :wk "Eval")
+  "eb" '(eval-buffer :wk "Eval buffer")
+  "er" '(eval-region :wk "Eval region")
+  "ee" '(eval-last-sexp :wk "Eval last sexp")
+  "ed" '(eval-defun :wk "Eval defun"))
+
 ;;; Python mode bindings
 
 (with-eval-after-load 'python
