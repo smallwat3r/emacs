@@ -27,7 +27,11 @@
 (use-package marginalia
   :demand t
   :config
-  (marginalia-mode 1))
+  (marginalia-mode 1)
+  ;; Remove underline from annotation faces
+  (set-face-attribute 'marginalia-documentation nil :underline nil)
+  (set-face-attribute 'marginalia-value nil :underline nil)
+  (set-face-attribute 'marginalia-key nil :underline nil))
 
 ;; Orderless - flexible completion style with fuzzy matching
 (use-package orderless
