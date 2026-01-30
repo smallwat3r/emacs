@@ -47,11 +47,12 @@
         claude-code-toggle-auto-select t
         claude-code-display-window-fn #'sw/claude-display-buffer-full-frame)
 
-  :config
   ;; Custom toggle that uses full frame display
+  ;; Defined in :init so the command exists before the package is loaded
   (defun sw/claude-code-toggle ()
     "Show or hide the Claude window in full frame."
     (interactive)
+    (require 'claude-code)
     (let ((claude-code-buffer (claude-code--get-or-prompt-for-buffer)))
       (if claude-code-buffer
           (if (get-buffer-window claude-code-buffer)
@@ -63,6 +64,7 @@
                 (select-window window))))
         (claude-code--show-not-running-message))))
 
+  :config
   (advice-add 'claude-code-toggle :override #'sw/claude-code-toggle))
 
 (provide 'sw-claude)

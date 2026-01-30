@@ -30,12 +30,17 @@
       initial-major-mode 'fundamental-mode)
 
 ;; Disable GUI elements before they load
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . 0) default-frame-alist)
-(push '(vertical-scroll-bars) default-frame-alist)
-(push '(horizontal-scroll-bars) default-frame-alist)
-(push '(internal-border-width . 0) default-frame-alist)
-(push '(fullscreen . maximized) default-frame-alist)
+(setq default-frame-alist
+      (append `((menu-bar-lines . 0)
+                (tool-bar-lines . 0)
+                (vertical-scroll-bars)
+                (horizontal-scroll-bars)
+                (internal-border-width . 0)
+                (fullscreen . maximized)
+                (font . ,(cond
+                          ((eq system-type 'darwin) "Monaco-13")
+                          (t "MonacoB-13"))))
+              default-frame-alist))
 
 ;; Prevent flickering during resize
 (setq frame-inhibit-implied-resize t)

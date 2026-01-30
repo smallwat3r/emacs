@@ -12,7 +12,8 @@
   "Return a font size depending on the device or OS."
   (cond
    (sw/is-gpd 13)
-   (sw/is-fedora 13)
+   (sw/is-linux 13)
+   (sw/is-mac 17)
    (t 13)))
 
 (defun sw/font-available-p (font)
@@ -33,28 +34,19 @@ SPEC are additional arguments passed to `font-spec'."
 (defun sw/configure-fonts (&optional frame)
   "Configure fonts when a graphical display is available.
 FRAME is the frame to check for display capability."
-  (let ((frame (or frame (selected-frame))))
-    (when (and (not sw/fonts-configured)
-               (display-graphic-p frame))
-      (let* ((size (sw/get-font-size))
-             (font-spec
-              (cond
-               (sw/is-gpd
-                (sw/safe-font '("MonacoB" "Monospace") :size size))
-               (sw/is-linux
-                (sw/safe-font '("MonacoB" "Triplicate A Code" "Monospace") :size size))
-               (sw/is-mac
-                (sw/safe-font '("Triplicate A Code" "Monaco") :size size))
-               (t
-                (sw/safe-font '("Triplicate A Code" "Monospace") :size size)))))
-        (when font-spec
-          (set-face-attribute 'default nil :font font-spec)
-          (set-face-attribute 'fixed-pitch nil :font font-spec)
-          (set-face-attribute 'variable-pitch nil :font font-spec)))
-      (setq sw/fonts-configured t)
-      ;; Clean up hooks after configuration
-      (remove-function after-focus-change-function #'sw/configure-fonts)
-      (remove-hook 'window-setup-hook #'sw/configure-fonts))))
+  (when (and (not sw/fonts-configured)
+             (display-graphic-p (or frame (selected-frame))))
+    (let* ((fonts (cond (sw/is-linux '("MonacoB" "Monospace"))
+                        (sw/is-mac '("Monaco"))
+                        (t '("Monospace"))))
+           (font-spec (sw/safe-font fonts :size (sw/get-font-size))))
+      (when font-spec
+        (dolist (face '(default fixed-pitch variable-pitch))
+          (set-face-attribute face nil :font font-spec))))
+    (setq sw/fonts-configured t)
+    ;; Remove hooks after configuration (only needed once)
+    (remove-function after-focus-change-function #'sw/configure-fonts)
+    (remove-hook 'window-setup-hook #'sw/configure-fonts)))
 
 ;; Defer font configuration until the frame is ready
 (if (daemonp)

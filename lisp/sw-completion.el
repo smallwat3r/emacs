@@ -91,6 +91,12 @@
   (corfu-preselect 'prompt)
   (corfu-quit-no-match 'separator)
   (corfu-quit-at-boundary 'separator)
+  :bind
+  (:map corfu-map
+        ("TAB" . corfu-next)
+        ([tab] . corfu-next)
+        ("S-TAB" . corfu-previous)
+        ([backtab] . corfu-previous))
   :config
   (global-corfu-mode 1)
 

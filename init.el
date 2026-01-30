@@ -84,9 +84,9 @@
 
 (defconst sw/is-fedora
   (and sw/is-linux
-       (let ((os-release (ignore-errors
-                           (shell-command-to-string "cat /etc/os-release"))))
-         (and os-release (string-match-p "fedora" (downcase os-release))))))
+       (when-let ((os-release (ignore-errors
+                                (shell-command-to-string "cat /etc/os-release"))))
+         (and (string-match-p "fedora" (downcase os-release)) t))))
 
 (defconst sw/is-gpd
   (and sw/is-linux

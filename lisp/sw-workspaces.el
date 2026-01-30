@@ -25,26 +25,25 @@
   (mapcar (lambda (tab) (alist-get 'name tab))
           (funcall tab-bar-tabs-function)))
 
+(defun sw/workspace--format-tab (index name is-current)
+  "Format a single tab with INDEX, NAME, and IS-CURRENT status."
+  (let* ((num (1+ index))
+         (has-name (and name (not (string-empty-p name))))
+         (label (if has-name (format "[%d] %s" num name) (number-to-string num)))
+         (text (if is-current (format "(%s) " label) (format " %s  " label)))
+         (face (if is-current 'sw/workspace-tab-selected-face 'sw/workspace-tab-face)))
+    (propertize text 'face face)))
+
 (defun sw/workspace--tabline ()
   "Return formatted workspace tabline for echo area display."
   (let* ((tabs (funcall tab-bar-tabs-function))
          (current-index (tab-bar--current-tab-index tabs)))
     (mapconcat
      (lambda (tab)
-       (let* ((index (cl-position tab tabs))
-              (name (alist-get 'name tab))
-              (is-current (eq index current-index))
-              (has-name (and name (not (string-empty-p name)))))
-         (propertize (if has-name
-                         (if is-current
-                             (format "([%d] %s) " (1+ index) name)
-                           (format " [%d] %s  " (1+ index) name))
-                       (if is-current
-                           (format "(%d) " (1+ index))
-                         (format " %d  " (1+ index))))
-                     'face (if is-current
-                               'sw/workspace-tab-selected-face
-                             'sw/workspace-tab-face))))
+       (sw/workspace--format-tab
+        (cl-position tab tabs)
+        (alist-get 'name tab)
+        (eq (cl-position tab tabs) current-index)))
      tabs
      "")))
 
