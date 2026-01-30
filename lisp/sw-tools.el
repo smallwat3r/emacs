@@ -9,6 +9,15 @@
 
 (setq browse-url-browser-function 'browse-url-xdg-open)
 
+;;; Goto address - highlight URLs and email addresses
+
+(use-package goto-addr
+  :ensure nil
+  :hook ((prog-mode text-mode) . goto-address-mode)
+  :custom
+  (goto-address-url-face 'link)
+  (goto-address-mail-face 'link))
+
 ;;; Nerd icons (required by other packages)
 
 (use-package nerd-icons
