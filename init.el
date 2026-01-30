@@ -192,6 +192,7 @@
 (require 'sw-eglot)
 (require 'sw-tools)
 (require 'sw-claude)
+(require 'sw-workspaces)
 (require 'sw-keybindings)
 (require 'sw-dashboard)
 

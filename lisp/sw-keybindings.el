@@ -37,7 +37,8 @@
 
   ;; Buffers
   "b" '(:ignore t :wk "Buffer")
-  "bb" '(consult-buffer :wk "Switch buffer")
+  "bb" '(sw/workspace-switch-buffer :wk "Switch buffer")
+  "bB" '(sw/switch-buffer-global :wk "Switch buffer (all)")
   "bd" '(kill-current-buffer :wk "Kill buffer")
   "bi" '(ibuffer :wk "Ibuffer")
   "bl" '(evil-switch-to-windows-last-buffer :wk "Last buffer")
@@ -64,7 +65,7 @@
 
   ;; Project
   "p" '(:ignore t :wk "Project")
-  "pp" '(project-switch-project :wk "Switch project")
+  "pp" '(sw/workspace-switch-to-project :wk "Switch project")
   "pf" '(sw/project-find-file :wk "Find file in project")
   "pg" '(sw/consult-ripgrep-project :wk "Grep project")
   "pd" '(project-find-dir :wk "Find dir")
@@ -136,6 +137,25 @@
   "ti" '(imenu-list-smart-toggle :wk "Imenu list")
   "tw" '(whitespace-mode :wk "Whitespace")
   "tb" '(blamer-mode :wk "Git blame")
+
+  ;; Workspaces (tab-bar)
+  "TAB" '(:ignore t :wk "Workspace")
+  "TAB TAB" '(sw/workspace-display :wk "Display workspaces")
+  "TAB ." '(tab-bar-switch-to-tab :wk "Switch workspace")
+  "TAB n" '(sw/workspace-new :wk "New workspace")
+  "TAB d" '(tab-bar-close-tab :wk "Close workspace")
+  "TAB r" '(tab-bar-rename-tab :wk "Rename workspace")
+  "TAB ]" '(tab-bar-switch-to-next-tab :wk "Next workspace")
+  "TAB [" '(tab-bar-switch-to-prev-tab :wk "Prev workspace")
+  "TAB 1" '((lambda () (interactive) (tab-bar-select-tab 1)) :wk "Workspace 1")
+  "TAB 2" '((lambda () (interactive) (tab-bar-select-tab 2)) :wk "Workspace 2")
+  "TAB 3" '((lambda () (interactive) (tab-bar-select-tab 3)) :wk "Workspace 3")
+  "TAB 4" '((lambda () (interactive) (tab-bar-select-tab 4)) :wk "Workspace 4")
+  "TAB 5" '((lambda () (interactive) (tab-bar-select-tab 5)) :wk "Workspace 5")
+  "TAB 6" '((lambda () (interactive) (tab-bar-select-tab 6)) :wk "Workspace 6")
+  "TAB 7" '((lambda () (interactive) (tab-bar-select-tab 7)) :wk "Workspace 7")
+  "TAB 8" '((lambda () (interactive) (tab-bar-select-tab 8)) :wk "Workspace 8")
+  "TAB 9" '((lambda () (interactive) (tab-bar-select-tab 9)) :wk "Workspace 9")
 
   ;; Window
   "w" '(:ignore t :wk "Window")
