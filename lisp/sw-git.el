@@ -90,5 +90,8 @@
   (blamer-commit-formatter " - %s")
   :commands blamer-mode)
 
+;; Open remote repo in browser
+(use-package browse-at-remote)
+
 (provide 'sw-git)
 ;;; sw-git.el ends here

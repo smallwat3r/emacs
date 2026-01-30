@@ -49,7 +49,7 @@
     creamy-theme simplicity-theme hl-todo rainbow-delimiters
     highlight-numbers symbol-overlay nerd-icons
     ;; Git
-    magit diff-hl git-timemachine blamer git-modes
+    magit diff-hl git-timemachine blamer git-modes browse-at-remote
     ;; Programming
     apheleia editorconfig markdown-mode web-mode dockerfile-mode docker
     terraform-mode lua-mode nginx-mode cargo pet yasnippet yasnippet-snippets

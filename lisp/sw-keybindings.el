@@ -123,6 +123,9 @@
   "gS" '(magit-file-stage :wk "Stage file")
   "gU" '(magit-file-unstage :wk "Unstage file")
   "gt" '(git-timemachine-toggle :wk "Timemachine")
+  "go" '(:ignore t :wk "Open")
+  "goo" '(browse-at-remote :wk "Browse remote")
+  "goy" '(browse-at-remote-kill :wk "Copy remote URL")
   "g[" '(diff-hl-previous-hunk :wk "Previous hunk")
   "g]" '(diff-hl-next-hunk :wk "Next hunk")
 
@@ -212,11 +215,6 @@
   "hp" '(helpful-at-point :wk "At point")
   "hi" '(info :wk "Info")
   "hm" '(describe-mode :wk "Mode")
-
-  ;; Quit
-  "q" '(:ignore t :wk "Quit")
-  "qq" '(save-buffers-kill-terminal :wk "Quit Emacs")
-  "qr" '(restart-emacs :wk "Restart")
 
   ;; Local/Mode (placeholder for which-key)
   "m" '(:ignore t :wk "Local mode"))

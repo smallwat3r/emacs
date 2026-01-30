@@ -5,6 +5,10 @@
 
 ;;; Code:
 
+;;; Browser configuration
+
+(setq browse-url-browser-function 'browse-url-xdg-open)
+
 ;;; Nerd icons (required by other packages)
 
 (use-package nerd-icons
