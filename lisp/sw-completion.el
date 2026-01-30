@@ -88,6 +88,7 @@
 (use-package corfu
   :demand t
   :custom
+  (corfu-count 5)
   (corfu-auto t)
   (corfu-auto-delay 0.2)
   (corfu-auto-prefix 2)
