@@ -93,6 +93,7 @@
  ("treesit-auto" . "016bd286a1ba4628f833a626f8b9d497882ecdf3")
  ("use-package" . "039b721a4d24b93adc3170e39a6cba7a8200ed43")
  ("vertico" . "c6f6d0674cfeb4374a77dde5e5f899e0fe62dd32")
+ ("vundo" . "288d1b06ea9283852640bb49532e57ae0515492f")
  ("web-mode" . "1e7694aee87722f9e51b6e39c35d175d83a1fb2c")
  ("with-editor" . "902b4d572af2c2f36060da01e3c33d194cdec32b")
  ("xref" . "2113694c8c921a91e368a0a41a7cb78362092286")

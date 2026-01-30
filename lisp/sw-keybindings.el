@@ -44,6 +44,7 @@
   "bn" '(next-buffer :wk "Next buffer")
   "bp" '(previous-buffer :wk "Previous buffer")
   "br" '(revert-buffer :wk "Revert buffer")
+  "bu" '(vundo :wk "Undo tree")
   "bs" '(save-buffer :wk "Save buffer")
   "bS" '(evil-write-all :wk "Save all buffers")
   "bx" '(scratch-buffer :wk "Scratch buffer")

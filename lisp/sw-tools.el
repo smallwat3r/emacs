@@ -81,7 +81,7 @@
              helpful-key
              helpful-at-point))
 
-;;; Persistent undo history
+;;; Undo enhancements
 
 (use-package undo-fu-session
   :demand t
@@ -89,6 +89,12 @@
   (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'"))
   :config
   (undo-fu-session-global-mode 1))
+
+(use-package vundo
+  :commands vundo
+  :custom
+  (vundo-glyph-alist vundo-unicode-symbols)
+  (vundo-compact-display t))
 
 (provide 'sw-tools)
 ;;; sw-tools.el ends here
