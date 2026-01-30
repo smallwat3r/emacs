@@ -7,7 +7,7 @@
 ;;; Code:
 
 (use-package project
-  :ensure nil
+  :straight nil
   :demand t
   :custom
   ;; Remember known projects

@@ -8,7 +8,7 @@
 ;;; Tree-sitter (built-in since Emacs 29)
 
 (use-package treesit
-  :ensure nil
+  :straight nil
   :custom
   (treesit-font-lock-level 4)
   :config
@@ -62,7 +62,7 @@
 ;;; Python
 
 (use-package python
-  :ensure nil
+  :straight nil
   :custom
   (python-indent-offset 4)
   (python-shell-interpreter "python3")
@@ -106,7 +106,7 @@
 ;;; Go
 
 (use-package go-ts-mode
-  :ensure nil
+  :straight nil
   :custom
   (go-ts-mode-indent-offset 4)
   :hook (go-ts-mode . (lambda () (setq-local indent-tabs-mode t))))
@@ -114,7 +114,7 @@
 ;;; Rust
 
 (use-package rust-ts-mode
-  :ensure nil
+  :straight nil
   :mode "\\.rs\\'")
 
 (use-package cargo
@@ -123,12 +123,12 @@
 ;;; JavaScript/TypeScript
 
 (use-package js
-  :ensure nil
+  :straight nil
   :custom
   (js-indent-level 2))
 
 (use-package typescript-ts-mode
-  :ensure nil
+  :straight nil
   :mode ("\\.ts\\'" "\\.tsx\\'")
   :custom
   (typescript-ts-mode-indent-offset 2))
@@ -148,12 +148,12 @@
 ;;; JSON/YAML
 
 (use-package json-ts-mode
-  :ensure nil
+  :straight nil
   :mode "\\.json\\'"
   :hook (json-ts-mode . (lambda () (setq-local tab-width 2))))
 
 (use-package yaml-ts-mode
-  :ensure nil
+  :straight nil
   :mode "\\.ya?ml\\'")
 
 ;;; Markdown
@@ -167,7 +167,7 @@
 ;;; Shell
 
 (use-package sh-script
-  :ensure nil
+  :straight nil
   :custom
   (sh-basic-offset 2)
   (sh-indentation 2)

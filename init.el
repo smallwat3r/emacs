@@ -18,64 +18,27 @@
       (when (file-directory-p dir)
         (add-to-list 'load-path dir)))))
 
-;; Initialize package management
-(require 'package)
-(setq package-archives
-      '(("melpa" . "https://melpa.org/packages/")))
-(package-initialize)
+;; Bootstrap straight.el
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                         user-emacs-directory))
+      (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-;; Refresh package contents only if archive cache doesn't exist
-;; (Run M-x package-refresh-contents manually if needed)
-(unless (file-exists-p (expand-file-name "archives/melpa/archive-contents"
-                                         package-user-dir))
-  (package-refresh-contents))
-
-;; Ensure use-package is available (built-in since Emacs 29)
-(require 'use-package)
-(require 'use-package-ensure)
-(setq use-package-always-ensure t
+;; Integrate straight.el with use-package
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t
       use-package-always-defer t
       use-package-expand-minimally t
       use-package-compute-statistics nil)
-
-;; List of packages to install (run M-x sw/install-packages to install)
-(defvar sw/required-packages
-  '(;; Core
-    evil evil-collection evil-goggles evil-snipe evil-surround
-    evil-nerd-commenter evil-visualstar evil-anzu anzu general which-key
-    ;; Completion
-    vertico orderless consult marginalia embark embark-consult corfu cape
-    ;; Theme & UI
-    creamy-theme simplicity-theme hl-todo rainbow-delimiters
-    highlight-numbers symbol-overlay nerd-icons
-    ;; Git
-    magit diff-hl git-timemachine blamer git-modes browse-at-remote
-    ;; Programming
-    apheleia editorconfig markdown-mode web-mode dockerfile-mode docker
-    terraform-mode lua-mode nginx-mode cargo pet yasnippet yasnippet-snippets
-    ;; Tools
-    helpful eat restart-emacs restclient pdf-tools
-    pass password-store
-    ;; Dired
-    dired-narrow dired-subtree nerd-icons-dired diredfl
-    ;; Org
-    org-modern org-journal toc-org
-    ;; Eglot
-    consult-eglot
-    ;; Misc
-    imenu-list logview)
-  "List of packages required by this configuration.")
-
-(defun sw/install-packages ()
-  "Install all missing packages from `sw/required-packages'."
-  (interactive)
-  (package-refresh-contents)
-  (dolist (pkg sw/required-packages)
-    (unless (package-installed-p pkg)
-      (condition-case err
-          (package-install pkg)
-        (error (message "Failed to install %s: %s" pkg err)))))
-  (message "Package installation complete!"))
 
 ;;; System detection
 
@@ -106,7 +69,7 @@
 ;;; Core settings
 
 (use-package emacs
-  :ensure nil
+  :straight nil
   :demand t
   :custom
   (user-full-name sw/full-name)

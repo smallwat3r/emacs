@@ -15,15 +15,13 @@
   (display-buffer buffer '((display-buffer-full-frame))))
 
 ;; Required dependency for claude-code
-;; Install with: M-x package-vc-install RET https://github.com/purcell/inheritenv RET
 (use-package inheritenv
-  :ensure nil
+  :straight (:host github :repo "purcell/inheritenv")
   :demand t)
 
-;; Claude Code - install from GitHub for eat support:
-;; M-x package-vc-install RET https://github.com/stevemolitor/claude-code.el RET
+;; Claude Code
 (use-package claude-code
-  :ensure nil
+  :straight (:host github :repo "stevemolitor/claude-code.el")
   :when (executable-find "claude")
   :after inheritenv
   :commands (claude-code

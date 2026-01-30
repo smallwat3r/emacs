@@ -362,7 +362,7 @@ For remote directories, opens a shell on the remote host."
 ;;; TRAMP configuration
 
 (use-package tramp
-  :ensure nil
+  :straight nil
   :defer t
   :custom
   (tramp-default-method "ssh")
@@ -392,7 +392,7 @@ For remote directories, opens a shell on the remote host."
 
 ;; Docker TRAMP support (built-in since Emacs 29)
 (use-package tramp-container
-  :ensure nil
+  :straight nil
   :after tramp)
 
 (provide 'sw-terminal)

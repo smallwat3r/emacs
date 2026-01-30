@@ -12,7 +12,7 @@
 ;;; Goto address - highlight URLs and email addresses
 
 (use-package goto-addr
-  :ensure nil
+  :straight nil
   :hook ((prog-mode text-mode) . goto-address-mode)
   :custom
   (goto-address-url-face 'link)
@@ -48,7 +48,7 @@
 
 ;; Auth source for pass
 (use-package auth-source-pass
-  :ensure nil
+  :straight nil
   :demand t
   :config
   (auth-source-pass-enable))
@@ -67,10 +67,8 @@
   :commands imenu-list-smart-toggle)
 
 ;;; Pinentry for GPG
-;; Install from GNU ELPA: M-: (package-install 'pinentry)
 
 (use-package pinentry
-  :ensure nil
   :demand t
   :config
   (setenv "GPG_AGENT_INFO" nil)

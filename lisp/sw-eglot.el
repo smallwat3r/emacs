@@ -6,7 +6,7 @@
 ;;; Code:
 
 (use-package eglot
-  :ensure nil
+  :straight nil
   :hook ((python-ts-mode python-mode) . eglot-ensure)
   :hook ((go-ts-mode go-mode) . eglot-ensure)
   :hook ((rust-ts-mode rust-mode) . eglot-ensure)
@@ -46,9 +46,8 @@
   :commands consult-eglot-symbols)
 
 ;; Eglot booster - IO buffering for better performance
-;; Install from GitHub: M-x package-vc-install RET https://github.com/jdtsmith/eglot-booster RET
 (use-package eglot-booster
-  :ensure nil
+  :straight (:host github :repo "jdtsmith/eglot-booster")
   :after eglot
   :when (executable-find "emacs-lsp-booster")
   :init

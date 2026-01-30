@@ -18,7 +18,7 @@
 
 ;; Save minibuffer history
 (use-package savehist
-  :ensure nil
+  :straight nil
   :demand t
   :config
   (savehist-mode 1))
@@ -113,7 +113,7 @@
 
 ;; Corfu popup info
 (use-package corfu-popupinfo
-  :ensure nil
+  :straight nil
   :after corfu
   :hook (corfu-mode . corfu-popupinfo-mode)
   :custom

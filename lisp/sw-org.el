@@ -6,7 +6,7 @@
 ;;; Code:
 
 (use-package org
-  :ensure nil
+  :straight nil
   :custom
   ;; Directories
   (org-directory "~/org")

@@ -8,7 +8,7 @@
 ;;; SQL
 
 (use-package sql
-  :ensure nil
+  :straight nil
   :mode (("\\.sql\\'" . sql-mode)
          ("\\.mysql\\'" . sql-mode)
          ("\\.pgsql\\'" . sql-mode))
@@ -26,7 +26,7 @@
 ;;; Makefile
 
 (use-package make-mode
-  :ensure nil
+  :straight nil
   :mode ("Makefile.*" . makefile-mode))
 
 ;;; Additional file type associations
