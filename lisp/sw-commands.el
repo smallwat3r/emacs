@@ -100,15 +100,22 @@ Uses eglot for region formatting when available, apheleia for buffer."
 
 ;;; Workspace commands
 
-(defun sw/workspace-switch-to-1 () "Switch to workspace 1." (interactive) (tab-bar-select-tab 1))
-(defun sw/workspace-switch-to-2 () "Switch to workspace 2." (interactive) (tab-bar-select-tab 2))
-(defun sw/workspace-switch-to-3 () "Switch to workspace 3." (interactive) (tab-bar-select-tab 3))
-(defun sw/workspace-switch-to-4 () "Switch to workspace 4." (interactive) (tab-bar-select-tab 4))
-(defun sw/workspace-switch-to-5 () "Switch to workspace 5." (interactive) (tab-bar-select-tab 5))
-(defun sw/workspace-switch-to-6 () "Switch to workspace 6." (interactive) (tab-bar-select-tab 6))
-(defun sw/workspace-switch-to-7 () "Switch to workspace 7." (interactive) (tab-bar-select-tab 7))
-(defun sw/workspace-switch-to-8 () "Switch to workspace 8." (interactive) (tab-bar-select-tab 8))
-(defun sw/workspace-switch-to-9 () "Switch to workspace 9." (interactive) (tab-bar-select-tab 9))
+;; Generates `sw/workspace-switch-to-1' through `sw/workspace-switch-to-9'.
+;; Each function switches to the corresponding workspace index, or displays
+;; an error if the workspace does not exist.
+(defmacro sw/--define-workspace-switchers ()
+  "Define workspace switching functions 1-9."
+  `(progn
+     ,@(mapcar (lambda (n)
+                 `(defun ,(intern (format "sw/workspace-switch-to-%d" n)) ()
+                    ,(format "Switch to workspace %d." n)
+                    (interactive)
+                    (if (<= ,n (length (tab-bar-tabs)))
+                        (tab-bar-select-tab ,n)
+                      (message "Workspace %d does not exist" ,n))))
+               (number-sequence 1 9))))
+
+(sw/--define-workspace-switchers)
 
 (provide 'sw-commands)
 ;;; sw-commands.el ends here
