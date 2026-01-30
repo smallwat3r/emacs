@@ -14,6 +14,7 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
 ;; Bootstrap straight.el
+(setq straight-check-for-modifications nil)  ; faster startup, use M-x straight-pull-all to update
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name "straight/repos/straight.el/bootstrap.el"
