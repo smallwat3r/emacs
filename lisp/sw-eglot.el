@@ -7,10 +7,15 @@
 
 (use-package eglot
   :straight nil
-  :hook ((python-ts-mode python-mode) . eglot-ensure)
-  :hook ((go-ts-mode go-mode) . eglot-ensure)
-  :hook ((rust-ts-mode rust-mode) . eglot-ensure)
-  :hook ((typescript-ts-mode js-ts-mode) . eglot-ensure)
+  :demand t
+  :hook (python-ts-mode . eglot-ensure)
+  :hook (python-mode . eglot-ensure)
+  :hook (go-ts-mode . eglot-ensure)
+  :hook (go-mode . eglot-ensure)
+  :hook (rust-ts-mode . eglot-ensure)
+  :hook (rust-mode . eglot-ensure)
+  :hook (typescript-ts-mode . eglot-ensure)
+  :hook (js-ts-mode . eglot-ensure)
   :hook (terraform-mode . eglot-ensure)
   :init
   ;; Prevent eglot from managing flymake
