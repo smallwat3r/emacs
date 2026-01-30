@@ -4,25 +4,14 @@ Personal Emacs configuration in vanilla elisp. Requires Emacs 30+.
 
 ## Installation
 
-Clone to `~/.emacs.d` and start Emacs. Packages will install automatically on
-first run via [straight.el](https://github.com/radian-software/straight.el).
+Clone or symlink to `~/.emacs.d` and start Emacs. Packages install automatically
+on first run.
 
 ## Package management
 
-Packages are managed with straight.el, which provides version locking. The
-lockfile at `straight/versions/default.el` is version-controlled for
-reproducible installs.
-
-### From Emacs
-
-```
-M-x straight-pull-all        Update all packages
-M-x straight-freeze-versions Save versions to lockfile
-M-x straight-thaw-versions   Restore from lockfile
-M-x straight-rebuild-all     Rebuild all packages
-```
-
-### From CLI
+Packages are managed with [straight.el](https://github.com/radian-software/straight.el),
+which provides version locking. The lockfile at `straight/versions/default.el` is
+version-controlled for reproducible installs.
 
 Run `make` to see available commands:
 
