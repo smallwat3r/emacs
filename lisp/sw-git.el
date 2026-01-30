@@ -57,9 +57,12 @@
                     (kill-buffer buf))))))
 
   ;; Git rebase keybindings for moving commits
+  ;; n, a bindings match custom keyboard layout (up/down)
   (with-eval-after-load 'git-rebase
     (define-key git-rebase-mode-map (kbd "K") #'git-rebase-move-line-up)
-    (define-key git-rebase-mode-map (kbd "J") #'git-rebase-move-line-down)))
+    (define-key git-rebase-mode-map (kbd "J") #'git-rebase-move-line-down)
+    (define-key git-rebase-mode-map (kbd "N") #'git-rebase-move-line-up)
+    (define-key git-rebase-mode-map (kbd "A") #'git-rebase-move-line-down)))
 
 ;; Git gutter
 (use-package diff-hl
@@ -75,7 +78,12 @@
 
 ;; Git time machine
 (use-package git-timemachine
-  :commands git-timemachine)
+  :commands git-timemachine
+  :config
+  ;; C-n, C-a navigation matches custom keyboard layout (up/down)
+  (evil-define-key 'normal git-timemachine-mode-map
+    (kbd "C-n") #'git-timemachine-show-previous-revision
+    (kbd "C-a") #'git-timemachine-show-next-revision))
 
 ;; Git modes for config files
 (use-package git-modes)
