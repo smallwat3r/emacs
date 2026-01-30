@@ -38,9 +38,11 @@
   (define-key magit-mode-map (kbd "l") nil)
   (define-key magit-mode-map (kbd "h") nil)
 
-  ;; No line numbers in commit buffer
+  ;; Commit buffer settings
   (add-hook 'git-commit-mode-hook
-            (lambda () (display-line-numbers-mode -1)))
+            (lambda ()
+              (display-line-numbers-mode -1)
+              (evil-insert-state)))
 
   ;; Git commit settings
   (with-eval-after-load 'git-commit
