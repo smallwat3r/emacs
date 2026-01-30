@@ -31,15 +31,12 @@
 
 ;; Disable GUI elements before they load
 (setq default-frame-alist
-      (append `((menu-bar-lines . 0)
+      (append '((menu-bar-lines . 0)
                 (tool-bar-lines . 0)
                 (vertical-scroll-bars)
                 (horizontal-scroll-bars)
                 (internal-border-width . 0)
-                (fullscreen . maximized)
-                (font . ,(cond
-                          ((eq system-type 'darwin) "Monaco-13")
-                          (t "MonacoB-13"))))
+                (fullscreen . maximized))
               default-frame-alist))
 
 ;; Prevent flickering during resize
