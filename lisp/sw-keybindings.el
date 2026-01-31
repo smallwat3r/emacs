@@ -230,6 +230,7 @@
   ;; Help
   "h" '(:ignore t :wk "Help")
   "hf" '(helpful-callable :wk "Function")
+  "hF" '(describe-char :wk "Face at point")
   "hv" '(helpful-variable :wk "Variable")
   "hk" '(helpful-key :wk "Key")
   "hp" '(helpful-at-point :wk "At point")
