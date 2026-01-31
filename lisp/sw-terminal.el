@@ -235,8 +235,7 @@ For local directories, uses the user's default shell."
          (buf-name (or name (generate-new-buffer-name (sw/eat--buffer-for-dir dir)))))
     (if (file-remote-p dir)
         ;; For remote directories, use eat's built-in TRAMP support
-        (let* ((remote (file-remote-p dir))
-               (method (file-remote-p dir 'method))
+        (let* ((method (file-remote-p dir 'method))
                (shell (or (cdr (assoc method eat-tramp-shells)) "/bin/bash"))
                (buffer (get-buffer-create buf-name)))
           (with-current-buffer buffer
