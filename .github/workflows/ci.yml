@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  check:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,10 +18,55 @@ jobs:
         with:
           version: '30.1'
 
-      - name: Check elisp syntax
+      - name: Check syntax
         run: |
-          for f in lisp/*.el early-init.el init.el; do
-            echo "Checking $f..."
-            emacs --batch --eval "(check-parens)" "$f" 2>&1 || exit 1
-          done
-          echo "All files have valid syntax"
+          emacs -Q --batch \
+            --eval "(dolist (f (append (file-expand-wildcards \"lisp/*.el\")
+                                       '(\"early-init.el\" \"init.el\")))
+                      (message \"Checking %s...\" f)
+                      (find-file f)
+                      (check-parens))"
+
+      - name: Byte-compile
+        run: |
+          cat > /tmp/ci-check.el << 'EOF'
+          ;; Add lisp dir to load path for local requires
+          (add-to-list 'load-path (expand-file-name "lisp"))
+
+          ;; Load built-in packages needed for compilation
+          (require 'project)
+
+          ;; Stub macros for external packages
+          (defmacro use-package (name &rest args) nil)
+          (defmacro general-create-definer (name &rest args)
+            `(defmacro ,name (&rest bindings) nil))
+          (defmacro general-define-key (&rest args) nil)
+          (defmacro evil-define-key* (&rest args) nil)
+
+          ;; Stub functions
+          (defun straight-use-package (&rest _))
+
+          ;; Provide stubbed features
+          (provide 'use-package)
+          (provide 'general)
+          (provide 'evil)
+          (provide 'straight)
+
+          ;; Compile settings
+          (setq byte-compile-warnings '(not free-vars unresolved docstrings))
+
+          ;; Compile all files (skip init.el as it only contains requires)
+          (let ((files (append (file-expand-wildcards "lisp/*.el")
+                               '("early-init.el")))
+                (failed nil))
+            (dolist (f files)
+              (princ (format "Compiling %s..." f))
+              (if (byte-compile-file f)
+                  (princ " OK\n")
+                (princ " FAILED\n")
+                (setq failed t)))
+            (if failed
+                (kill-emacs 1)
+              (princ "All files compiled successfully\n")))
+          EOF
+          emacs -Q --batch -l /tmp/ci-check.el
