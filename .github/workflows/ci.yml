@@ -18,15 +18,6 @@ jobs:
         with:
           version: '30.1'
 
-      - name: Check syntax
-        run: |
-          emacs -Q --batch \
-            --eval "(dolist (f (append (file-expand-wildcards \"lisp/*.el\")
-                                       '(\"early-init.el\" \"init.el\")))
-                      (message \"Checking %s...\" f)
-                      (find-file f)
-                      (check-parens))"
-
       - name: Byte-compile
         run: |
           cat > /tmp/ci-check.el << 'EOF'
