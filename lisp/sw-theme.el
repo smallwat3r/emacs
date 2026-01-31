@@ -48,5 +48,14 @@
 (use-package symbol-overlay
   :commands (symbol-overlay-put symbol-overlay-remove-all))
 
+;; Dim inactive windows
+(use-package auto-dim-other-buffers
+  :demand t
+  :custom
+  (auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)
+  :config
+  (set-face-background 'auto-dim-other-buffers-face "#E8D8B8")
+  (auto-dim-other-buffers-mode 1))
+
 (provide 'sw-theme)
 ;;; sw-theme.el ends here

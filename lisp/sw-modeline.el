@@ -65,11 +65,5 @@ Updates both `sw/buffer-count-cache' (all user-visible buffers) and
                 ,mode-line-misc-info
                 ,mode-line-end-spaces))
 
-;; Orange modeline for active window
-(set-face-attribute 'mode-line nil
-                    :background "#ffb86c"
-                    :foreground "#1a1a1a"
-                    :weight 'bold)
-
 (provide 'sw-modeline)
 ;;; sw-modeline.el ends here

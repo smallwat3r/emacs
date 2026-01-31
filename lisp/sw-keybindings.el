@@ -136,6 +136,7 @@
   "ti" '(imenu-list-smart-toggle :wk "Imenu list")
   "tw" '(whitespace-mode :wk "Whitespace")
   "tb" '(blamer-mode :wk "Git blame")
+  "tf" '(load-theme :wk "Load theme")
 
   ;; Workspaces (tab-bar)
   "TAB" '(:ignore t :wk "Workspace")
