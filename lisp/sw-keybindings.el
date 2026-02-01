@@ -69,6 +69,7 @@
   "pd" '(project-find-dir :wk "Find dir")
   "pb" '(project-switch-to-buffer :wk "Project buffer")
   "pk" '(project-kill-buffers :wk "Kill project buffers")
+  "pK" '(sw/kill-all-projects-and-buffers :wk "Kill all projects")
   "pm" '(sw/project-make :wk "Run make")
   "pi" '(sw/project-refresh :wk "Refresh projects")
 

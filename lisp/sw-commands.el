@@ -30,6 +30,23 @@
         (kill-buffer)
         (message "Deleted %s" file)))))
 
+(defun sw/kill-all-projects-and-buffers ()
+  "Kill all buffers and close all workspaces except current.
+Preserves *scratch* and *Messages* buffers."
+  (interactive)
+  (when (y-or-n-p "Kill all projects and buffers? ")
+    ;; Close all tabs except the current one
+    (while (> (length (tab-bar-tabs)) 1)
+      (tab-bar-close-other-tabs))
+    (tab-bar-rename-tab "main")
+    ;; Kill all buffers except essential ones
+    (dolist (buf (buffer-list))
+      (unless (member (buffer-name buf) '("*scratch*" "*Messages*"))
+        (kill-buffer buf)))
+    (switch-to-buffer "*scratch*")
+    (delete-other-windows)
+    (message "All projects and buffers killed")))
+
 ;;; Formatting
 
 (defun sw/format-region-with-command (beg end cmd args msg)
