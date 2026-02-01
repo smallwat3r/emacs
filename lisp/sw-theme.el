@@ -7,6 +7,9 @@
 
 ;;; Fonts (primary font set in early-init.el)
 
+(set-face-attribute 'fixed-pitch nil :family sw/font-family :height sw/font-height)
+(set-face-attribute 'fixed-pitch-serif nil :family sw/font-family :height sw/font-height)
+
 (setq-default line-spacing 2)
 
 ;;; Frame appearance
