@@ -62,5 +62,22 @@
 (use-package toc-org
   :hook (org-mode . toc-org-mode))
 
+;; Deft - quick note browsing
+(use-package deft
+  :commands deft
+  :custom
+  (deft-directory org-directory)
+  (deft-extensions '("org" "md" "txt"))
+  (deft-default-extension "org")
+  (deft-recursive t)
+  (deft-use-filename-as-title nil)
+  (deft-use-filter-string-for-filename t)
+  (deft-auto-save-interval -1.0)
+  (deft-file-naming-rules '((noslash . "-")
+                            (nospace . "-")
+                            (case-fn . downcase)))
+  :config
+  (evil-set-initial-state 'deft-mode 'insert))
+
 (provide 'sw-org)
 ;;; sw-org.el ends here

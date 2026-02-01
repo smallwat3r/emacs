@@ -228,6 +228,11 @@
   "ie" '(sw/insert-email :wk "Email")
   "iy" '(consult-yank-pop :wk "From kill ring")
 
+  ;; Notes
+  "n" '(:ignore t :wk "Notes")
+  "nd" '(deft :wk "Deft")
+  "nj" '(org-journal-new-entry :wk "Journal entry")
+
   ;; Help
   "h" '(:ignore t :wk "Help")
   "hf" '(helpful-callable :wk "Function")
@@ -320,6 +325,27 @@
    :keymaps 'eat-mode-map
    :states '(normal insert)
    "C-," 'sw/eat-zsh-history-pick))
+
+;;; Deft mode bindings
+
+(with-eval-after-load 'deft
+  (general-define-key
+   :keymaps 'deft-mode-map
+   :states 'normal
+   "gr" 'deft-refresh
+   "a"  'deft-new-file
+   "A"  'deft-new-file-named
+   "d"  'deft-delete-file
+   "D"  'deft-archive-file
+   "r"  'deft-rename-file
+   "q"  'kill-current-buffer)
+
+  (general-define-key
+   :keymaps 'deft-mode-map
+   :states 'insert
+   "C-n" 'deft-new-file
+   "C-d" 'deft-delete-file
+   "C-r" 'deft-rename-file))
 
 (provide 'sw-keybindings)
 ;;; sw-keybindings.el ends here
