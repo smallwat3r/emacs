@@ -7,7 +7,6 @@
 
 (use-package dired
   :ensure nil
-  :hook (dired-mode . dired-hide-details-mode)
   :custom
   (dired-listing-switches "-alh --group-directories-first")
   (dired-dwim-target t)
