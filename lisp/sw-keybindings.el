@@ -8,9 +8,13 @@
 (require 'general)
 (require 'sw-commands)
 
-;;; Escape quits everything
+;;; Escape quits minibuffer
 
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+(dolist (map (list minibuffer-local-map
+                   minibuffer-local-ns-map
+                   minibuffer-local-completion-map
+                   minibuffer-local-must-match-map))
+  (define-key map [escape] #'abort-recursive-edit))
 
 ;;; Leader key bindings
 
