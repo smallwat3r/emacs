@@ -22,6 +22,7 @@
   (evil-respect-visual-line-mode t)
   (evil-search-module 'evil-search)
   (evil-kbd-macro-suppress-motion-error t)  ; don't abort macros on motion errors
+  (evil-ex-interactive-search-highlight 'selected-window)  ; only highlight in current window
   :config
   (evil-mode 1)
 
@@ -70,7 +71,11 @@
   :custom
   (evil-snipe-scope 'visible)
   (evil-snipe-repeat-scope 'visible)
-  (evil-snipe-spillover-scope nil))
+  (evil-snipe-spillover-scope nil)
+  :config
+  ;; Use n/N to repeat snipes (in addition to ;/,)
+  (define-key evil-snipe-parent-transient-map "n" #'evil-snipe-repeat)
+  (define-key evil-snipe-parent-transient-map "N" #'evil-snipe-repeat-reverse))
 
 ;; Comment with gc
 (use-package evil-nerd-commenter
