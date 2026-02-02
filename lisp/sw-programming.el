@@ -45,6 +45,48 @@
   (setf (alist-get 'bash-ts-mode apheleia-mode-alist) 'shfmt)
   (setf (alist-get 'sh-mode apheleia-mode-alist) 'shfmt))
 
+;; Region formatters by mode (mirrors apheleia config where applicable)
+(defvar sw-region-formatters
+  '((python-mode    . ("black" "--quiet" "-"))
+    (python-ts-mode . ("black" "--quiet" "-"))
+    (go-mode        . ("gofmt"))
+    (go-ts-mode     . ("gofmt"))
+    (sh-mode        . ("shfmt" "-i" "2" "-ci" "-bn" "-"))
+    (bash-ts-mode   . ("shfmt" "-i" "2" "-ci" "-bn" "-")))
+  "Alist mapping major modes to region formatter commands.
+Each value is a list where car is the command and cdr is the arguments.")
+
+(defun sw-format-region ()
+  "Format the current region using language-specific tools or eglot."
+  (interactive)
+  (unless (use-region-p)
+    (user-error "No region selected"))
+  (let* ((beg (region-beginning))
+         (end (region-end))
+         (formatter (alist-get major-mode sw-region-formatters)))
+    (cond
+     (formatter
+      (let* ((cmd (car formatter))
+             (args (cdr formatter))
+             (input (buffer-substring-no-properties beg end))
+             (output (with-temp-buffer
+                       (insert input)
+                       (when (zerop (apply #'call-process-region
+                                           (point-min) (point-max) cmd t t nil args))
+                         (buffer-string)))))
+        (if output
+            (save-excursion
+              (delete-region beg end)
+              (goto-char beg)
+              (insert output)
+              (message "Formatted region (%s)" cmd))
+          (message "%s formatting failed" cmd))))
+     ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
+      (eglot-format beg end)
+      (message "Formatted region (eglot)"))
+     (t
+      (message "No region formatter available")))))
+
 ;;; Python
 
 (use-package python
