@@ -10,7 +10,7 @@
 (use-package vertico
   :hook (sw/first-input . vertico-mode)
   :custom
-  (vertico-count 15)
+  (vertico-count 10)
   (vertico-resize nil)
   (vertico-cycle t))
 

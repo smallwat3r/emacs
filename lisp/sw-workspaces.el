@@ -146,8 +146,11 @@ If a workspace for the project already exists, switch to it."
       tab-bar-format '(tab-bar-format-tabs))
 (tab-bar-mode 1)
 
-;; Show workspaces on startup
-(add-hook 'emacs-startup-hook #'sw/workspace-display)
+;; Name the initial workspace "main" and show workspaces on startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (tab-bar-rename-tab "main")
+            (sw/workspace-display)))
 
 ;; Buffer tracking per workspace
 (defvar sw/workspace-buffer-alist nil
