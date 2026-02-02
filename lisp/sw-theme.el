@@ -46,6 +46,7 @@
 
 ;; Themes
 (use-package creamy-theme
+  :ensure (:wait t)
   :demand t
   :config
   (load-theme 'creamy t))
@@ -75,6 +76,7 @@
 
 ;; Dim inactive windows
 (use-package auto-dim-other-buffers
+  :ensure (:wait t)
   :demand t
   :custom
   (auto-dim-other-buffers-dim-on-switch-to-minibuffer nil)

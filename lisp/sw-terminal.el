@@ -380,7 +380,7 @@ Configures terminal with xterm-256color TERM for foot compatibility."
 ;;; TRAMP configuration
 
 (use-package tramp
-  :straight nil
+  :ensure nil
   :defer t
   :custom
   (tramp-default-method "ssh")
@@ -410,7 +410,7 @@ Configures terminal with xterm-256color TERM for foot compatibility."
 
 ;; Docker TRAMP support (built-in since Emacs 29)
 (use-package tramp-container
-  :straight nil
+  :ensure nil
   :after tramp)
 
 (provide 'sw-terminal)

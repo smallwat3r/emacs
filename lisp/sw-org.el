@@ -9,7 +9,7 @@
   "Directory for org files.")
 
 (use-package org
-  :straight nil
+  :ensure nil
   :custom
   ;; Directories
   (org-directory "~/org")

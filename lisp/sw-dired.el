@@ -6,7 +6,7 @@
 ;;; Code:
 
 (use-package dired
-  :straight nil
+  :ensure nil
   :hook (dired-mode . dired-hide-details-mode)
   :custom
   (dired-listing-switches "-alh --group-directories-first")
@@ -19,7 +19,7 @@
   (put 'dired-find-alternate-file 'disabled nil))
 
 (use-package dired-x
-  :straight nil
+  :ensure nil
   :after dired
   :config
   (setq dired-omit-files

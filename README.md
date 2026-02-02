@@ -14,9 +14,9 @@ on first run.
 
 ## Package management
 
-Packages are managed with [straight.el](https://github.com/radian-software/straight.el),
-which provides version locking. The lockfile at `straight/versions/default.el` is
-version-controlled for reproducible installs.
+Packages are managed with [elpaca](https://github.com/progfolio/elpaca), which
+provides async installation and version locking. The lockfile `elpaca-lockfile.el`
+is version-controlled for reproducible installs.
 
 Run `make` to see available commands:
 
@@ -24,11 +24,9 @@ Run `make` to see available commands:
 $ make
   help       Show this help
   link       Symlink this directory to ~/.emacs.d
-  install    Install packages (first run or from lockfile)
-  update     Pull latest versions and freeze
-  freeze     Save current package versions to lockfile
-  thaw       Restore packages to lockfile versions
-  rebuild    Rebuild all packages
+  install    Install packages (first run)
+  update     Update all packages and save lockfile
+  lock       Save current package versions to lockfile
   clean      Remove all installed packages
 ```
 

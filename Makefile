@@ -1,7 +1,7 @@
 EMACS ?= emacs
 INIT := ~/.emacs.d/init.el
 
-.PHONY: help link install update freeze thaw rebuild clean
+.PHONY: help link install update lock clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -14,21 +14,19 @@ link: ## Symlink this directory to ~/.emacs.d
 	ln -s $(CURDIR) ~/.emacs.d
 	@echo "Linked $(CURDIR) -> ~/.emacs.d"
 
-install: ## Install packages (first run or from lockfile)
+install: ## Install packages (first run)
 	$(EMACS) --batch -l $(INIT)
 
-update: ## Pull latest versions and freeze
-	$(EMACS) --batch -l $(INIT) --eval "(straight-pull-all)"
-	$(EMACS) --batch -l $(INIT) --eval "(straight-freeze-versions)"
+update: ## Update all packages and save lockfile
+	$(EMACS) --batch -l $(INIT) \
+		--eval "(elpaca-update-all t)" \
+		--eval "(elpaca-wait)" \
+		--eval "(elpaca-write-lockfile elpaca-lockfile)"
 
-freeze: ## Save current package versions to lockfile
-	$(EMACS) --batch -l $(INIT) --eval "(straight-freeze-versions)"
-
-thaw: ## Restore packages to lockfile versions
-	$(EMACS) --batch -l $(INIT) --eval "(straight-thaw-versions)"
-
-rebuild: ## Rebuild all packages
-	$(EMACS) --batch -l $(INIT) --eval "(straight-rebuild-all)"
+lock: ## Save current package versions to lockfile
+	$(EMACS) --batch -l $(INIT) \
+		--eval "(elpaca-wait)" \
+		--eval "(elpaca-write-lockfile elpaca-lockfile)"
 
 clean: ## Remove all installed packages
-	rm -rf straight/build straight/repos
+	rm -rf elpaca/

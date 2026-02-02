@@ -8,13 +8,14 @@
 ;;; Tree-sitter (built-in since Emacs 29)
 
 (use-package treesit
-  :straight nil
+  :ensure nil
   :demand t
   :custom
   (treesit-font-lock-level 4))
 
 ;; Auto-install and remap to tree-sitter modes
 (use-package treesit-auto
+  :ensure (:wait t)
   :demand t
   :custom
   (treesit-auto-install 'prompt)
@@ -25,6 +26,7 @@
 ;;; Formatting
 
 (use-package apheleia
+  :ensure (:wait t)
   :demand t
   :config
   ;; Python formatters (black/isort read pyproject.toml automatically)
@@ -46,7 +48,7 @@
 ;;; Python
 
 (use-package python
-  :straight nil
+  :ensure nil
   :custom
   (python-indent-offset 4)
   (python-shell-interpreter "python3")
@@ -92,7 +94,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; Go
 
 (use-package go-ts-mode
-  :straight nil
+  :ensure nil
   :custom
   (go-ts-mode-indent-offset 4)
   :hook (go-ts-mode . (lambda () (setq-local indent-tabs-mode t))))
@@ -100,7 +102,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; Rust
 
 (use-package rust-ts-mode
-  :straight nil
+  :ensure nil
   :mode "\\.rs\\'")
 
 (use-package cargo
@@ -109,12 +111,12 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; JavaScript/TypeScript
 
 (use-package js
-  :straight nil
+  :ensure nil
   :custom
   (js-indent-level 2))
 
 (use-package typescript-ts-mode
-  :straight nil
+  :ensure nil
   :mode ("\\.ts\\'" "\\.tsx\\'")
   :custom
   (typescript-ts-mode-indent-offset 2))
@@ -134,12 +136,12 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; JSON/YAML
 
 (use-package json-ts-mode
-  :straight nil
+  :ensure nil
   :mode "\\.json\\'"
   :hook (json-ts-mode . (lambda () (setq-local tab-width 2))))
 
 (use-package yaml-ts-mode
-  :straight nil
+  :ensure nil
   :mode "\\.ya?ml\\'")
 
 ;;; Markdown
@@ -153,7 +155,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; Shell
 
 (use-package sh-script
-  :straight nil
+  :ensure nil
   :custom
   (sh-basic-offset 2)
   (sh-indentation 2)
@@ -184,6 +186,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; Editorconfig
 
 (use-package editorconfig
+  :ensure (:wait t)
   :demand t
   :config
   (editorconfig-mode 1))

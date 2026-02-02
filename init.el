@@ -13,28 +13,8 @@
 ;; Add lisp/ to load path
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-;; Bootstrap straight.el
-(setq straight-check-for-modifications nil)  ; faster startup, use M-x straight-pull-all to update
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el"
-                         user-emacs-directory))
-      (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-;; Integrate straight.el with use-package
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t
-      use-package-always-defer t
-      use-package-expand-minimally t
-      use-package-compute-statistics nil)
+;; Bootstrap elpaca and use-package
+(require 'sw-elpaca)
 
 ;;; Personal info
 
@@ -46,7 +26,7 @@
 ;;; Core settings
 
 (use-package emacs
-  :straight nil
+  :ensure nil
   :demand t
   :custom
   (user-full-name sw/full-name)
@@ -131,11 +111,19 @@
 (when (file-exists-p custom-file)
   (load custom-file 'noerror 'nomessage))
 
+;;; Early dependencies
+
+;; Transient needs to be updated before magit/claude-code load
+(use-package transient :ensure (:wait t))
+
 ;;; Load modules
 
+;; Wait for all queued packages to be installed before loading modules
+(elpaca-wait)
+
 (require 'sw-theme)
-(require 'sw-modeline)
 (require 'sw-evil)
+(require 'sw-modeline)
 (require 'sw-completion)
 (require 'sw-project)
 (require 'sw-git)

@@ -6,6 +6,7 @@
 ;;; Code:
 
 (use-package evil
+  :ensure (:wait t)
   :demand t
   :custom
   (evil-want-integration t)
@@ -33,6 +34,7 @@
 
 ;; Evil keybindings for many modes
 (use-package evil-collection
+  :ensure (:wait t)
   :after evil
   :demand t
   :custom
@@ -62,11 +64,13 @@
 
 ;; Comment with gc
 (use-package evil-nerd-commenter
+  :ensure (:wait t)
   :after evil
   :demand t)
 
 ;; Surround text objects
 (use-package evil-surround
+  :ensure (:wait t)
   :after evil
   :demand t
   :config
@@ -74,6 +78,7 @@
 
 ;; Search for visual selection with * and #
 (use-package evil-visualstar
+  :ensure (:wait t)
   :after evil
   :demand t
   :config
@@ -83,6 +88,7 @@
 
 ;; Leader key support
 (use-package general
+  :ensure (:wait t)
   :demand t
   :config
   (general-create-definer sw/leader
@@ -98,7 +104,7 @@
 
 ;; Which-key for discoverability (built-in since Emacs 30)
 (use-package which-key
-  :straight nil
+  :ensure nil
   :hook (sw/first-input . which-key-mode)
   :custom
   (which-key-idle-delay 0.3)

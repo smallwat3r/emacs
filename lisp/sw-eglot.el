@@ -6,7 +6,7 @@
 ;;; Code:
 
 (use-package eglot
-  :straight nil
+  :ensure nil
   :demand t
   :hook (python-ts-mode . eglot-ensure)
   :hook (go-ts-mode . eglot-ensure)
@@ -49,7 +49,7 @@
 
 ;; Eglot booster - IO buffering for better performance
 (use-package eglot-booster
-  :straight (:host github :repo "jdtsmith/eglot-booster")
+  :ensure (:host github :repo "jdtsmith/eglot-booster")
   :after eglot
   :when (executable-find "emacs-lsp-booster")
   :init

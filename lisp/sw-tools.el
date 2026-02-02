@@ -12,15 +12,11 @@
 ;;; Goto address - highlight URLs and email addresses
 
 (use-package goto-addr
-  :straight nil
+  :ensure nil
   :hook ((prog-mode text-mode) . goto-address-mode)
   :custom
   (goto-address-url-face 'link)
   (goto-address-mail-face 'link))
-
-;;; Nerd icons
-
-(use-package nerd-icons)
 
 ;;; Restart Emacs
 
@@ -47,7 +43,7 @@
 
 ;; Auth source for pass
 (use-package auth-source-pass
-  :straight nil
+  :ensure nil
   :defer 2
   :config
   (auth-source-pass-enable))

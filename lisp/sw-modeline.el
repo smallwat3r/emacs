@@ -9,6 +9,7 @@
 
 ;; Show counter while in search modes
 (use-package evil-anzu
+  :ensure (:wait t)
   :after evil
   :demand t
   :config

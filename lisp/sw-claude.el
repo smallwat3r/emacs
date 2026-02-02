@@ -16,12 +16,12 @@
 
 ;; Required dependency for claude-code
 (use-package inheritenv
-  :straight (:host github :repo "purcell/inheritenv")
+  :ensure (:host github :repo "purcell/inheritenv" :wait t)
   :demand t)
 
 ;; Claude Code
 (use-package claude-code
-  :straight (:host github :repo "stevemolitor/claude-code.el")
+  :ensure (:host github :repo "stevemolitor/claude-code.el" :wait t)
   :when (executable-find "claude")
   :after inheritenv
   :init

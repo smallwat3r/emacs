@@ -1,9 +1,6 @@
 # Installed packages
 elpa/
-straight/*
-!straight/versions/
-straight/versions/*
-!straight/versions/default.el
+elpaca/
 
 # Native compilation cache
 eln-cache/
