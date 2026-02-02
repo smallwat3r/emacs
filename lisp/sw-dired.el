@@ -35,6 +35,7 @@
 ;; Subtree expansion
 (use-package dired-subtree
   :after dired
+  :demand t
   :custom
   (dired-subtree-use-backgrounds nil))
 
