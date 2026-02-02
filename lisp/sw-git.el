@@ -49,6 +49,9 @@
   (with-eval-after-load 'git-commit
     (setq git-commit-summary-max-length 75))
 
+  ;; Ensure commit buffer is focused in daemon mode
+  (add-hook 'server-switch-hook #'raise-frame)
+
   ;; Kill all COMMIT_EDITMSG buffers after committing
   (with-eval-after-load 'with-editor
     (add-hook 'with-editor-post-finish-hook
