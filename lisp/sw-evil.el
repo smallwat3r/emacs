@@ -43,25 +43,22 @@
 ;; Visual hints for operations
 (use-package evil-goggles
   :after evil
-  :demand t
+  :hook (sw/first-input . evil-goggles-mode)
   :custom
   (evil-goggles-duration 0.15)
   (evil-goggles-pulse nil)
   :config
-  (evil-goggles-mode 1)
   (evil-goggles-use-diff-refine-faces))
 
 ;; Two-character search
 (use-package evil-snipe
   :after evil
-  :demand t
+  :hook ((sw/first-input . evil-snipe-mode)
+         (sw/first-input . evil-snipe-override-mode))
   :custom
   (evil-snipe-scope 'visible)
   (evil-snipe-repeat-scope 'visible)
-  (evil-snipe-spillover-scope nil)
-  :config
-  (evil-snipe-mode 1)
-  (evil-snipe-override-mode 1))
+  (evil-snipe-spillover-scope nil))
 
 ;; Comment with gc
 (use-package evil-nerd-commenter
@@ -102,13 +99,11 @@
 ;; Which-key for discoverability (built-in since Emacs 30)
 (use-package which-key
   :straight nil
-  :demand t
+  :hook (sw/first-input . which-key-mode)
   :custom
   (which-key-idle-delay 0.3)
   (which-key-idle-secondary-delay 0.05)
-  (which-key-add-column-padding 2)
-  :config
-  (which-key-mode 1))
+  (which-key-add-column-padding 2))
 
 (provide 'sw-evil)
 ;;; sw-evil.el ends here

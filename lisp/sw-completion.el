@@ -8,26 +8,21 @@
 ;;; Minibuffer completion with Vertico
 
 (use-package vertico
-  :demand t
+  :hook (sw/first-input . vertico-mode)
   :custom
   (vertico-count 15)
   (vertico-resize nil)
-  (vertico-cycle t)
-  :config
-  (vertico-mode 1))
+  (vertico-cycle t))
 
 ;; Save minibuffer history
 (use-package savehist
   :straight nil
-  :demand t
-  :config
-  (savehist-mode 1))
+  :hook (sw/first-input . savehist-mode))
 
 ;; Marginalia - rich annotations in minibuffer
 (use-package marginalia
-  :demand t
+  :hook (sw/first-input . marginalia-mode)
   :config
-  (marginalia-mode 1)
   ;; Remove underline from annotation faces
   (dolist (face '(marginalia-documentation marginalia-value marginalia-key))
     (set-face-attribute face nil :underline nil)))
@@ -85,7 +80,7 @@
 ;;; In-buffer completion with Corfu
 
 (use-package corfu
-  :demand t
+  :hook (sw/first-input . global-corfu-mode)
   :custom
   (corfu-count 5)
   (corfu-auto t)
@@ -100,13 +95,11 @@
         ("TAB" . corfu-next)
         ([tab] . corfu-next)
         ("S-TAB" . corfu-previous)
-        ([backtab] . corfu-previous))
-  :config
-  (global-corfu-mode 1))
+        ([backtab] . corfu-previous)))
 
 ;; Cape - completion at point extensions
 (use-package cape
-  :demand t
+  :after corfu
   :config
   ;; Add in reverse order since add-to-list pushes to front
   ;; Final order: dabbrev, file, keyword

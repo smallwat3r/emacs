@@ -5,10 +5,32 @@
 
 ;;; Code:
 
-;;; Fonts (primary font set in early-init.el)
+;;; Fonts (font variables defined in early-init.el)
 
+;; Monospace faces
 (set-face-attribute 'fixed-pitch nil :family sw/font-family :height sw/font-height)
-(set-face-attribute 'fixed-pitch-serif nil :family sw/font-family :height sw/font-height)
+(set-face-attribute 'fixed-pitch-serif nil :family sw/font-serif :height sw/font-height)
+
+;; Variable-pitch face
+(set-face-attribute 'variable-pitch nil
+                    :family sw/font-variable-pitch
+                    :height sw/font-variable-pitch-height)
+
+;; Symbol and emoji fontsets
+(defun sw/setup-fontsets ()
+  "Configure fontsets for symbols and emoji."
+  ;; Resolve fonts from fallback lists now that display is available
+  (setq sw/font-symbol (sw/first-available-font sw/font-symbol-fallbacks))
+  (setq sw/font-emoji (sw/first-available-font sw/font-emoji-fallbacks))
+  (when sw/font-symbol
+    (set-fontset-font t 'symbol sw/font-symbol nil 'prepend)
+    (set-fontset-font t 'mathematical sw/font-symbol nil 'prepend))
+  (when sw/font-emoji
+    (set-fontset-font t 'emoji sw/font-emoji nil 'prepend)))
+
+(if (daemonp)
+    (add-hook 'server-after-make-frame-hook #'sw/setup-fontsets)
+  (add-hook 'after-init-hook #'sw/setup-fontsets))
 
 (setq-default line-spacing 2)
 

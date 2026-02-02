@@ -67,11 +67,10 @@
 
 ;; Git gutter
 (use-package diff-hl
-  :demand t
+  :hook (sw/first-file . global-diff-hl-mode)
   :custom
   (diff-hl-draw-borders nil)
   :config
-  (global-diff-hl-mode 1)
   (diff-hl-flydiff-mode 1)
   ;; Integration with magit
   (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)

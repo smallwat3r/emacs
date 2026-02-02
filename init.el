@@ -99,20 +99,31 @@
 
   ;; Enable useful modes
   (column-number-mode 1)
-  (show-paren-mode 1)
   (electric-pair-mode 1)
   (global-auto-revert-mode 1)
-  (save-place-mode 1)
-  (recentf-mode 1)
   (pixel-scroll-precision-mode 1)
   (repeat-mode 1)
-  (global-so-long-mode 1)
+
+  ;; Deferred modes (via custom hooks from early-init.el)
+  (add-hook 'sw/first-buffer-hook #'show-paren-mode)
+  (add-hook 'sw/first-file-hook #'save-place-mode)
+  (add-hook 'sw/first-file-hook #'recentf-mode)
+  (add-hook 'sw/first-file-hook #'global-so-long-mode)
 
   ;; Disable blinking cursor
   (blink-cursor-mode -1)
 
   ;; Clean up whitespace on save
   (add-hook 'before-save-hook #'whitespace-cleanup))
+
+;;; Garbage collection during idle time
+
+(use-package gcmh
+  :hook (sw/first-buffer . gcmh-mode)
+  :custom
+  (gcmh-idle-delay 'auto)
+  (gcmh-auto-idle-delay-factor 10)
+  (gcmh-high-cons-threshold (* 64 1024 1024)))
 
 ;;; Custom file (keep init.el clean)
 
