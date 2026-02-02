@@ -128,6 +128,7 @@
 (require 'sw-project)
 (require 'sw-git)
 (require 'sw-terminal)
+(require 'sw-tailscale)
 (require 'sw-dired)
 (require 'sw-filetypes)
 (require 'sw-org)

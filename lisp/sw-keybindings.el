@@ -208,6 +208,12 @@
   "op" '(pass :wk "Pass")
   "ol" '(browse-url-at-point :wk "Open URL")
 
+  ;; Tailscale
+  "T" '(:ignore t :wk "Tailscale")
+  "Ts" '(sw-tailscale-switch :wk "Switch account")
+  "TS" '(sw-tailscale-status :wk "Status")
+  "Tc" '(sw-tailscale-ssh :wk "SSH to device")
+
   ;; Claude AI / LSP
   "r" '(:ignore t :wk "AI/LSP")
   "rc" '(claude-code :wk "Claude chat")
