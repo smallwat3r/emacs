@@ -280,6 +280,10 @@
  ;; Commenting (gc is an operator, gcc handled by evil-nerd-commenter)
  "gc" 'evilnc-comment-operator
 
+ ;; Alignment (gl/gL operator, e.g., glip= to align paragraph by =)
+ "gl" 'evil-lion-left
+ "gL" 'evil-lion-right
+
  ;; Quick commands with ;
  ";w" 'save-buffer)
 
@@ -288,6 +292,8 @@
 (general-define-key
  :states 'visual
  "gc" 'evilnc-comment-operator
+ "gl" 'evil-lion-left
+ "gL" 'evil-lion-right
  ";f" 'sw/format-region)
 
 ;;; Emacs Lisp mode bindings

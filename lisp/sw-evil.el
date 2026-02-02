@@ -24,6 +24,9 @@
   :config
   (evil-mode 1)
 
+  ;; Don't copy visual selection to clipboard on every movement (perf on Wayland)
+  (setq evil-visual-update-x-selection-p nil)
+
   ;; Cursor colors by state
   (setq evil-default-state-cursor  '(box "cyan3")
         evil-normal-state-cursor   '(box "cyan3")
@@ -85,6 +88,12 @@
   (evil-define-key* 'visual 'global
     "*" #'evil-visualstar/begin-search-forward
     "#" #'evil-visualstar/begin-search-backward))
+
+;; Align text with gl/gL operator (e.g., glip= to align paragraph by =)
+(use-package evil-lion
+  :ensure (:wait t)
+  :after evil
+  :demand t)
 
 ;; Leader key support
 (use-package general
