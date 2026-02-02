@@ -27,6 +27,12 @@
   ;; Don't copy visual selection to clipboard on every movement (perf on Wayland)
   (setq evil-visual-update-x-selection-p nil)
 
+  ;; Slow down search highlighting in large/folded buffers to prevent lag
+  (defun sw/slow-down-evil-highlighting ()
+    (setq-local evil-ex-hl-update-delay 0.25))
+  (dolist (hook '(magit-mode-hook so-long-minor-mode-hook))
+    (add-hook hook #'sw/slow-down-evil-highlighting))
+
   ;; Cursor colors by state
   (setq evil-default-state-cursor  '(box "cyan3")
         evil-normal-state-cursor   '(box "cyan3")
