@@ -319,6 +319,27 @@ For remote directories, opens a shell on the remote host."
   (interactive)
   (sw/eat-here nil))
 
+(defun sw/eat--kill-buffers (&optional keep-current)
+  "Kill eat buffers. If KEEP-CURRENT, spare the current buffer."
+  (let ((count 0)
+        (current (current-buffer)))
+    (dolist (buf (buffer-list))
+      (when (and (eq (buffer-local-value 'major-mode buf) 'eat-mode)
+                 (not (and keep-current (eq buf current))))
+        (kill-buffer buf)
+        (cl-incf count)))
+    (message "Killed %d eat buffer(s)" count)))
+
+(defun sw/eat-kill-all ()
+  "Kill all eat buffers."
+  (interactive)
+  (sw/eat--kill-buffers))
+
+(defun sw/eat-kill-other ()
+  "Kill all eat buffers except the current one."
+  (interactive)
+  (sw/eat--kill-buffers t))
+
 ;;; External terminal helpers
 
 (defun sw/terminal-here--default-directory ()

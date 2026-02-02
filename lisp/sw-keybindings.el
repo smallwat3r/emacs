@@ -51,6 +51,9 @@
   "bs" '(save-buffer :wk "Save buffer")
   "bS" '(evil-write-all :wk "Save all buffers")
   "bx" '(scratch-buffer :wk "Scratch buffer")
+  "be" '(:ignore t :wk "Eat")
+  "bek" '(sw/eat-kill-other :wk "Kill other eat buffers")
+  "beK" '(sw/eat-kill-all :wk "Kill all eat buffers")
 
   ;; Files
   "f" '(:ignore t :wk "File")
