@@ -154,23 +154,22 @@ If a workspace for the project already exists, switch to it."
 
 ;; Buffer tracking per workspace
 (defvar sw/workspace-buffer-alist nil
-  "Alist mapping tab indices to their buffer lists.")
+  "Alist mapping workspace names to their buffer lists.")
 
-(defun sw/workspace--current-index ()
-  "Return current workspace index (0-based)."
-  (tab-bar--current-tab-index))
+(defun sw/workspace--current-name ()
+  "Return current workspace name."
+  (alist-get 'name (tab-bar--current-tab)))
 
 (defun sw/workspace--get-buffers ()
   "Return list of buffers for current workspace."
-  (let ((idx (sw/workspace--current-index)))
-    (alist-get idx sw/workspace-buffer-alist)))
+  (alist-get (sw/workspace--current-name) sw/workspace-buffer-alist nil nil #'equal))
 
 (defun sw/workspace--add-buffer (buffer)
   "Add BUFFER to current workspace's buffer list."
-  (let* ((idx (sw/workspace--current-index))
-         (buffers (alist-get idx sw/workspace-buffer-alist)))
+  (let* ((name (sw/workspace--current-name))
+         (buffers (alist-get name sw/workspace-buffer-alist nil nil #'equal)))
     (unless (memq buffer buffers)
-      (setf (alist-get idx sw/workspace-buffer-alist)
+      (setf (alist-get name sw/workspace-buffer-alist nil nil #'equal)
             (cons buffer buffers)))))
 
 (defun sw/workspace--remove-killed-buffer ()
@@ -195,11 +194,13 @@ Intended for use in `kill-buffer-hook'."
 (defun sw/workspace--kill-buffers-on-close (&optional tab-number &rest _)
   "Kill buffers associated with the workspace being closed.
 TAB-NUMBER is the 1-based tab number, or nil for current tab."
-  (let* ((idx (if tab-number (1- tab-number) (sw/workspace--current-index)))
-         (buffers (alist-get idx sw/workspace-buffer-alist)))
+  (let* ((tabs (funcall tab-bar-tabs-function))
+         (idx (if tab-number (1- tab-number) (tab-bar--current-tab-index tabs)))
+         (name (alist-get 'name (nth idx tabs)))
+         (buffers (alist-get name sw/workspace-buffer-alist nil nil #'equal)))
     (setq sw/workspace--last-kill-count (sw/workspace--kill-buffers buffers))
     (setq sw/workspace-buffer-alist
-          (assq-delete-all idx sw/workspace-buffer-alist))))
+          (assoc-delete-all name sw/workspace-buffer-alist #'equal))))
 
 (advice-add 'tab-bar-close-tab :before #'sw/workspace--kill-buffers-on-close)
 
@@ -228,11 +229,11 @@ Ignores minibuffers."
    :require-match t))
 
 (defun sw/workspace--find-buffer-workspace (buffer)
-  "Return workspace index containing BUFFER, or nil if not found."
+  "Return workspace name containing BUFFER, or nil if not found."
   (let ((buf (get-buffer buffer)))
-    (cl-loop for (idx . buffers) in sw/workspace-buffer-alist
+    (cl-loop for (name . buffers) in sw/workspace-buffer-alist
              when (memq buf buffers)
-             return idx)))
+             return name)))
 
 (defun sw/workspace-kill-all-buffers ()
   "Kill all buffers in the current workspace.
@@ -263,9 +264,9 @@ Switches to scratch buffer after killing."
                        (buffer-list)))
          (buf (sw/workspace--read-buffer all-buffers "Switch to buffer (global): ")))
     (when buf
-      (when-let ((workspace-idx (sw/workspace--find-buffer-workspace buf)))
-        (unless (= workspace-idx (sw/workspace--current-index))
-          (tab-bar-select-tab (1+ workspace-idx))))
+      (when-let ((workspace-name (sw/workspace--find-buffer-workspace buf)))
+        (unless (equal workspace-name (sw/workspace--current-name))
+          (tab-bar-switch-to-tab workspace-name)))
       (switch-to-buffer buf))))
 
 ;; Generates `sw/workspace-switch-to-1' through `sw/workspace-switch-to-9'.
