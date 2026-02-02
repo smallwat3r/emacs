@@ -29,22 +29,11 @@
 (sw/time "early-init" (load (expand-file-name "early-init.el" user-emacs-directory) nil t))
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-(sw/time "straight-bootstrap"
-  (defvar bootstrap-version)
-  (let ((bootstrap-file (expand-file-name "straight/repos/straight.el/bootstrap.el"
-                                          user-emacs-directory))
-        (bootstrap-version 6))
-    (load bootstrap-file nil t)))
-
-(sw/time "use-package"
-  (straight-use-package 'use-package)
-  (setq straight-use-package-by-default t
-        use-package-always-defer t
-        use-package-expand-minimally t))
+(sw/time "sw-elpaca" (require 'sw-elpaca))
 
 (sw/time "sw-theme" (require 'sw-theme))
-(sw/time "sw-modeline" (require 'sw-modeline))
 (sw/time "sw-evil" (require 'sw-evil))
+(sw/time "sw-modeline" (require 'sw-modeline))
 (sw/time "sw-completion" (require 'sw-completion))
 (sw/time "sw-project" (require 'sw-project))
 (sw/time "sw-git" (require 'sw-git))
@@ -63,10 +52,10 @@
 ;; Results
 (let ((total (float-time (time-subtract (current-time) sw/test-start))))
   (princ "\nModule breakdown:\n")
-  (princ "─────────────────────────────\n")
+  (princ "------------------------------\n")
   (dolist (item (sort sw/test-times (lambda (a b) (> (cdr a) (cdr b)))))
     (princ (format "%-20s %6.3fs\n" (car item) (cdr item))))
-  (princ "─────────────────────────────\n")
+  (princ "------------------------------\n")
   (princ (format "%-20s %6.3fs\n" "TOTAL" total))
   (princ "\n")
   (if (< total sw/test-threshold)
