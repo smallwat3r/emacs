@@ -16,34 +16,34 @@
   (global-anzu-mode 1))
 
 ;; Buffer count cache
-(defvar sw/buffer-count-cache 0
+(defvar sw-buffer-count-cache 0
   "Cached count of user-visible buffers.")
 
-(defvar sw/workspace-buffer-count-cache 0
+(defvar sw-workspace-buffer-count-cache 0
   "Cached count of buffers in current workspace.")
 
-(defun sw/update-buffer-count ()
+(defun sw-update-buffer-count ()
   "Update the cached buffer counts for modeline display.
-Updates both `sw/buffer-count-cache' (all user-visible buffers) and
-`sw/workspace-buffer-count-cache' (buffers in current workspace)."
-  (setq sw/buffer-count-cache
+Updates both `sw-buffer-count-cache' (all user-visible buffers) and
+`sw-workspace-buffer-count-cache' (buffers in current workspace)."
+  (setq sw-buffer-count-cache
         (cl-count-if
          (lambda (b)
            (or (buffer-file-name b)
                (not (string-match "^ " (buffer-name b)))))
          (buffer-list)))
-  (setq sw/workspace-buffer-count-cache
-        (length (sw/workspace-buffer-list))))
+  (setq sw-workspace-buffer-count-cache
+        (length (sw-workspace-buffer-list))))
 
-(add-hook 'buffer-list-update-hook #'sw/update-buffer-count)
+(add-hook 'buffer-list-update-hook #'sw-update-buffer-count)
 
-(defun sw/number-of-buffers ()
+(defun sw-number-of-buffers ()
   "Return the cached count of buffers."
-  sw/buffer-count-cache)
+  sw-buffer-count-cache)
 
-(defun sw/number-of-workspace-buffers ()
+(defun sw-number-of-workspace-buffers ()
   "Return the cached count of workspace buffers."
-  sw/workspace-buffer-count-cache)
+  sw-workspace-buffer-count-cache)
 
 ;; Custom mode-line format
 ;; Displays: buffer status, buffer name, buffer count, position, VC info, major mode
@@ -56,8 +56,8 @@ Updates both `sw/buffer-count-cache' (all user-visible buffers) and
                 ,mode-line-frame-identification
                 ,mode-line-buffer-identification
                 (:eval (format "  b(%s/%s)"
-                               (sw/number-of-workspace-buffers)
-                               (sw/number-of-buffers)))
+                               (sw-number-of-workspace-buffers)
+                               (sw-number-of-buffers)))
                 " %p %l,%c  "
                 (vc-mode vc-mode)
                 " "

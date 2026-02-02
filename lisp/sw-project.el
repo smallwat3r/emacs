@@ -21,14 +21,14 @@
           "pyproject.toml" "setup.py" "Makefile" ".git")))
 
 ;; Auto-discover projects in these directories
-(defvar sw/project-directories '("~/code" "~/work" "~/dotfiles")
+(defvar sw-project-directories '("~/code" "~/work" "~/dotfiles")
   "Directories to scan for projects.")
 
-(defun sw/project-discover ()
-  "Scan `sw/project-directories' for git repos and add them as known projects."
+(defun sw-project-discover ()
+  "Scan `sw-project-directories' for git repos and add them as known projects."
   (interactive)
   (message "Discovering projects...")
-  (dolist (dir sw/project-directories)
+  (dolist (dir sw-project-directories)
     (let ((expanded (expand-file-name dir)))
       (when (file-directory-p expanded)
         (project-remember-projects-under expanded nil))))
@@ -37,9 +37,9 @@
 ;; Only scan on first run (when project list is empty or doesn't exist)
 (unless (and (file-exists-p project-list-file)
              (> (file-attribute-size (file-attributes project-list-file)) 10))
-  (run-with-idle-timer 2 nil #'sw/project-discover))
+  (run-with-idle-timer 2 nil #'sw-project-discover))
 
-(defun sw/project-root-or-default (&optional prefer-remote)
+(defun sw-project-root-or-default (&optional prefer-remote)
   "Return project root or `default-directory'.
 When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
   (if (and prefer-remote (file-remote-p default-directory))
@@ -48,37 +48,37 @@ When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
           (project-root proj))
         default-directory)))
 
-(defun sw/project-find-file ()
+(defun sw-project-find-file ()
   "Find file in current project using fd."
   (interactive)
   (require 'consult)
-  (consult-fd (sw/project-root-or-default)))
+  (consult-fd (sw-project-root-or-default)))
 
-(defun sw/consult-ripgrep-project ()
+(defun sw-consult-ripgrep-project ()
   "Search in current project with ripgrep."
   (interactive)
   (require 'consult)
-  (consult-ripgrep (sw/project-root-or-default)))
+  (consult-ripgrep (sw-project-root-or-default)))
 
-(defun sw/consult-ripgrep-project-symbol ()
+(defun sw-consult-ripgrep-project-symbol ()
   "Search for symbol at point in project."
   (interactive)
   (require 'consult)
-  (consult-ripgrep (sw/project-root-or-default) (thing-at-point 'symbol t)))
+  (consult-ripgrep (sw-project-root-or-default) (thing-at-point 'symbol t)))
 
-(defun sw/project-make ()
+(defun sw-project-make ()
   "Run make in project root."
   (interactive)
-  (let ((default-directory (sw/project-root-or-default)))
+  (let ((default-directory (sw-project-root-or-default)))
     (call-interactively #'compile)))
 
-(defun sw/project-refresh ()
+(defun sw-project-refresh ()
   "Refresh the known projects list.
-Removes projects that no longer exist and re-scans `sw/project-directories'
+Removes projects that no longer exist and re-scans `sw-project-directories'
 for new projects."
   (interactive)
   (project-forget-zombie-projects)
-  (sw/project-discover))
+  (sw-project-discover))
 
 (provide 'sw-project)
 ;;; sw-project.el ends here

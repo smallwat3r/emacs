@@ -54,7 +54,7 @@
   (python-shell-interpreter "python3")
   (python-shell-completion-native-enable nil)
   :config
-  (defun sw/python-toggle-fstring ()
+  (defun sw-python-toggle-fstring ()
     "Toggle f-string prefix on the current Python string literal.
 When point is inside a string, adds or removes the `f' prefix.
 Handles combined prefixes like `rf' or `fr' correctly."

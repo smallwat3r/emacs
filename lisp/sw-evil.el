@@ -30,10 +30,10 @@
   (setq evil-visual-update-x-selection-p nil)
 
   ;; Slow down search highlighting in large/folded buffers to prevent lag
-  (defun sw/slow-down-evil-highlighting ()
+  (defun sw-slow-down-evil-highlighting ()
     (setq-local evil-ex-hl-update-delay 0.25))
   (dolist (hook '(magit-mode-hook so-long-minor-mode-hook))
-    (add-hook hook #'sw/slow-down-evil-highlighting))
+    (add-hook hook #'sw-slow-down-evil-highlighting))
 
   ;; Cursor colors by state
   (setq evil-default-state-cursor  '(box "cyan3")
@@ -56,7 +56,7 @@
 ;; Visual hints for operations
 (use-package evil-goggles
   :after evil
-  :hook (sw/first-input . evil-goggles-mode)
+  :hook (sw-first-input . evil-goggles-mode)
   :custom
   (evil-goggles-duration 0.15)
   (evil-goggles-pulse nil)
@@ -66,8 +66,8 @@
 ;; Two-character search
 (use-package evil-snipe
   :after evil
-  :hook ((sw/first-input . evil-snipe-mode)
-         (sw/first-input . evil-snipe-override-mode))
+  :hook ((sw-first-input . evil-snipe-mode)
+         (sw-first-input . evil-snipe-override-mode))
   :custom
   (evil-snipe-scope 'visible)
   (evil-snipe-repeat-scope 'visible)
@@ -112,13 +112,13 @@
   :ensure (:wait t)
   :demand t
   :config
-  (general-create-definer sw/leader
+  (general-create-definer sw-leader
     :states '(normal visual motion)
     :keymaps 'override
     :prefix "SPC"
     :global-prefix "C-SPC")
 
-  (general-create-definer sw/local-leader
+  (general-create-definer sw-local-leader
     :states '(normal visual motion)
     :prefix "SPC m"
     :global-prefix "C-SPC m"))
@@ -126,7 +126,7 @@
 ;; Which-key for discoverability (built-in since Emacs 30)
 (use-package which-key
   :ensure nil
-  :hook (sw/first-input . which-key-mode)
+  :hook (sw-first-input . which-key-mode)
   :custom
   (which-key-idle-delay 0.3)
   (which-key-idle-secondary-delay 0.05)

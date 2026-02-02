@@ -70,7 +70,7 @@
 
 ;; Git gutter
 (use-package diff-hl
-  :hook (sw/first-file . global-diff-hl-mode)
+  :hook (sw-first-file . global-diff-hl-mode)
   :custom
   (diff-hl-draw-borders nil)
   :config

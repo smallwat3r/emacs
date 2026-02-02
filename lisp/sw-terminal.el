@@ -7,7 +7,7 @@
 
 ;;; SSH config files
 
-(defvar sw/ssh-config-files
+(defvar sw-ssh-config-files
   '("~/.ssh/config"
     "~/.ssh/work"
     "~/.ssh/private")
@@ -18,11 +18,11 @@
 
 ;;; SSH helpers
 
-(defun sw/ssh-config-hosts ()
-  "Return a list of SSH host aliases from `sw/ssh-config-files'.
+(defun sw-ssh-config-hosts ()
+  "Return a list of SSH host aliases from `sw-ssh-config-files'.
 Parses config files fresh each call (fast enough that caching is unnecessary)."
   (let ((hosts '()))
-    (dolist (file sw/ssh-config-files)
+    (dolist (file sw-ssh-config-files)
       (setq file (expand-file-name file))
       (when (file-readable-p file)
         (with-temp-buffer
@@ -35,7 +35,7 @@ Parses config files fresh each call (fast enough that caching is unnecessary)."
                   (push h hosts))))))))
     (delete-dups hosts)))
 
-(defun sw/zsh-history-candidates (&optional limit)
+(defun sw-zsh-history-candidates (&optional limit)
   "Return recent unique zsh history lines (most recent first).
 LIMIT defaults to 10000."
   (let* ((histfile (expand-file-name (or (getenv "HISTFILE") "~/.zsh_history")))
@@ -48,7 +48,7 @@ LIMIT defaults to 10000."
                (shell-quote-argument histfile) limit)))
     (split-string (shell-command-to-string cmd) "\n" t)))
 
-(defun sw/tramp-connect ()
+(defun sw-tramp-connect ()
   "Open remote SSH connection with TRAMP."
   (interactive)
   (find-file (read-file-name "SSH target: " "/ssh:")))
@@ -87,22 +87,22 @@ LIMIT defaults to 10000."
     (set-face-attribute (car spec) nil :foreground (cdr spec)))
 
   ;; Evil integration: switch eat modes based on evil state
-  (defun sw/eat-evil-insert-enter ()
+  (defun sw-eat-evil-insert-enter ()
     "Switch to semi-char mode when entering insert state in eat."
     (when (and (derived-mode-p 'eat-mode)
                (boundp 'eat--input-mode)
                (not (eq eat--input-mode 'semi-char)))
       (eat-semi-char-mode)))
 
-  (defun sw/eat-evil-insert-exit ()
+  (defun sw-eat-evil-insert-exit ()
     "Switch to emacs mode when exiting insert state in eat."
     (when (and (derived-mode-p 'eat-mode)
                (boundp 'eat--input-mode)
                (not (eq eat--input-mode 'emacs)))
       (eat-emacs-mode)))
 
-  (add-hook 'evil-insert-state-entry-hook #'sw/eat-evil-insert-enter)
-  (add-hook 'evil-insert-state-exit-hook #'sw/eat-evil-insert-exit)
+  (add-hook 'evil-insert-state-entry-hook #'sw-eat-evil-insert-enter)
+  (add-hook 'evil-insert-state-exit-hook #'sw-eat-evil-insert-exit)
 
   ;; Start in insert state (semi-char mode) when opening eat
   (add-hook 'eat-mode-hook #'evil-insert-state)
@@ -113,19 +113,19 @@ LIMIT defaults to 10000."
               (set-process-query-on-exit-flag proc nil)))
 
   ;; Yank from kill ring into terminal
-  (defun sw/eat-yank ()
+  (defun sw-eat-yank ()
     "Yank the last killed text into eat terminal."
     (interactive)
     (when eat-terminal
       (eat-term-send-string eat-terminal (current-kill 0))))
 
-  (defun sw/eat-backward-kill-word ()
+  (defun sw-eat-backward-kill-word ()
     "Send backward-kill-word (M-backspace / ESC DEL) to terminal."
     (interactive)
     (when eat-terminal
       (eat-term-send-string eat-terminal "\e\C-?")))
 
-  (defun sw/eat-interrupt ()
+  (defun sw-eat-interrupt ()
     "Send interrupt (C-c) to the eat terminal."
     (interactive)
     (when (bound-and-true-p eat-terminal)
@@ -133,7 +133,7 @@ LIMIT defaults to 10000."
 
   ;; Keybindings for semi-char mode
   (define-key eat-semi-char-mode-map (kbd "<escape>") #'evil-normal-state)
-  (define-key eat-semi-char-mode-map (kbd "C-<backspace>") #'sw/eat-backward-kill-word)
+  (define-key eat-semi-char-mode-map (kbd "C-<backspace>") #'sw-eat-backward-kill-word)
   (define-key eat-semi-char-mode-map (kbd "M-<backspace>") #'eat-self-input)
   (define-key eat-semi-char-mode-map (kbd "M-d") #'eat-self-input)
   (define-key eat-semi-char-mode-map (kbd "M-f") #'eat-self-input)
@@ -142,21 +142,21 @@ LIMIT defaults to 10000."
   (define-key eat-semi-char-mode-map (kbd "C-<right>") #'eat-self-input)
   (define-key eat-semi-char-mode-map (kbd "C-k") #'eat-self-input)
   (define-key eat-semi-char-mode-map (kbd "C-j") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-y") #'sw/eat-yank)
-  (define-key eat-semi-char-mode-map (kbd "C-,") #'sw/eat-zsh-history-pick)
+  (define-key eat-semi-char-mode-map (kbd "C-y") #'sw-eat-yank)
+  (define-key eat-semi-char-mode-map (kbd "C-,") #'sw-eat-zsh-history-pick)
 
   ;; TRAMP integration: rename buffer, inject `e` function to open remote files
-  (defun sw/eat-find-file-handler (path)
+  (defun sw-eat-find-file-handler (path)
     "Open PATH in another window."
     (when (and path (not (string-empty-p path)))
       (find-file-other-window path)))
 
-  (add-to-list 'eat-message-handler-alist '("find-file" . sw/eat-find-file-handler))
+  (add-to-list 'eat-message-handler-alist '("find-file" . sw-eat-find-file-handler))
 
-  (defvar-local sw/eat-tramp-initialized nil
+  (defvar-local sw-eat-tramp-initialized nil
     "Non-nil if TRAMP shell initialization has been sent for this buffer.")
 
-  (defun sw/eat--tramp-init-string (prefix)
+  (defun sw-eat--tramp-init-string (prefix)
     "Return shell initialization string for TRAMP with PREFIX."
     (format "export TERM=xterm-256color
 e() { local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
@@ -164,20 +164,20 @@ printf '\\033]51;e;M;%%s;%%s\\033\\\\' \"$(printf 'find-file' | base64)\" \
 \"$(printf '%s%%s' \"$f\" | base64)\"; }
 clear\n" prefix))
 
-  (defun sw/eat--try-send-tramp-init (proc tramp-prefix)
+  (defun sw-eat--try-send-tramp-init (proc tramp-prefix)
     "Try to send TRAMP initialization to PROC if ready.
 TRAMP-PREFIX is the remote prefix for the `e` function."
     (when (and (process-live-p proc)
                (buffer-live-p (process-buffer proc)))
       (with-current-buffer (process-buffer proc)
-        (unless sw/eat-tramp-initialized
+        (unless sw-eat-tramp-initialized
           ;; Check if terminal has received any output (shell is ready)
           (when (and (bound-and-true-p eat-terminal)
                      (> (buffer-size) 0))
-            (setq sw/eat-tramp-initialized t)
-            (process-send-string proc (sw/eat--tramp-init-string tramp-prefix)))))))
+            (setq sw-eat-tramp-initialized t)
+            (process-send-string proc (sw-eat--tramp-init-string tramp-prefix)))))))
 
-  (defun sw/eat-setup-tramp (proc)
+  (defun sw-eat-setup-tramp (proc)
     "Configure eat for TRAMP: rename buffer, set TERM, inject `e` file opener."
     (when-let* ((buf (process-buffer proc))
                 (_ (buffer-live-p buf))
@@ -186,7 +186,7 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
       (with-current-buffer buf
         (rename-buffer (format "*eat@%s*" tramp-prefix) t)
         (setq-local eat-enable-shell-integration nil)
-        (setq-local sw/eat-tramp-initialized nil)
+        (setq-local sw-eat-tramp-initialized nil)
         ;; Use a repeating timer that stops once initialization succeeds
         (let ((timer nil)
               (attempts 0)
@@ -196,43 +196,43 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
                  0.1 0.1
                  (lambda ()
                    (setq attempts (1+ attempts))
-                   (if (or sw/eat-tramp-initialized
+                   (if (or sw-eat-tramp-initialized
                            (>= attempts max-attempts)
                            (not (process-live-p proc)))
                        (cancel-timer timer)
-                     (sw/eat--try-send-tramp-init proc tramp-prefix)))))))))
+                     (sw-eat--try-send-tramp-init proc tramp-prefix)))))))))
 
-  (add-hook 'eat-exec-hook #'sw/eat-setup-tramp))
+  (add-hook 'eat-exec-hook #'sw-eat-setup-tramp))
 
 ;;; Eat buffer management functions
 
-(defun sw/eat--project-root ()
+(defun sw-eat--project-root ()
   "Return the project root directory or `default-directory'.
 For remote directories, returns the remote default-directory."
-  (sw/project-root-or-default t))
+  (sw-project-root-or-default t))
 
-(defun sw/eat--buffer-for-dir (dir)
+(defun sw-eat--buffer-for-dir (dir)
   "Return buffer name for eat terminal in DIR.
 Remote directories use format `*eat@<remote>*', local use `*eat:<path>*'."
   (if (file-remote-p dir)
       (format "*eat@%s*" (file-remote-p dir))
     (format "*eat:%s*" (abbreviate-file-name dir))))
 
-(defun sw/eat--get-buffer (dir)
+(defun sw-eat--get-buffer (dir)
   "Get existing or create new eat buffer for DIR.
 Returns existing buffer if one exists for DIR, otherwise creates a new one."
   (require 'eat)
-  (let ((buf-name (sw/eat--buffer-for-dir dir)))
+  (let ((buf-name (sw-eat--buffer-for-dir dir)))
     (or (get-buffer buf-name)
-        (sw/eat--new-buffer dir buf-name))))
+        (sw-eat--new-buffer dir buf-name))))
 
-(defun sw/eat--new-buffer (dir &optional name)
+(defun sw-eat--new-buffer (dir &optional name)
   "Create a new eat terminal buffer for DIR with optional NAME.
 For remote directories, uses TRAMP to connect.
 For local directories, uses the user's default shell."
   (require 'eat)
   (let* ((default-directory dir)
-         (buf-name (or name (generate-new-buffer-name (sw/eat--buffer-for-dir dir)))))
+         (buf-name (or name (generate-new-buffer-name (sw-eat--buffer-for-dir dir)))))
     (if (file-remote-p dir)
         ;; For remote directories, use eat's built-in TRAMP support
         (let* ((method (file-remote-p dir 'method))
@@ -256,52 +256,52 @@ For local directories, uses the user's default shell."
             (eat-exec buffer buf-name shell nil nil)))
         buffer))))
 
-(defun sw/eat--determine-directory (here)
+(defun sw-eat--determine-directory (here)
   "Return directory for eat buffer.
 If HERE is non-nil, use current buffer's directory.
 Otherwise, use project root or default-directory."
   (if here
       (or (and buffer-file-name (file-name-directory buffer-file-name))
           default-directory)
-    (sw/eat--project-root)))
+    (sw-eat--project-root)))
 
-(defun sw/eat-here (&optional here)
+(defun sw-eat-here (&optional here)
   "Open a new eat buffer at the project root, replacing the current buffer.
 If HERE is non-nil, open at current buffer's directory.
 For remote directories, opens a shell on the remote host."
   (interactive "P")
   (require 'eat)
-  (switch-to-buffer (sw/eat--new-buffer (sw/eat--determine-directory here))))
+  (switch-to-buffer (sw-eat--new-buffer (sw-eat--determine-directory here))))
 
-(defun sw/eat-toggle (&optional here)
+(defun sw-eat-toggle (&optional here)
   "Toggle eat buffer visibility.
 If HERE is non-nil, use buffer-specific directory.
 For remote directories, opens a shell on the remote host."
   (interactive "P")
   (require 'eat)
-  (let* ((dir (sw/eat--determine-directory here))
-         (buf (get-buffer (sw/eat--buffer-for-dir dir))))
+  (let* ((dir (sw-eat--determine-directory here))
+         (buf (get-buffer (sw-eat--buffer-for-dir dir))))
     (if-let ((win (and buf (get-buffer-window buf))))
         (delete-window win)
-      (pop-to-buffer (sw/eat--get-buffer dir)))))
+      (pop-to-buffer (sw-eat--get-buffer dir)))))
 
-(defun sw/eat-here-current-buffer ()
+(defun sw-eat-here-current-buffer ()
   "Open an eat buffer from the current directory."
   (interactive)
-  (sw/eat-here t))
+  (sw-eat-here t))
 
-(defun sw/eat-toggle-current-buffer ()
+(defun sw-eat-toggle-current-buffer ()
   "Toggle an eat buffer from the current directory."
   (interactive)
-  (sw/eat-toggle t))
+  (sw-eat-toggle t))
 
-(defun sw/eat-zsh-history-pick ()
+(defun sw-eat-zsh-history-pick ()
   "Prompt from zsh history and insert into eat (recency preserved)."
   (interactive)
   (require 'eat)
   (unless (bound-and-true-p eat-terminal)
     (user-error "No eat process in current buffer"))
-  (let* ((history (sw/zsh-history-candidates))
+  (let* ((history (sw-zsh-history-candidates))
          (collection (lambda (string pred action)
                        (if (eq action 'metadata)
                            '(metadata
@@ -314,12 +314,12 @@ For remote directories, opens a shell on the remote host."
       (eat-term-send-string eat-terminal "\C-w"))
     (eat-term-send-string eat-terminal choice)))
 
-(defun sw/eat-project ()
+(defun sw-eat-project ()
   "Open eat terminal in project root."
   (interactive)
-  (sw/eat-here nil))
+  (sw-eat-here nil))
 
-(defun sw/eat--kill-buffers (&optional keep-current)
+(defun sw-eat--kill-buffers (&optional keep-current)
   "Kill eat buffers. If KEEP-CURRENT, spare the current buffer."
   (let ((count 0)
         (current (current-buffer)))
@@ -330,54 +330,54 @@ For remote directories, opens a shell on the remote host."
         (cl-incf count)))
     (message "Killed %d eat buffer(s)" count)))
 
-(defun sw/eat-kill-all ()
+(defun sw-eat-kill-all ()
   "Kill all eat buffers."
   (interactive)
-  (sw/eat--kill-buffers))
+  (sw-eat--kill-buffers))
 
-(defun sw/eat-kill-other ()
+(defun sw-eat-kill-other ()
   "Kill all eat buffers except the current one."
   (interactive)
-  (sw/eat--kill-buffers t))
+  (sw-eat--kill-buffers t))
 
 ;;; External terminal helpers
 
-(defun sw/terminal-here--default-directory ()
+(defun sw-terminal-here--default-directory ()
   "Return directory where external terminal should start.
 Uses current file's directory if visiting a file, otherwise home."
   (or (when buffer-file-name
         (file-name-directory buffer-file-name))
       (expand-file-name "~")))
 
-(defun sw/terminal-here--pick-terminal ()
+(defun sw-terminal-here--pick-terminal ()
   "Return terminal emulator name for this system.
 Uses alacritty on macOS, foot on Linux."
   (cond
-   (sw/is-mac "alacritty")
+   (sw-is-mac "alacritty")
    (t "foot")))
 
-(defun sw/terminal-here--command ()
+(defun sw-terminal-here--command ()
   "Build shell command to launch external terminal in current directory.
 Sets INSIDE_EMACS environment variable to indicate Emacs context."
-  (let* ((term (sw/terminal-here--pick-terminal))
-         (dir (sw/terminal-here--default-directory)))
+  (let* ((term (sw-terminal-here--pick-terminal))
+         (dir (sw-terminal-here--default-directory)))
     (unless (executable-find term)
       (error "Executable '%s' not found in PATH" term))
     (format "sh -lc 'cd %s && INSIDE_EMACS=%s %s' >/dev/null 2>&1"
             (shell-quote-argument dir) term term)))
 
-(defun sw/terminal-here ()
+(defun sw-terminal-here ()
   "Open a terminal window in the current directory."
   (interactive "@")
   (start-process-shell-command
    "terminal-here" nil
-   (sw/terminal-here--command))
+   (sw-terminal-here--command))
   (message "Terminal is ready!"))
 
-(defun sw/terminal-ssh--command (host)
+(defun sw-terminal-ssh--command (host)
   "Build shell command to open external terminal with SSH connection to HOST.
 Configures terminal with xterm-256color TERM for foot compatibility."
-  (let* ((term (sw/terminal-here--pick-terminal))
+  (let* ((term (sw-terminal-here--pick-terminal))
          (extra-flags (if (string= term "foot") "-t xterm-256color" ""))
          (ssh-cmd (format "ssh %s" (shell-quote-argument host))))
     (unless (executable-find term)
@@ -387,13 +387,13 @@ Configures terminal with xterm-256color TERM for foot compatibility."
             extra-flags
             (shell-quote-argument ssh-cmd))))
 
-(defun sw/ssh-external (host)
+(defun sw-ssh-external (host)
   "Open an external terminal and SSH to HOST."
   (interactive
    (list (completing-read "SSH target: "
-                          (sw/ssh-config-hosts)
+                          (sw-ssh-config-hosts)
                           nil nil)))
-  (let ((cmd (sw/terminal-ssh--command host)))
+  (let ((cmd (sw-terminal-ssh--command host)))
     (message "SSH external running: %s" cmd)
     (start-process-shell-command
      "ssh-external" nil cmd)))
@@ -418,7 +418,7 @@ Configures terminal with xterm-256color TERM for foot compatibility."
    (append
     (mapcar (lambda (f)
               (list 'tramp-parse-sconfig (expand-file-name f)))
-            sw/ssh-config-files)
+            sw-ssh-config-files)
     '((tramp-parse-sconfig "/etc/ssh_config")
       (tramp-parse-shosts "/etc/hosts")
       (tramp-parse-shosts "~/.ssh/known_hosts"))))

@@ -8,14 +8,14 @@
 
 ;;; Code:
 
-(defconst sw/dashboard-buffer-name "*dashboard*"
+(defconst sw-dashboard-buffer-name "*dashboard*"
   "Name of the dashboard buffer.")
 
-(defun sw/dashboard-protect-buffer ()
+(defun sw-dashboard-protect-buffer ()
   "Prevent the dashboard buffer from being killed."
-  (not (string= (buffer-name) sw/dashboard-buffer-name)))
+  (not (string= (buffer-name) sw-dashboard-buffer-name)))
 
-(defun sw/dashboard--os-version ()
+(defun sw-dashboard--os-version ()
   "Return the OS version string."
   (pcase system-type
     ('gnu/linux
@@ -31,7 +31,7 @@
              (string-trim (shell-command-to-string "sw_vers -productVersion"))))
     (_ (capitalize (symbol-name system-type)))))
 
-(defun sw/dashboard-render ()
+(defun sw-dashboard-render ()
   "Render the dashboard content in the current buffer."
   (with-silent-modifications
     (erase-buffer)
@@ -48,7 +48,7 @@
       (funcall center "smallwat3r's Emacs")
       (insert "\n\n")
       (funcall center (format "Emacs %s" emacs-version))
-      (funcall center (sw/dashboard--os-version))
+      (funcall center (sw-dashboard--os-version))
       (funcall center (if (daemonp) "Mode: Daemon" "Mode: Standalone"))
       (insert "\n")
       (funcall center (format "Loaded in %.2fs, %d GCs" load-time gcs-done)))
@@ -57,40 +57,40 @@
               cursor-type nil
               truncate-lines t))
 
-(defun sw/dashboard--on-resize (&optional _frame)
+(defun sw-dashboard--on-resize (&optional _frame)
   "Re-render dashboard when window size changes."
-  (when-let ((buf (get-buffer sw/dashboard-buffer-name)))
+  (when-let ((buf (get-buffer sw-dashboard-buffer-name)))
     (when (get-buffer-window buf)
       (with-current-buffer buf
-        (sw/dashboard-render)))))
+        (sw-dashboard-render)))))
 
-(defun sw/dashboard-display ()
+(defun sw-dashboard-display ()
   "Create and switch to the dashboard buffer."
-  (switch-to-buffer (get-buffer-create sw/dashboard-buffer-name))
-  (sw/dashboard-render)
-  (add-hook 'window-size-change-functions #'sw/dashboard--on-resize))
+  (switch-to-buffer (get-buffer-create sw-dashboard-buffer-name))
+  (sw-dashboard-render)
+  (add-hook 'window-size-change-functions #'sw-dashboard--on-resize))
 
-(defun sw/dashboard-refresh ()
+(defun sw-dashboard-refresh ()
   "Refresh the dashboard buffer."
   (interactive)
-  (when (get-buffer sw/dashboard-buffer-name)
-    (with-current-buffer sw/dashboard-buffer-name
-      (sw/dashboard-render))))
+  (when (get-buffer sw-dashboard-buffer-name)
+    (with-current-buffer sw-dashboard-buffer-name
+      (sw-dashboard-render))))
 
-(defun sw/dashboard--daemon-display ()
+(defun sw-dashboard--daemon-display ()
   "Display dashboard after frame is ready in daemon mode.
 Only display if no file is being visited."
   (run-at-time 0.1 nil
                (lambda ()
                  (unless (buffer-file-name)
-                   (sw/dashboard-display)))))
+                   (sw-dashboard-display)))))
 
-(defun sw/dashboard-setup ()
+(defun sw-dashboard-setup ()
   "Set up the dashboard to display on startup."
-  (add-hook 'kill-buffer-query-functions #'sw/dashboard-protect-buffer)
+  (add-hook 'kill-buffer-query-functions #'sw-dashboard-protect-buffer)
   (if (daemonp)
-      (add-hook 'server-after-make-frame-hook #'sw/dashboard--daemon-display)
-    (add-hook 'emacs-startup-hook #'sw/dashboard-display 100)))
+      (add-hook 'server-after-make-frame-hook #'sw-dashboard--daemon-display)
+    (add-hook 'emacs-startup-hook #'sw-dashboard-display 100)))
 
 (provide 'sw-dashboard)
 

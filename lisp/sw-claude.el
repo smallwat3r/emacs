@@ -5,12 +5,12 @@
 
 ;;; Code:
 
-(defun sw/claude-notify (title message)
+(defun sw-claude-notify (title message)
   "Display a Linux notification with TITLE and MESSAGE using notify-send."
-  (when (and sw/is-linux (executable-find "notify-send"))
+  (when (and sw-is-linux (executable-find "notify-send"))
     (call-process "notify-send" nil nil nil title message)))
 
-(defun sw/claude-display-buffer-full-frame (buffer)
+(defun sw-claude-display-buffer-full-frame (buffer)
   "Display claude-code BUFFER.
 If only one window exists, use full frame.
 If in a split view, display in the current window."
@@ -31,13 +31,13 @@ If in a split view, display in the current window."
   :after inheritenv
   :init
   (setq claude-code-terminal-backend 'eat
-        claude-code-notification-function #'sw/claude-notify
+        claude-code-notification-function #'sw-claude-notify
         claude-code-toggle-auto-select t
-        claude-code-display-window-fn #'sw/claude-display-buffer-full-frame)
+        claude-code-display-window-fn #'sw-claude-display-buffer-full-frame)
 
   ;; Custom toggle that uses full frame display
   ;; Defined in :init so the command exists before the package is loaded
-  (defun sw/claude-code-toggle ()
+  (defun sw-claude-code-toggle ()
     "Show or hide the Claude window in full frame."
     (interactive)
     (require 'claude-code)
@@ -45,7 +45,7 @@ If in a split view, display in the current window."
       (if claude-code-buffer
           (if (get-buffer-window claude-code-buffer)
               (delete-window (get-buffer-window claude-code-buffer))
-            (let ((window (sw/claude-display-buffer-full-frame claude-code-buffer)))
+            (let ((window (sw-claude-display-buffer-full-frame claude-code-buffer)))
               (set-window-parameter window 'no-delete-other-windows
                                     claude-code-no-delete-other-windows)
               (when claude-code-toggle-auto-select
@@ -53,7 +53,7 @@ If in a split view, display in the current window."
         (claude-code--show-not-running-message))))
 
   :config
-  (advice-add 'claude-code-toggle :override #'sw/claude-code-toggle))
+  (advice-add 'claude-code-toggle :override #'sw-claude-code-toggle))
 
 (provide 'sw-claude)
 ;;; sw-claude.el ends here

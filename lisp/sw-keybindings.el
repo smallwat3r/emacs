@@ -11,10 +11,10 @@
 ;;; Window navigation macro
 ;; Generates arrow keys, YNAE keys (custom layout), and split bindings for a prefix.
 
-(defmacro sw/define-window-nav-keys (prefix label)
+(defmacro sw-define-window-nav-keys (prefix label)
   "Define window navigation bindings under PREFIX with LABEL for which-key."
   (let ((p prefix))
-    `(sw/leader
+    `(sw-leader
        ,(concat p "") '(:ignore t :wk ,label)
        ;; Arrow keys
        ,(concat p " <left>") '(evil-window-left :wk "Window left")
@@ -40,18 +40,18 @@
 
 ;;; Leader key bindings
 
-(sw/leader
+(sw-leader
   ;; Top level
   "SPC" '(project-find-file :wk "Find file in project")
-  "1"   '(sw/show-buffer-path :wk "Show path")
+  "1"   '(sw-show-buffer-path :wk "Show path")
   "."   '(find-file :wk "Find file")
   ","   '(consult-buffer :wk "Switch buffer")
   "`"   '(evil-switch-to-windows-last-buffer :wk "Last buffer")
   ";"   '(pp-eval-expression :wk "Eval expression")
   ":"   '(execute-extended-command :wk "M-x")
   "'"   '(vertico-repeat :wk "Resume last search")
-  "*"   '(sw/consult-ripgrep-project-symbol :wk "Search symbol in project")
-  "/"   '(sw/consult-ripgrep-project :wk "Search project")
+  "*"   '(sw-consult-ripgrep-project-symbol :wk "Search symbol in project")
+  "/"   '(sw-consult-ripgrep-project :wk "Search project")
   "x"   '(scratch-buffer :wk "Scratch buffer")
   "RET" '(bookmark-jump :wk "Jump to bookmark")
   "§"   '(other-frame :wk "Other frame")
@@ -59,10 +59,10 @@
 
   ;; Buffers
   "b" '(:ignore t :wk "Buffer")
-  "bb" '(sw/workspace-switch-buffer :wk "Switch buffer")
-  "bB" '(sw/switch-buffer-global :wk "Switch buffer (all)")
+  "bb" '(sw-workspace-switch-buffer :wk "Switch buffer")
+  "bB" '(sw-switch-buffer-global :wk "Switch buffer (all)")
   "bd" '(kill-current-buffer :wk "Kill buffer")
-  "bD" '(sw/workspace-kill-all-buffers :wk "Kill workspace buffers")
+  "bD" '(sw-workspace-kill-all-buffers :wk "Kill workspace buffers")
   "bi" '(ibuffer :wk "Ibuffer")
   "bl" '(evil-switch-to-windows-last-buffer :wk "Last buffer")
   "bm" '(bookmark-set :wk "Set bookmark")
@@ -74,8 +74,8 @@
   "bS" '(evil-write-all :wk "Save all buffers")
   "bx" '(scratch-buffer :wk "Scratch buffer")
   "be" '(:ignore t :wk "Eat")
-  "bek" '(sw/eat-kill-other :wk "Kill other eat buffers")
-  "beK" '(sw/eat-kill-all :wk "Kill all eat buffers")
+  "bek" '(sw-eat-kill-other :wk "Kill other eat buffers")
+  "beK" '(sw-eat-kill-all :wk "Kill all eat buffers")
 
   ;; Files
   "f" '(:ignore t :wk "File")
@@ -85,29 +85,29 @@
   "fr" '(consult-recent-file :wk "Recent files")
   "fs" '(save-buffer :wk "Save file")
   "fS" '(write-file :wk "Save file as")
-  "fD" '(sw/delete-this-file :wk "Delete this file")
-  "fy" '(sw/copy-file-path :wk "Yank file path")
-  "f." '(sw/workspace-find-dotfiles :wk "Find in dotfiles")
-  "fe" '(sw/workspace-find-emacs-config :wk "Find in .emacs.d")
+  "fD" '(sw-delete-this-file :wk "Delete this file")
+  "fy" '(sw-copy-file-path :wk "Yank file path")
+  "f." '(sw-workspace-find-dotfiles :wk "Find in dotfiles")
+  "fe" '(sw-workspace-find-emacs-config :wk "Find in .emacs.d")
 
   ;; Project
   "p" '(:ignore t :wk "Project")
-  "pp" '(sw/workspace-switch-to-project :wk "Switch project")
-  "pf" '(sw/project-find-file :wk "Find file in project")
-  "pg" '(sw/consult-ripgrep-project :wk "Grep project")
+  "pp" '(sw-workspace-switch-to-project :wk "Switch project")
+  "pf" '(sw-project-find-file :wk "Find file in project")
+  "pg" '(sw-consult-ripgrep-project :wk "Grep project")
   "pd" '(project-find-dir :wk "Find dir")
   "pb" '(project-switch-to-buffer :wk "Project buffer")
   "pk" '(project-kill-buffers :wk "Kill project buffers")
-  "pK" '(sw/kill-all-projects-and-buffers :wk "Kill all projects")
-  "pm" '(sw/project-make :wk "Run make")
-  "pi" '(sw/project-refresh :wk "Refresh projects")
+  "pK" '(sw-kill-all-projects-and-buffers :wk "Kill all projects")
+  "pm" '(sw-project-make :wk "Run make")
+  "pi" '(sw-project-refresh :wk "Refresh projects")
 
   ;; Search
   "s" '(:ignore t :wk "Search")
   "ss" '(consult-line :wk "Search buffer")
   "sS" '(consult-line-multi :wk "Search all buffers")
-  "sp" '(sw/consult-ripgrep-project :wk "Search project")
-  "sw" '(sw/consult-ripgrep-project-symbol :wk "Search symbol")
+  "sp" '(sw-consult-ripgrep-project :wk "Search project")
+  "sw" '(sw-consult-ripgrep-project-symbol :wk "Search symbol")
   "si" '(consult-imenu :wk "Imenu")
   "sI" '(consult-imenu-multi :wk "Imenu all")
   "sr" '(consult-ripgrep :wk "Ripgrep")
@@ -170,22 +170,22 @@
 
   ;; Workspaces (tab-bar)
   "TAB" '(:ignore t :wk "Workspace")
-  "TAB TAB" '(sw/workspace-display :wk "Display workspaces")
+  "TAB TAB" '(sw-workspace-display :wk "Display workspaces")
   "TAB ." '(tab-bar-switch-to-tab :wk "Switch workspace")
-  "TAB n" '(sw/workspace-new :wk "New workspace")
+  "TAB n" '(sw-workspace-new :wk "New workspace")
   "TAB d" '(tab-bar-close-tab :wk "Close workspace")
   "TAB r" '(tab-bar-rename-tab :wk "Rename workspace")
   "TAB ]" '(tab-bar-switch-to-next-tab :wk "Next workspace")
   "TAB [" '(tab-bar-switch-to-prev-tab :wk "Prev workspace")
-  "TAB 1" '(sw/workspace-switch-to-1 :wk "Workspace 1")
-  "TAB 2" '(sw/workspace-switch-to-2 :wk "Workspace 2")
-  "TAB 3" '(sw/workspace-switch-to-3 :wk "Workspace 3")
-  "TAB 4" '(sw/workspace-switch-to-4 :wk "Workspace 4")
-  "TAB 5" '(sw/workspace-switch-to-5 :wk "Workspace 5")
-  "TAB 6" '(sw/workspace-switch-to-6 :wk "Workspace 6")
-  "TAB 7" '(sw/workspace-switch-to-7 :wk "Workspace 7")
-  "TAB 8" '(sw/workspace-switch-to-8 :wk "Workspace 8")
-  "TAB 9" '(sw/workspace-switch-to-9 :wk "Workspace 9")
+  "TAB 1" '(sw-workspace-switch-to-1 :wk "Workspace 1")
+  "TAB 2" '(sw-workspace-switch-to-2 :wk "Workspace 2")
+  "TAB 3" '(sw-workspace-switch-to-3 :wk "Workspace 3")
+  "TAB 4" '(sw-workspace-switch-to-4 :wk "Workspace 4")
+  "TAB 5" '(sw-workspace-switch-to-5 :wk "Workspace 5")
+  "TAB 6" '(sw-workspace-switch-to-6 :wk "Workspace 6")
+  "TAB 7" '(sw-workspace-switch-to-7 :wk "Workspace 7")
+  "TAB 8" '(sw-workspace-switch-to-8 :wk "Workspace 8")
+  "TAB 9" '(sw-workspace-switch-to-9 :wk "Workspace 9")
 
   ;; Window (unique bindings only, navigation via macro below)
   "w" '(:ignore t :wk "Window")
@@ -197,13 +197,13 @@
 
   ;; Open/Apps
   "o" '(:ignore t :wk "Open")
-  "o1" '(sw/terminal-here :wk "External terminal")
-  "oT" '(sw/eat-here :wk "Eat at root")
-  "ot" '(sw/eat-toggle :wk "Toggle eat at root")
-  "oV" '(sw/eat-here-current-buffer :wk "Eat at buffer")
-  "ov" '(sw/eat-toggle-current-buffer :wk "Toggle eat at buffer")
-  "o." '(sw/tramp-connect :wk "TRAMP SSH")
-  "os" '(sw/ssh-external :wk "SSH external term")
+  "o1" '(sw-terminal-here :wk "External terminal")
+  "oT" '(sw-eat-here :wk "Eat at root")
+  "ot" '(sw-eat-toggle :wk "Toggle eat at root")
+  "oV" '(sw-eat-here-current-buffer :wk "Eat at buffer")
+  "ov" '(sw-eat-toggle-current-buffer :wk "Toggle eat at buffer")
+  "o." '(sw-tramp-connect :wk "TRAMP SSH")
+  "os" '(sw-ssh-external :wk "SSH external term")
   "od" '(dired-jump :wk "Dired")
   "op" '(pass :wk "Pass")
   "ol" '(browse-url-at-point :wk "Open URL")
@@ -216,7 +216,7 @@
   "rn" '(claude-code-new-instance :wk "New instance")
   "rd" '(claude-code-start-in-directory :wk "Start in directory")
   "rs" '(claude-code-select-buffer :wk "Switch buffer")
-  "rt" '(sw/claude-code-toggle :wk "Toggle Claude")
+  "rt" '(sw-claude-code-toggle :wk "Toggle Claude")
   "rr" '(claude-code-send-region :wk "Send region")
   "rp" '(claude-code-send-command :wk "Send command")
   "rx" '(claude-code-send-command-with-context :wk "Send with context")
@@ -229,9 +229,9 @@
 
   ;; Insert
   "i" '(:ignore t :wk "Insert")
-  "id" '(sw/insert-date :wk "Date")
-  "it" '(sw/insert-datetime :wk "Datetime")
-  "ie" '(sw/insert-email :wk "Email")
+  "id" '(sw-insert-date :wk "Date")
+  "it" '(sw-insert-datetime :wk "Datetime")
+  "ie" '(sw-insert-email :wk "Email")
   "iy" '(consult-yank-pop :wk "From kill ring")
 
   ;; Notes
@@ -254,8 +254,8 @@
 
 ;; Window navigation bindings (arrows, YNAE, splits) for both prefixes.
 ;; "w" makes sense (for window), "l" is kept for muscle memory.
-(sw/define-window-nav-keys "w" "Window")
-(sw/define-window-nav-keys "l" "Select window")
+(sw-define-window-nav-keys "w" "Window")
+(sw-define-window-nav-keys "l" "Select window")
 
 ;;; Evil normal state bindings
 
@@ -301,11 +301,11 @@
  "gc" 'evilnc-comment-operator
  "gl" 'evil-lion-left
  "gL" 'evil-lion-right
- ";f" 'sw/format-region)
+ ";f" 'sw-format-region)
 
 ;;; Emacs Lisp mode bindings
 
-(sw/local-leader
+(sw-local-leader
   :keymaps '(emacs-lisp-mode-map lisp-interaction-mode-map)
   "e" '(:ignore t :wk "Eval")
   "eb" '(eval-buffer :wk "Eval buffer")
@@ -316,9 +316,9 @@
 ;;; Python mode bindings
 
 (with-eval-after-load 'python
-  (sw/local-leader
+  (sw-local-leader
     :keymaps '(python-mode-map python-ts-mode-map)
-    "f" '(sw/python-toggle-fstring :wk "Toggle f-string")))
+    "f" '(sw-python-toggle-fstring :wk "Toggle f-string")))
 
 ;;; Eat mode bindings
 
@@ -335,13 +335,13 @@
    "C-u" 'evil-scroll-up
    "C-d" 'evil-scroll-down
    "RET" 'evil-insert-state
-   "dd" 'sw/eat-interrupt
-   "p" 'sw/eat-yank)
+   "dd" 'sw-eat-interrupt
+   "p" 'sw-eat-yank)
 
   (general-define-key
    :keymaps 'eat-mode-map
    :states '(normal insert)
-   "C-," 'sw/eat-zsh-history-pick))
+   "C-," 'sw-eat-zsh-history-pick))
 
 ;;; Deft mode bindings
 

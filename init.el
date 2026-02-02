@@ -18,10 +18,10 @@
 
 ;;; Personal info
 
-(defconst sw/full-name "Matt Petiteau")
-(defconst sw/email-addresses '("mpetiteau.pro@gmail.com" "matt@smallwat3r.com"))
-(defconst sw/email (car sw/email-addresses))
-(defconst sw/dotfiles-directory "~/dotfiles/")
+(defconst sw-full-name "Matt Petiteau")
+(defconst sw-email-addresses '("mpetiteau.pro@gmail.com" "matt@smallwat3r.com"))
+(defconst sw-email (car sw-email-addresses))
+(defconst sw-dotfiles-directory "~/dotfiles/")
 
 ;;; Core settings
 
@@ -29,8 +29,8 @@
   :ensure nil
   :demand t
   :custom
-  (user-full-name sw/full-name)
-  (user-mail-address sw/email)
+  (user-full-name sw-full-name)
+  (user-mail-address sw-email)
 
   ;; General behavior (startup settings in early-init.el)
   (ring-bell-function 'ignore)
@@ -85,10 +85,10 @@
   (repeat-mode 1)
 
   ;; Deferred modes (via custom hooks from early-init.el)
-  (add-hook 'sw/first-buffer-hook #'show-paren-mode)
-  (add-hook 'sw/first-file-hook #'save-place-mode)
-  (add-hook 'sw/first-file-hook #'recentf-mode)
-  (add-hook 'sw/first-file-hook #'global-so-long-mode)
+  (add-hook 'sw-first-buffer-hook #'show-paren-mode)
+  (add-hook 'sw-first-file-hook #'save-place-mode)
+  (add-hook 'sw-first-file-hook #'recentf-mode)
+  (add-hook 'sw-first-file-hook #'global-so-long-mode)
 
   ;; Disable blinking cursor
   (blink-cursor-mode -1)
@@ -99,7 +99,7 @@
 ;;; Garbage collection during idle time
 
 (use-package gcmh
-  :hook (sw/first-buffer . gcmh-mode)
+  :hook (sw-first-buffer . gcmh-mode)
   :custom
   (gcmh-idle-delay 'auto)
   (gcmh-auto-idle-delay-factor 10)
@@ -141,6 +141,6 @@
 
 ;;; Dashboard setup
 
-(sw/dashboard-setup)
+(sw-dashboard-setup)
 
 ;;; init.el ends here

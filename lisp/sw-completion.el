@@ -8,7 +8,7 @@
 ;;; Minibuffer completion with Vertico
 
 (use-package vertico
-  :hook (sw/first-input . vertico-mode)
+  :hook (sw-first-input . vertico-mode)
   :custom
   (vertico-count 10)
   (vertico-resize nil)
@@ -17,11 +17,11 @@
 ;; Save minibuffer history
 (use-package savehist
   :ensure nil
-  :hook (sw/first-input . savehist-mode))
+  :hook (sw-first-input . savehist-mode))
 
 ;; Marginalia - rich annotations in minibuffer
 (use-package marginalia
-  :hook (sw/first-input . marginalia-mode)
+  :hook (sw-first-input . marginalia-mode)
   :config
   ;; Remove underline from annotation faces
   (dolist (face '(marginalia-documentation marginalia-value marginalia-key))
@@ -81,7 +81,7 @@
 ;;; In-buffer completion with Corfu
 
 (use-package corfu
-  :hook (sw/first-input . global-corfu-mode)
+  :hook (sw-first-input . global-corfu-mode)
   :custom
   (corfu-count 5)
   (corfu-auto t)
