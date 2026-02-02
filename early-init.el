@@ -89,13 +89,6 @@
                 (fullscreen . maximized))
               default-frame-alist))
 
-;;; Custom group for configuration
-
-(defgroup sw nil
-  "Personal Emacs configuration settings."
-  :prefix "sw/"
-  :group 'convenience)
-
 ;;; Font management
 
 (defun sw/font-available-p (font)
@@ -107,58 +100,37 @@
   (seq-find #'sw/font-available-p fonts))
 
 ;; Primary font families (set early, before display is available)
-(defcustom sw/font-family (if sw/is-mac "Monaco" "MonacoB")
-  "Primary monospace font for code and default text."
-  :type 'string
-  :group 'sw)
+(defvar sw/font-family (if sw/is-mac "Monaco" "MonacoB")
+  "Primary monospace font for code and default text.")
 
-(defcustom sw/font-variable-pitch nil
-  "Variable-pitch font for prose and UI elements.
-If nil, defaults to `sw/font-family'."
-  :type '(choice (const :tag "Same as sw/font-family" nil)
-                 (string :tag "Font family"))
-  :group 'sw)
+(defvar sw/font-variable-pitch sw/font-family
+  "Variable-pitch font for prose and UI elements.")
 
-(defcustom sw/font-serif nil
-  "Serif font for documents and reading.
-If nil, defaults to `sw/font-family'."
-  :type '(choice (const :tag "Same as sw/font-family" nil)
-                 (string :tag "Font family"))
-  :group 'sw)
+(defvar sw/font-serif sw/font-family
+  "Serif font for documents and reading.")
 
 ;; Fallback font lists (resolved after display is available)
-(defcustom sw/font-symbol-fallbacks
+(defvar sw/font-symbol-fallbacks
   '("Symbola" "Apple Symbols" "Noto Sans Symbols" "Noto Sans Symbols 2")
-  "Fallback list for symbol font."
-  :type '(repeat string)
-  :group 'sw)
+  "Fallback list for symbol font.")
 
-(defcustom sw/font-emoji-fallbacks
+(defvar sw/font-emoji-fallbacks
   (if sw/is-mac
       '("Apple Color Emoji")
     '("Noto Color Emoji" "Noto Emoji" "Segoe UI Emoji"))
-  "Fallback list for emoji font."
-  :type '(repeat string)
-  :group 'sw)
+  "Fallback list for emoji font.")
 
-;; These are set programmatically, so keep as defvar
 (defvar sw/font-symbol nil
   "Font for mathematical and technical symbols. Set after init.")
 
 (defvar sw/font-emoji nil
   "Font for emoji characters. Set after init.")
 
-(defcustom sw/font-height (if sw/is-mac 130 100)
-  "Default font height in 1/10 points."
-  :type 'integer
-  :group 'sw)
+(defvar sw/font-height (if sw/is-mac 130 100)
+  "Default font height in 1/10 points.")
 
-(defcustom sw/font-variable-pitch-height nil
-  "Variable-pitch font height in 1/10 points.
-If nil, defaults to `sw/font-height'."
-  :type '(choice (const :tag "Same as sw/font-height" nil)
-                 (integer :tag "Height"))
-  :group 'sw)
+(defvar sw/font-variable-pitch-height sw/font-height
+  "Variable-pitch font height in 1/10 points.")
 
 ;; Set primary font early to prevent random sizing
 (set-face-attribute 'default nil :family sw/font-family :height sw/font-height)

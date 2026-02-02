@@ -21,10 +21,8 @@
           "pyproject.toml" "setup.py" "Makefile" ".git")))
 
 ;; Auto-discover projects in these directories
-(defcustom sw/project-directories '("~/code" "~/work" "~/dotfiles")
-  "Directories to scan for projects."
-  :type '(repeat directory)
-  :group 'sw)
+(defvar sw/project-directories '("~/code" "~/work" "~/dotfiles")
+  "Directories to scan for projects.")
 
 (defun sw/project-discover ()
   "Scan `sw/project-directories' for git repos and add them as known projects."
