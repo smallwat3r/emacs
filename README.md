@@ -15,8 +15,14 @@ on first run.
 ## Package management
 
 Packages are managed with [elpaca](https://github.com/progfolio/elpaca), which
-provides async installation and version locking. The lockfile `elpaca-lockfile.el`
-is version-controlled for reproducible installs.
+provides async installation and version locking. Packages install automatically
+when Emacs starts. The lockfile `elpaca-lock.el` is version-controlled for
+reproducible installs.
+
+Common commands (run in Emacs after startup):
+
+- `M-x elpaca-update-all` - update all packages
+- `M-x elpaca-write-lock-file` - save current versions to lockfile
 
 Run `make` to see available commands:
 
@@ -24,9 +30,6 @@ Run `make` to see available commands:
 $ make
   help       Show this help
   link       Symlink this directory to ~/.emacs.d
-  install    Install packages (first run)
-  update     Update all packages and save lockfile
-  lock       Save current package versions to lockfile
   clean      Remove all installed packages
 ```
 
