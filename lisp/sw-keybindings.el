@@ -8,6 +8,28 @@
 (require 'general)
 (require 'sw-commands)
 
+;;; Window navigation macro
+;; Generates arrow keys, YNAE keys (custom layout), and split bindings for a prefix.
+
+(defmacro sw/define-window-nav-keys (prefix label)
+  "Define window navigation bindings under PREFIX with LABEL for which-key."
+  (let ((p prefix))
+    `(sw/leader
+       ,(concat p "") '(:ignore t :wk ,label)
+       ;; Arrow keys
+       ,(concat p " <left>") '(evil-window-left :wk "Window left")
+       ,(concat p " <right>") '(evil-window-right :wk "Window right")
+       ,(concat p " <up>") '(evil-window-up :wk "Window up")
+       ,(concat p " <down>") '(evil-window-down :wk "Window down")
+       ;; YNAE keys (custom keyboard layout)
+       ,(concat p "y") '(evil-window-left :wk "Window left")
+       ,(concat p "n") '(evil-window-down :wk "Window down")
+       ,(concat p "a") '(evil-window-up :wk "Window up")
+       ,(concat p "e") '(evil-window-right :wk "Window right")
+       ;; Splits
+       ,(concat p "v") '(split-window-right :wk "Split right")
+       ,(concat p "s") '(split-window-below :wk "Split below"))))
+
 ;;; Escape quits minibuffer
 
 (dolist (map (list minibuffer-local-map
@@ -165,36 +187,13 @@
   "TAB 8" '(sw/workspace-switch-to-8 :wk "Workspace 8")
   "TAB 9" '(sw/workspace-switch-to-9 :wk "Workspace 9")
 
-  ;; Window
+  ;; Window (unique bindings only, navigation via macro below)
   "w" '(:ignore t :wk "Window")
   "ww" '(other-window :wk "Other window")
-  "wv" '(split-window-right :wk "Split right")
-  "ws" '(split-window-below :wk "Split below")
   "wd" '(delete-window :wk "Delete window")
   "wD" '(delete-other-windows :wk "Delete others")
   "w=" '(balance-windows :wk "Balance")
   "wm" '(maximize-window :wk "Maximize")
-  "w <left>" '(evil-window-left :wk "Window left")
-  "w <right>" '(evil-window-right :wk "Window right")
-  "w <up>" '(evil-window-up :wk "Window up")
-  "w <down>" '(evil-window-down :wk "Window down")
-  "wy" '(evil-window-left :wk "Window left")
-  "wn" '(evil-window-down :wk "Window down")
-  "wa" '(evil-window-up :wk "Window up")
-  "we" '(evil-window-right :wk "Window right")
-
-  ;; Window selection (arrow keys)
-  "l" '(:ignore t :wk "Select window")
-  "l <left>" '(evil-window-left :wk "Window left")
-  "l <right>" '(evil-window-right :wk "Window right")
-  "l <up>" '(evil-window-up :wk "Window up")
-  "l <down>" '(evil-window-down :wk "Window down")
-  "ly" '(evil-window-left :wk "Window left")
-  "ln" '(evil-window-down :wk "Window down")
-  "la" '(evil-window-up :wk "Window up")
-  "le" '(evil-window-right :wk "Window right")
-  "lv" '(split-window-right :wk "Split right")
-  "ls" '(split-window-below :wk "Split below")
 
   ;; Open/Apps
   "o" '(:ignore t :wk "Open")
@@ -252,6 +251,11 @@
 
   ;; Local/Mode (placeholder for which-key)
   "m" '(:ignore t :wk "Local mode"))
+
+;; Window navigation bindings (arrows, YNAE, splits) for both prefixes.
+;; "w" makes sense (for window), "l" is kept for muscle memory.
+(sw/define-window-nav-keys "w" "Window")
+(sw/define-window-nav-keys "l" "Select window")
 
 ;;; Evil normal state bindings
 
