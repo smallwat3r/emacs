@@ -11,8 +11,13 @@
     (call-process "notify-send" nil nil nil title message)))
 
 (defun sw/claude-display-buffer-full-frame (buffer)
-  "Display claude-code BUFFER in full frame."
-  (display-buffer buffer '((display-buffer-full-frame))))
+  "Display claude-code BUFFER.
+If only one window exists, use full frame.
+If in a split view, display in the current window."
+  (display-buffer buffer
+                  (if (one-window-p)
+                      '((display-buffer-full-frame))
+                    '((display-buffer-same-window)))))
 
 ;; Required dependency for claude-code
 (use-package inheritenv
