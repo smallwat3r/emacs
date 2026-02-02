@@ -21,6 +21,7 @@
   (evil-vsplit-window-right t)
   (evil-respect-visual-line-mode t)
   (evil-search-module 'evil-search)
+  (evil-kbd-macro-suppress-motion-error t)  ; don't abort macros on motion errors
   :config
   (evil-mode 1)
 
