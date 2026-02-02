@@ -130,7 +130,7 @@
   :custom
   (which-key-idle-delay 0.3)
   (which-key-idle-secondary-delay 0.05)
-  (which-key-add-column-padding 2))
+  (which-key-add-column-padding 0))
 
 (provide 'sw-evil)
 ;;; sw-evil.el ends here
