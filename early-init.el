@@ -27,35 +27,40 @@
 (defvar sw/first-buffer-hook nil
   "Transient hook run before the first buffer switch.")
 
-(defvar sw/--initial-hooks-setup nil
-  "Non-nil if initial hooks have been set up.")
+;; Explicit mapping of transient hooks to their Emacs trigger hooks.
+;; Avoids fragile intern-based function name construction.
+(defvar sw/--hook-triggers nil
+  "Alist mapping (hook-var . (trigger-hook . trigger-fn)).")
 
-(defun sw/--run-hook-once (hook-var trigger-hook)
-  "Run HOOK-VAR once, then remove it from TRIGGER-HOOK."
+(defun sw/--run-hook-once (hook-var)
+  "Run HOOK-VAR once, then remove its trigger from the parent hook."
   (when (and after-init-time (symbol-value hook-var))
     (run-hooks hook-var)
     (set hook-var nil)
-    (remove-hook trigger-hook (intern (format "sw/--trigger-%s" hook-var)))))
+    (when-let ((entry (assq hook-var sw/--hook-triggers)))
+      (remove-hook (cadr entry) (cddr entry)))))
 
-(defun sw/--trigger-sw/first-input-hook ()
+(defun sw/--trigger-first-input ()
   "Trigger `sw/first-input-hook'."
-  (sw/--run-hook-once 'sw/first-input-hook 'pre-command-hook))
+  (sw/--run-hook-once 'sw/first-input-hook))
 
-(defun sw/--trigger-sw/first-file-hook ()
+(defun sw/--trigger-first-file ()
   "Trigger `sw/first-file-hook'."
-  (sw/--run-hook-once 'sw/first-file-hook 'find-file-hook))
+  (sw/--run-hook-once 'sw/first-file-hook))
 
-(defun sw/--trigger-sw/first-buffer-hook (_frame)
+(defun sw/--trigger-first-buffer (&rest _)
   "Trigger `sw/first-buffer-hook'."
-  (sw/--run-hook-once 'sw/first-buffer-hook 'window-buffer-change-functions))
+  (sw/--run-hook-once 'sw/first-buffer-hook))
 
 (defun sw/setup-initial-hooks ()
   "Set up triggers for first-* hooks. Call this after init."
-  (unless sw/--initial-hooks-setup
-    (add-hook 'pre-command-hook #'sw/--trigger-sw/first-input-hook)
-    (add-hook 'find-file-hook #'sw/--trigger-sw/first-file-hook)
-    (add-hook 'window-buffer-change-functions #'sw/--trigger-sw/first-buffer-hook)
-    (setq sw/--initial-hooks-setup t)))
+  (setq sw/--hook-triggers
+        `((sw/first-input-hook  . (pre-command-hook . sw/--trigger-first-input))
+          (sw/first-file-hook   . (find-file-hook . sw/--trigger-first-file))
+          (sw/first-buffer-hook . (window-buffer-change-functions
+                                   . sw/--trigger-first-buffer))))
+  (dolist (entry sw/--hook-triggers)
+    (add-hook (cadr entry) (cddr entry))))
 
 (add-hook 'emacs-startup-hook #'sw/setup-initial-hooks)
 
