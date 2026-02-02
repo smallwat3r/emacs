@@ -30,17 +30,18 @@
 
   :config
   ;; Server configurations
-  (add-to-list 'eglot-server-programs
-               '((python-mode python-ts-mode) . ("basedpyright-langserver" "--stdio")))
-  (add-to-list 'eglot-server-programs
-               '((rust-mode rust-ts-mode) . ("rust-analyzer")))
-  (add-to-list 'eglot-server-programs
-               '((go-mode go-ts-mode) . ("gopls")))
-  (add-to-list 'eglot-server-programs
-               '((typescript-ts-mode js-ts-mode tsx-ts-mode)
-                 . ("typescript-language-server" "--stdio")))
-  (add-to-list 'eglot-server-programs
-               '(terraform-mode . ("terraform-ls" "serve"))))
+  (dolist (server '(((python-mode python-ts-mode)
+                     "basedpyright-langserver" "--stdio")
+                    ((rust-mode rust-ts-mode)
+                     "rust-analyzer")
+                    ((go-mode go-ts-mode)
+                     "gopls")
+                    ((typescript-ts-mode js-ts-mode tsx-ts-mode)
+                     "typescript-language-server" "--stdio")
+                    (terraform-mode
+                     "terraform-ls" "serve")))
+    (add-to-list 'eglot-server-programs
+                 (cons (car server) (cdr server)))))
 
 ;; Consult integration for eglot
 (use-package consult-eglot

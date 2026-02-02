@@ -7,11 +7,13 @@
 
 ;;; SSH config files
 
-(defvar sw/ssh-config-files
+(defcustom sw/ssh-config-files
   '("~/.ssh/config"
     "~/.ssh/work"
     "~/.ssh/private")
-  "List of user SSH config files used for TRAMP and SSH helpers.")
+  "List of user SSH config files used for TRAMP and SSH helpers."
+  :type '(repeat file)
+  :group 'sw)
 
 (add-to-list 'auto-mode-alist
              '("/\\.ssh/\\(?:work\\|private\\)\\'" . ssh-config-mode))

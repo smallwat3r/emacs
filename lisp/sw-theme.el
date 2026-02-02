@@ -9,12 +9,14 @@
 
 ;; Monospace faces
 (set-face-attribute 'fixed-pitch nil :family sw/font-family :height sw/font-height)
-(set-face-attribute 'fixed-pitch-serif nil :family sw/font-serif :height sw/font-height)
+(set-face-attribute 'fixed-pitch-serif nil
+                    :family (or sw/font-serif sw/font-family)
+                    :height sw/font-height)
 
 ;; Variable-pitch face
 (set-face-attribute 'variable-pitch nil
-                    :family sw/font-variable-pitch
-                    :height sw/font-variable-pitch-height)
+                    :family (or sw/font-variable-pitch sw/font-family)
+                    :height (or sw/font-variable-pitch-height sw/font-height))
 
 ;; Symbol and emoji fontsets
 (defun sw/setup-fontsets ()
