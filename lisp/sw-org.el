@@ -5,15 +5,15 @@
 
 ;;; Code:
 
-(defvar org-directory "~/org"
+(defvar sw/org-directory "~/org"
   "Directory for org files.")
 
 (use-package org
   :ensure nil
   :custom
   ;; Directories
-  (org-directory "~/org")
-  (org-default-notes-file (expand-file-name "notes.org" org-directory))
+  (org-directory sw/org-directory)
+  (org-default-notes-file (expand-file-name "notes.org" sw/org-directory))
 
   ;; Display
   (org-startup-indented t)
@@ -53,7 +53,7 @@
 ;; Org journal
 (use-package org-journal
   :custom
-  (org-journal-dir (expand-file-name "journal" org-directory))
+  (org-journal-dir (expand-file-name "journal" sw/org-directory))
   (org-journal-date-format "%A, %d %B %Y")
   (org-journal-file-format "%Y-%m-%d.org")
   (org-journal-file-type 'daily))
@@ -66,7 +66,7 @@
 (use-package deft
   :commands deft
   :custom
-  (deft-directory org-directory)
+  (deft-directory sw/org-directory)
   (deft-extensions '("org" "md" "txt"))
   (deft-default-extension "org")
   (deft-recursive t)
