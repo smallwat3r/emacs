@@ -8,12 +8,14 @@
 (use-package evil
   :ensure (:wait t)
   :demand t
+  :init
+  ;; These must be set BEFORE evil loads
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump t
+        evil-want-Y-yank-to-eol t)  ; Y yanks to end of line (like Doom)
   :custom
-  (evil-want-integration t)
-  (evil-want-keybinding nil)
-  (evil-want-C-u-scroll t)
-  (evil-want-C-i-jump t)
-  (evil-want-Y-yank-to-eol t)
   (evil-want-fine-undo t)
   (evil-undo-system 'undo-redo)
   (evil-symbol-word-search t)
