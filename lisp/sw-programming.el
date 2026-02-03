@@ -52,7 +52,16 @@
     (go-mode        . ("gofmt"))
     (go-ts-mode     . ("gofmt"))
     (sh-mode        . ("shfmt" "-i" "2" "-ci" "-bn" "-"))
-    (bash-ts-mode   . ("shfmt" "-i" "2" "-ci" "-bn" "-")))
+    (bash-ts-mode   . ("shfmt" "-i" "2" "-ci" "-bn" "-"))
+    (js-mode        . ("prettier" "--stdin-filepath" "file.js"))
+    (js-ts-mode     . ("prettier" "--stdin-filepath" "file.js"))
+    (typescript-ts-mode . ("prettier" "--stdin-filepath" "file.ts"))
+    (tsx-ts-mode    . ("prettier" "--stdin-filepath" "file.tsx"))
+    (c-mode         . ("clang-format"))
+    (c-ts-mode      . ("clang-format"))
+    (html-mode      . ("prettier" "--stdin-filepath" "file.html"))
+    (html-ts-mode   . ("prettier" "--stdin-filepath" "file.html"))
+    (web-mode       . ("prettier" "--stdin-filepath" "file.html")))
   "Alist mapping major modes to region formatter commands.
 Each value is a list where car is the command and cdr is the arguments.")
 
