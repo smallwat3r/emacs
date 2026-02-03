@@ -166,6 +166,15 @@ Handles combined prefixes like `rf' or `fr' correctly."
         (user-error "isort not found"))
       (apheleia-format-buffer 'isort)))))
 
+;; Pytest integration
+(use-package python-pytest
+  :commands (python-pytest
+             python-pytest-file
+             python-pytest-file-dwim
+             python-pytest-run-def-or-class-at-point
+             python-pytest-repeat
+             python-pytest-dispatch))
+
 ;; Virtual environment detection
 (use-package pet
   :hook (python-base-mode . pet-mode)
@@ -184,6 +193,13 @@ Handles combined prefixes like `rf' or `fr' correctly."
   :custom
   (go-ts-mode-indent-offset 4)
   :hook (go-ts-mode . (lambda () (setq-local indent-tabs-mode t))))
+
+;; Go test integration
+(use-package gotest
+  :commands (go-test-current-test
+             go-test-current-file
+             go-test-current-project
+             go-run))
 
 ;;; Rust
 

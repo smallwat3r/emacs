@@ -332,7 +332,26 @@
     :keymaps '(python-mode-map python-ts-mode-map)
     "f" '(sw-python-toggle-fstring :wk "Toggle f-string")
     "i" '(:ignore t :wk "Import")
-    "io" '(sw-python-isort :wk "Optimize (isort)")))
+    "io" '(sw-python-isort :wk "Optimize (isort)")
+    "t" '(:ignore t :wk "Test")
+    "tt" '(python-pytest-run-def-or-class-at-point :wk "Test at point")
+    "tf" '(python-pytest-file-dwim :wk "Test file")
+    "ta" '(python-pytest :wk "Test all")
+    "tr" '(python-pytest-repeat :wk "Repeat last")
+    "tp" '(python-pytest-dispatch :wk "Pytest dispatch")))
+
+;;; Go mode bindings
+
+(with-eval-after-load 'go-ts-mode
+  (sw-local-leader
+    :keymaps 'go-ts-mode-map
+    "t" '(:ignore t :wk "Test")
+    "tt" '(go-test-current-test :wk "Test at point")
+    "tf" '(go-test-current-file :wk "Test file")
+    "ta" '(go-test-current-project :wk "Test all")
+    "b" '(:ignore t :wk "Build")
+    "br" '((lambda () (interactive) (compile "go run .")) :wk "Run")
+    "bb" '((lambda () (interactive) (compile "go build")) :wk "Build")))
 
 ;;; Eat mode bindings
 
