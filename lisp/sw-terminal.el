@@ -295,23 +295,43 @@ For remote directories, opens a shell on the remote host."
   (interactive)
   (sw-eat-toggle t))
 
+(defun sw-eat--current-input ()
+  "Return current input in eat, or nil if empty.
+Extracts text after common prompt characters ($, #, >, ❯, →, %)."
+  (when (derived-mode-p 'eat-mode)
+    (let* ((line (buffer-substring-no-properties
+                  (line-beginning-position) (point)))
+           ;; Best guess to find start of prompt
+           (prompt-re ".*?[$#>❯→%]\\s-*")
+           (input (if (string-match prompt-re line)
+                      (substring line (match-end 0))
+                    (string-trim line))))
+      (unless (string-empty-p input) input))))
+
 (defun sw-eat-zsh-history-pick ()
-  "Prompt from zsh history and insert into eat (recency preserved)."
+  "Prompt from zsh history and insert into eat.
+Current input becomes a prefix filter (^pattern)."
   (interactive)
   (require 'eat)
   (unless (bound-and-true-p eat-terminal)
     (user-error "No eat process in current buffer"))
   (let* ((history (sw-zsh-history-candidates))
-         (collection (lambda (string pred action)
+         (collection (lambda (str pred action)
                        (if (eq action 'metadata)
-                           '(metadata
-                             (display-sort-function . identity)
-                             (cycle-sort-function . identity))
-                         (complete-with-action action history string pred))))
-         (initial (or (thing-at-point 'symbol t) ""))
-         (choice (completing-read "zsh history: " collection nil nil initial)))
-    (when (thing-at-point 'symbol)
-      (eat-term-send-string eat-terminal "\C-w"))
+                           '(metadata (display-sort-function . identity)
+                                      (cycle-sort-function . identity))
+                         (let* ((prefix-p (string-prefix-p "^" str))
+                                (pattern (if prefix-p (substring str 1) str))
+                                (candidates (if prefix-p
+                                                (seq-filter
+                                                 (lambda (h) (string-prefix-p pattern h))
+                                                 history)
+                                              history)))
+                           (complete-with-action action candidates pattern pred)))))
+         (input (sw-eat--current-input))
+         (choice (completing-read "zsh history: " collection nil nil
+                                  (if input (concat "^" input) ""))))
+    (when input (eat-term-send-string eat-terminal "\C-u"))
     (eat-term-send-string eat-terminal choice)))
 
 (defun sw-eat-project ()
