@@ -111,6 +111,7 @@
 ;; Yasnippet
 (use-package yasnippet
   :hook ((prog-mode text-mode) . yas-minor-mode)
+  :commands (yas-insert-snippet yas-expand)
   :config
   (yas-reload-all))
 
