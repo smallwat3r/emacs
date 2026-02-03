@@ -56,8 +56,28 @@
   "Alist mapping major modes to region formatter commands.
 Each value is a list where car is the command and cdr is the arguments.")
 
+(defun sw--string-min-indent (str)
+  "Return minimum indentation (spaces) of non-blank lines in STR."
+  (let ((min most-positive-fixnum))
+    (dolist (line (split-string str "\n"))
+      (when (string-match "^\\( *\\)[^ \t\n]" line)
+        (setq min (min min (length (match-string 1 line))))))
+    (if (= min most-positive-fixnum) 0 min)))
+
+(defun sw--string-reindent (str old-indent new-indent)
+  "Change indentation of STR from OLD-INDENT to NEW-INDENT spaces."
+  (let ((prefix (make-string new-indent ?\s))
+        (re (concat "^" (make-string old-indent ?\s))))
+    (mapconcat (lambda (line)
+                 (if (string-match-p "^[ \t]*$" line)
+                     line
+                   (concat prefix (replace-regexp-in-string re "" line t t))))
+               (split-string str "\n" nil)
+               "\n")))
+
 (defun sw-format-region ()
-  "Format the current region using language-specific tools or eglot."
+  "Format the current region using language-specific tools or eglot.
+For Python, handles indented code by dedenting before formatting."
   (interactive)
   (unless (use-region-p)
     (user-error "No region selected"))
@@ -69,8 +89,10 @@ Each value is a list where car is the command and cdr is the arguments.")
       (let* ((cmd (car formatter))
              (args (cdr formatter))
              (input (buffer-substring-no-properties beg end))
+             (indent (sw--string-min-indent input))
+             (dedented (sw--string-reindent input indent 0))
              (output (with-temp-buffer
-                       (insert input)
+                       (insert dedented)
                        (when (zerop (apply #'call-process-region
                                            (point-min) (point-max) cmd t t nil args))
                          (buffer-string)))))
@@ -78,7 +100,7 @@ Each value is a list where car is the command and cdr is the arguments.")
             (save-excursion
               (delete-region beg end)
               (goto-char beg)
-              (insert output)
+              (insert (sw--string-reindent output 0 indent))
               (message "Formatted region (%s)" cmd))
           (message "%s formatting failed" cmd))))
      ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
@@ -120,7 +142,17 @@ Handles combined prefixes like `rf' or `fr' correctly."
            ;; No f-prefix, add it
            (t
             (goto-char string-start)
-            (insert "f"))))))))
+            (insert "f"))))))
+
+  (defun sw-python-isort ()
+    "Run isort on the current buffer."
+    (interactive)
+    (let ((isort (or (executable-find "isort")
+                     (and (fboundp 'pet-executable-find)
+                          (pet-executable-find "isort")))))
+      (unless isort
+        (user-error "isort not found"))
+      (apheleia-format-buffer 'isort)))))
 
 ;; Virtual environment detection
 (use-package pet

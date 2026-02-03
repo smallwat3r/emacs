@@ -324,7 +324,9 @@
 (with-eval-after-load 'python
   (sw-local-leader
     :keymaps '(python-mode-map python-ts-mode-map)
-    "f" '(sw-python-toggle-fstring :wk "Toggle f-string")))
+    "f" '(sw-python-toggle-fstring :wk "Toggle f-string")
+    "i" '(:ignore t :wk "Import")
+    "io" '(sw-python-isort :wk "Optimize (isort)")))
 
 ;;; Eat mode bindings
 
