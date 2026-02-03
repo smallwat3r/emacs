@@ -66,6 +66,34 @@ Preserves *scratch* and *Messages* buffers."
               (completing-read "Email: " sw-email-addresses nil t)
             sw-email)))
 
+;;; Editing commands
+
+(defun sw-backward-kill-word ()
+  "Kill backward more gradually than `backward-kill-word'.
+Deletes one of: punctuation sequence, word (with single preceding space), or whitespace."
+  (interactive)
+  (let ((start (point)))
+    (cond
+     ;; At beginning of buffer
+     ((bobp) nil)
+     ;; Punctuation: delete punctuation sequence
+     ((looking-back "[^[:alnum:][:space:]]+" (line-beginning-position))
+      (skip-chars-backward "^[:alnum:][:space:]"))
+     ;; Multiple whitespace: delete all whitespace
+     ((looking-back "[ \t\n][ \t\n]+" (line-beginning-position))
+      (skip-chars-backward " \t\n"))
+     ;; Single space after word: delete space and word together
+     ((looking-back "[[:alnum:]_-]+ " (line-beginning-position))
+      (backward-char)
+      (skip-chars-backward "[:alnum:]_-"))
+     ;; Just whitespace
+     ((looking-back "[ \t\n]+" (line-beginning-position))
+      (skip-chars-backward " \t\n"))
+     ;; Word characters: delete word
+     (t
+      (skip-chars-backward "[:alnum:]_-")))
+    (delete-region (point) start)))
+
 ;;; Window commands
 
 (defun sw-split-window-right ()

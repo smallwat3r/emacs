@@ -40,6 +40,10 @@
   (define-key map (kbd "C-v") #'yank)
   (define-key map (kbd "C-r") #'evil-paste-from-register))
 
+;;; Global editing bindings
+
+(global-set-key (kbd "C-<backspace>") #'sw-backward-kill-word)
+
 ;;; Leader key bindings
 
 (sw-leader
