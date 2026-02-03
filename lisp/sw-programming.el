@@ -94,6 +94,9 @@ For Python, handles indented code by dedenting before formatting."
          (end (region-end))
          (formatter (alist-get major-mode sw-region-formatters)))
     (cond
+     ((derived-mode-p 'emacs-lisp-mode 'lisp-mode)
+      (indent-region beg end)
+      (message "Formatted region (indent-region)"))
      (formatter
       (let* ((cmd (car formatter))
              (args (cdr formatter))
