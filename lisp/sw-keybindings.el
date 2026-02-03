@@ -30,13 +30,15 @@
        ,(concat p "v") '(sw-split-window-right :wk "Split right")
        ,(concat p "s") '(sw-split-window-below :wk "Split below"))))
 
-;;; Escape quits minibuffer
+;;; Minibuffer bindings
 
 (dolist (map (list minibuffer-local-map
                    minibuffer-local-ns-map
                    minibuffer-local-completion-map
                    minibuffer-local-must-match-map))
-  (define-key map [escape] #'abort-recursive-edit))
+  (define-key map [escape] #'abort-recursive-edit)
+  (define-key map (kbd "C-v") #'yank)
+  (define-key map (kbd "C-r") #'evil-paste-from-register))
 
 ;;; Leader key bindings
 
