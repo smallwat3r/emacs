@@ -131,20 +131,6 @@ LIMIT defaults to 10000."
     (when (bound-and-true-p eat-terminal)
       (eat-term-send-string eat-terminal "\C-c")))
 
-  ;; Keybindings for semi-char mode
-  (define-key eat-semi-char-mode-map (kbd "<escape>") #'evil-normal-state)
-  (define-key eat-semi-char-mode-map (kbd "C-<backspace>") #'sw-eat-backward-kill-word)
-  (define-key eat-semi-char-mode-map (kbd "M-<backspace>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "M-d") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "M-f") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "M-b") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-<left>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-<right>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-k") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-j") #'eat-self-input)
-  (define-key eat-semi-char-mode-map (kbd "C-y") #'sw-eat-yank)
-  (define-key eat-semi-char-mode-map (kbd "C-,") #'sw-eat-zsh-history-pick)
-
   ;; TRAMP integration: rename buffer, inject `e` function to open remote files
   (defun sw-eat-find-file-handler (path)
     "Open PATH in another window."

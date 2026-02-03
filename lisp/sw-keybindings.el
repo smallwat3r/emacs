@@ -349,7 +349,42 @@
   (general-define-key
    :keymaps 'eat-mode-map
    :states '(normal insert)
+   "C-," 'sw-eat-zsh-history-pick)
+
+  ;; Semi-char mode bindings
+  (general-define-key
+   :keymaps 'eat-semi-char-mode-map
+   "<escape>" 'evil-normal-state
+   "C-<backspace>" 'sw-eat-backward-kill-word
+   "M-<backspace>" 'eat-self-input
+   "M-d" 'eat-self-input
+   "M-f" 'eat-self-input
+   "M-b" 'eat-self-input
+   "C-<left>" 'eat-self-input
+   "C-<right>" 'eat-self-input
+   "C-k" 'eat-self-input
+   "C-j" 'eat-self-input
+   "C-y" 'sw-eat-yank
    "C-," 'sw-eat-zsh-history-pick))
+
+;;; Dired mode bindings
+
+(with-eval-after-load 'dired
+  (general-define-key
+   :keymaps 'dired-mode-map
+   :states 'normal
+   "TAB" 'dired-subtree-toggle
+   "<backtab>" 'dired-subtree-remove
+   "/" 'dired-narrow-fuzzy))
+
+;;; Git timemachine bindings
+
+(with-eval-after-load 'git-timemachine
+  (general-define-key
+   :keymaps 'git-timemachine-mode-map
+   :states 'normal
+   "C-n" 'git-timemachine-show-previous-revision
+   "C-a" 'git-timemachine-show-next-revision))
 
 ;;; Deft mode bindings
 

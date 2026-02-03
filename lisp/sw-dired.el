@@ -43,15 +43,5 @@
 (use-package dired-narrow
   :after dired)
 
-;; Evil keybindings for dired extensions
-(with-eval-after-load 'evil
-  (with-eval-after-load 'dired-subtree
-    (evil-define-key 'normal dired-mode-map
-      (kbd "TAB") #'dired-subtree-toggle
-      (kbd "<backtab>") #'dired-subtree-remove))
-  (with-eval-after-load 'dired-narrow
-    (evil-define-key 'normal dired-mode-map
-      "/" #'dired-narrow-fuzzy)))
-
 (provide 'sw-dired)
 ;;; sw-dired.el ends here

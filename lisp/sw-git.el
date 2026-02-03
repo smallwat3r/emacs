@@ -81,12 +81,7 @@
 
 ;; Git time machine
 (use-package git-timemachine
-  :commands git-timemachine
-  :config
-  ;; C-n, C-a navigation matches custom keyboard layout (up/down)
-  (evil-define-key 'normal git-timemachine-mode-map
-    (kbd "C-n") #'git-timemachine-show-previous-revision
-    (kbd "C-a") #'git-timemachine-show-next-revision))
+  :commands git-timemachine)
 
 ;; Git modes for config files
 (use-package git-modes)
