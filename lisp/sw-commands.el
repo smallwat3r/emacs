@@ -70,28 +70,35 @@ Preserves *scratch* and *Messages* buffers."
 
 (defun sw-backward-kill-word ()
   "Kill backward more gradually than `backward-kill-word'.
-Deletes one of: punctuation sequence, word (with single preceding space), or whitespace."
+Stops at word boundaries including underscores and hyphens within identifiers."
   (interactive)
   (let ((start (point)))
     (cond
      ;; At beginning of buffer
      ((bobp) nil)
-     ;; Punctuation: delete punctuation sequence
-     ((looking-back "[^[:alnum:][:space:]]+" (line-beginning-position))
-      (skip-chars-backward "^[:alnum:][:space:]"))
+     ;; Trailing underscore/hyphen after word: delete with the word
+     ((looking-back "[[:alnum:]]+[_-]+" (line-beginning-position))
+      (skip-chars-backward "_-")
+      (skip-chars-backward "[:alnum:]"))
+     ;; Underscore/hyphen between words: delete just the separator
+     ((looking-back "[_-]+" (line-beginning-position))
+      (skip-chars-backward "_-"))
+     ;; Other punctuation: delete punctuation sequence
+     ((looking-back "[^[:alnum:][:space:]_-]+" (line-beginning-position))
+      (skip-chars-backward "^[:alnum:][:space:]_-"))
      ;; Multiple whitespace: delete all whitespace
      ((looking-back "[ \t\n][ \t\n]+" (line-beginning-position))
       (skip-chars-backward " \t\n"))
      ;; Single space after word: delete space and word together
-     ((looking-back "[[:alnum:]_-]+ " (line-beginning-position))
+     ((looking-back "[[:alnum:]]+ " (line-beginning-position))
       (backward-char)
-      (skip-chars-backward "[:alnum:]_-"))
+      (skip-chars-backward "[:alnum:]"))
      ;; Just whitespace
      ((looking-back "[ \t\n]+" (line-beginning-position))
       (skip-chars-backward " \t\n"))
-     ;; Word characters: delete word
+     ;; Word characters: delete word (stop at _ and -)
      (t
-      (skip-chars-backward "[:alnum:]_-")))
+      (skip-chars-backward "[:alnum:]")))
     (delete-region (point) start)))
 
 ;;; Window commands
