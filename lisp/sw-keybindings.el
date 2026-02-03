@@ -26,9 +26,9 @@
        ,(concat p "n") '(evil-window-down :wk "Window down")
        ,(concat p "a") '(evil-window-up :wk "Window up")
        ,(concat p "e") '(evil-window-right :wk "Window right")
-       ;; Splits
-       ,(concat p "v") '(split-window-right :wk "Split right")
-       ,(concat p "s") '(split-window-below :wk "Split below"))))
+       ;; Splits (auto-select new window)
+       ,(concat p "v") '(sw-split-window-right :wk "Split right")
+       ,(concat p "s") '(sw-split-window-below :wk "Split below"))))
 
 ;;; Escape quits minibuffer
 

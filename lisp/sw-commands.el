@@ -66,5 +66,17 @@ Preserves *scratch* and *Messages* buffers."
               (completing-read "Email: " sw-email-addresses nil t)
             sw-email)))
 
+;;; Window commands
+
+(defun sw-split-window-right ()
+  "Split window right and select the new window."
+  (interactive)
+  (select-window (split-window-right)))
+
+(defun sw-split-window-below ()
+  "Split window below and select the new window."
+  (interactive)
+  (select-window (split-window-below)))
+
 (provide 'sw-commands)
 ;;; sw-commands.el ends here
