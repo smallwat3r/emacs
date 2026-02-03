@@ -245,6 +245,7 @@
   "it" '(sw-insert-datetime :wk "Datetime")
   "ie" '(sw-insert-email :wk "Email")
   "iy" '(consult-yank-pop :wk "From kill ring")
+  "is" '(yas-insert-snippet :wk "Snippet")
 
   ;; Notes
   "n" '(:ignore t :wk "Notes")
