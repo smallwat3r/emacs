@@ -19,19 +19,19 @@
 
 (defun sw-tailscale--devices ()
   "Return alist of Tailscale devices as (name . ip)."
-  (when (executable-find "tailscale")
-    (let ((json (shell-command-to-string "tailscale status --json 2>/dev/null")))
-      (when (and json (not (string-empty-p json)))
-        (let* ((data (json-parse-string json :object-type 'alist))
+  (sw-tailscale--with-cli
+    (condition-case nil
+        (let* ((json (shell-command-to-string "tailscale status --json 2>/dev/null"))
+               (data (json-parse-string json :object-type 'alist))
                (peers (alist-get 'Peer data)))
           (mapcar (lambda (peer)
                     (let* ((info (cdr peer))
                            (dns (alist-get 'DNSName info))
                            (name (car (split-string dns "\\.")))
-                           (ips (alist-get 'TailscaleIPs info))
-                           (ip (aref ips 0)))
+                           (ip (aref (alist-get 'TailscaleIPs info) 0)))
                       (cons name ip)))
-                  peers))))))
+                  peers))
+      (error nil))))
 
 (defun sw-tailscale-switch (account)
   "Switch Tailscale to ACCOUNT (alias from `sw-tailscale-accounts')."
@@ -52,12 +52,13 @@
   "Show Tailscale status."
   (interactive)
   (sw-tailscale--with-cli
-    (let ((status (shell-command-to-string "tailscale status")))
-      (with-current-buffer (get-buffer-create "*tailscale-status*")
+    (with-current-buffer (get-buffer-create "*tailscale-status*")
+      (let ((inhibit-read-only t))
         (erase-buffer)
-        (insert status)
-        (goto-char (point-min))
-        (pop-to-buffer (current-buffer))))))
+        (insert (shell-command-to-string "tailscale status")))
+      (goto-char (point-min))
+      (special-mode)
+      (pop-to-buffer (current-buffer)))))
 
 (defun sw-tailscale-ssh ()
   "Select a Tailscale device and connect via TRAMP."
