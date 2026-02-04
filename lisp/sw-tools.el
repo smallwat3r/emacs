@@ -23,6 +23,11 @@
 (use-package restart-emacs
   :commands restart-emacs)
 
+;;; Sudo edit
+
+(use-package sudo-edit
+  :commands (sudo-edit sudo-edit-find-file))
+
 ;;; PDF viewing
 
 (use-package pdf-tools
