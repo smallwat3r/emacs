@@ -291,6 +291,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
   :ensure (:wait t)
   :demand t
   :config
+  (setq editorconfig-exclude-modes '(tramp-mode))
   (editorconfig-mode 1))
 
 (provide 'sw-programming)
