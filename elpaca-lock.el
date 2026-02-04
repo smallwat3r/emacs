@@ -678,9 +678,9 @@
                     :fetcher github :source "elpaca-menu-lock-file" :protocol https :inherit t
                     :depth treeless :ref "c6f6d0674cfeb4374a77dde5e5f899e0fe62dd32"))
  (warm-mode :source "elpaca-menu-lock-file" :recipe
-            (:source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :host github
-                     :repo "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
-                     "d1787b7e86b3e0985fa441074047ad899b295a2f"))
+            (:source nil :protocol https :inherit t :depth treeless :host github :repo
+                     "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
+                     "3be9d7619b7a10fb15338786092f4179440018c6"))
  (web-mode :source "elpaca-menu-lock-file" :recipe
            (:package "web-mode" :repo "fxbois/web-mode" :fetcher github :files
                      ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
