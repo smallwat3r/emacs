@@ -37,14 +37,6 @@
   (dolist (hook '(magit-mode-hook so-long-minor-mode-hook))
     (add-hook hook #'sw-slow-down-evil-highlighting))
 
-  ;; Cursor colors by state
-  (setq evil-default-state-cursor  '(box "cyan3")
-        evil-normal-state-cursor   '(box "cyan3")
-        evil-insert-state-cursor   '(bar "green3")
-        evil-visual-state-cursor   '(box "OrangeRed2")
-        evil-replace-state-cursor  '(hbar "red2")
-        evil-operator-state-cursor '(box "red2")))
-
 ;; Evil keybindings for many modes
 (use-package evil-collection
   :ensure (:wait t)
