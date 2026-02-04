@@ -1,7 +1,7 @@
-;;; sw-modeline.el --- Custom modeline -*- lexical-binding: t -*-
+;;; sw-modeline.el --- Frame title info -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Custom modeline with buffer count, position, and VC info.
+;; Display buffer info in frame title, no modeline.
 
 ;;; Code:
 
@@ -50,32 +50,42 @@
   "Return the count of workspace buffers."
   (car (sw--buffer-counts)))
 
-;; Custom mode-line format
-(setq-default mode-line-format
-              '("%e"
-                " "
-                mode-line-modified
-                mode-line-remote
-                " "
-                mode-line-buffer-identification
-                "  "
-                "%p %l,%c"
-                "  "
-                (:eval (format "%d:%d"
-                               (sw-number-of-workspace-buffers)
-                               (sw-number-of-buffers)))
-                mode-line-format-right-align
-                (:eval (when vc-mode
-                         (propertize (substring vc-mode 1) 'face 'bold)))
-                "  "
-                mode-name
-                " "))
+;; Frame title with position info
+(defun sw--frame-title ()
+  "Return frame title string."
+  (format "%s%s  %s %s,%d"
+          (if (buffer-modified-p) "** " "")
+          (buffer-name)
+          (format-mode-line "%p")
+          (format-mode-line "%l")
+          (current-column)))
 
-;; Orange modeline for active window
+(defun sw--update-frame-title ()
+  "Update frame title with current position."
+  (set-frame-parameter nil 'name (sw--frame-title)))
+
+(add-hook 'post-command-hook #'sw--update-frame-title)
+
+;; Minimal modeline as colored border, hidden when single window
+(defun sw--update-mode-line-visibility ()
+  "Show mode-line only when frame has multiple windows."
+  (let ((fmt (if (> (count-windows) 1) " " nil)))
+    (dolist (win (window-list))
+      (with-selected-window win
+        (unless (eq mode-line-format fmt)
+          (setq mode-line-format fmt))))))
+
+(add-hook 'window-configuration-change-hook #'sw--update-mode-line-visibility)
+
 (set-face-attribute 'mode-line nil
-                    :background "#ffb86c"
-                    :foreground "#1a1a1a"
-                    :weight 'bold)
+                    :background "#e63946"
+                    :box nil
+                    :height 0.1)
+
+(set-face-attribute 'mode-line-inactive nil
+                    :background "#333333"
+                    :box nil
+                    :height 0.1)
 
 (provide 'sw-modeline)
 ;;; sw-modeline.el ends here

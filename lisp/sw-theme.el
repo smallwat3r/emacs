@@ -35,8 +35,8 @@
 (setq-default line-spacing 2)
 
 ;;; Frame appearance
-(setq-default left-fringe-width 8
-              right-fringe-width 8)
+(setq-default left-fringe-width 0
+              right-fringe-width 0)
 
 ;; Window dividers
 (setq window-divider-default-places t
