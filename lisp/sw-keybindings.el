@@ -100,6 +100,8 @@
   "fr" '(consult-recent-file :wk "Recent files")
   "fs" '(save-buffer :wk "Save file")
   "fS" '(write-file :wk "Save file as")
+  "fu" '(sw-sudo-this-file :wk "Sudo this file")
+  "fU" '(sw-sudo-save-buffer :wk "Sudo save")
   "fD" '(sw-delete-this-file :wk "Delete this file")
   "fy" '(sw-copy-file-path :wk "Yank file path")
   "f." '(sw-workspace-find-dotfiles :wk "Find in dotfiles")

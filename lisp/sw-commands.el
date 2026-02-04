@@ -7,6 +7,35 @@
 
 ;;; Buffer/File commands
 
+(defun sw--sudo-file-path (file)
+  "Return TRAMP path for FILE with sudo access."
+  (let ((host (or (file-remote-p file 'host) "localhost")))
+    (concat "/" (when (file-remote-p file)
+                  (concat (file-remote-p file 'method) ":"
+                          (if-let* ((user (file-remote-p file 'user)))
+                              (concat user "@" host)
+                            host)
+                          "|"))
+            "sudo:root@" host
+            ":" (or (file-remote-p file 'localname)
+                    file))))
+
+(defun sw-sudo-this-file ()
+  "Open the current file as root."
+  (interactive)
+  (let ((file (or (buffer-file-name (buffer-base-buffer))
+                  (when (derived-mode-p 'dired-mode 'wdired-mode)
+                    default-directory)
+                  (user-error "Current buffer isn't visiting a file"))))
+    (find-file (sw--sudo-file-path (expand-file-name file)))))
+
+(defun sw-sudo-save-buffer ()
+  "Save this file as root."
+  (interactive)
+  (let ((file (sw--sudo-file-path (buffer-file-name (buffer-base-buffer)))))
+    (write-region (point-min) (point-max) file)
+    (set-visited-file-name file t t)))
+
 (defun sw-show-buffer-path ()
   "Show current buffer file path or buffer name."
   (interactive)
