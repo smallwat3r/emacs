@@ -81,7 +81,10 @@
 
 ;; Git time machine
 (use-package git-timemachine
-  :commands git-timemachine)
+  :commands git-timemachine
+  :config
+  ;; Rehash evil keybindings so they are recognized
+  (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
 
 ;; Git modes for config files
 (use-package git-modes)
