@@ -43,6 +43,8 @@
 ;;; Global editing bindings
 
 (global-set-key (kbd "C-<backspace>") #'sw-backward-kill-word)
+(when (eq system-type 'darwin)
+  (global-set-key (kbd "A-<backspace>") #'sw-backward-kill-word))
 
 ;;; Leader key bindings
 
