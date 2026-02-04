@@ -172,7 +172,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
            ;; No f-prefix, add it
            (t
             (goto-char string-start)
-            (insert "f"))))))
+            (insert "f")))))))
 
   (defun sw-python-isort ()
     "Run isort on the current buffer."
@@ -182,7 +182,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
                           (pet-executable-find "isort")))))
       (unless isort
         (user-error "isort not found"))
-      (apheleia-format-buffer 'isort)))))
+      (apheleia-format-buffer 'isort))))
 
 ;; Pytest integration
 (use-package python-pytest
