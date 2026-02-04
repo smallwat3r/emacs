@@ -125,7 +125,7 @@
     :prefix "SPC m"
     :global-prefix "C-SPC m"))
 
-;; Which-key for discoverability (built-in since Emacs 30)
+;; Which-key for discoverability
 (use-package which-key
   :ensure nil
   :hook (sw-first-input . which-key-mode)
