@@ -70,36 +70,32 @@ Preserves *scratch* and *Messages* buffers."
 
 (defun sw-backward-kill-word ()
   "Kill backward more gradually than `backward-kill-word'.
-Stops at word boundaries including underscores and hyphens within identifiers."
+Stops at word boundaries including underscores and hyphens."
   (interactive)
-  (let ((start (point)))
-    (cond
-     ;; At beginning of buffer
-     ((bobp) nil)
-     ;; Trailing underscore/hyphen after word: delete with the word
-     ((looking-back "[[:alnum:]]+[_-]+" (line-beginning-position))
-      (skip-chars-backward "_-")
-      (skip-chars-backward "[:alnum:]"))
-     ;; Underscore/hyphen between words: delete just the separator
-     ((looking-back "[_-]+" (line-beginning-position))
-      (skip-chars-backward "_-"))
-     ;; Other punctuation: delete punctuation sequence
-     ((looking-back "[^[:alnum:][:space:]_-]+" (line-beginning-position))
-      (skip-chars-backward "^[:alnum:][:space:]_-"))
-     ;; Multiple whitespace: delete all whitespace
-     ((looking-back "[ \t\n][ \t\n]+" (line-beginning-position))
-      (skip-chars-backward " \t\n"))
-     ;; Single space after word: delete space and word together
-     ((looking-back "[[:alnum:]]+ " (line-beginning-position))
-      (backward-char)
-      (skip-chars-backward "[:alnum:]"))
-     ;; Just whitespace
-     ((looking-back "[ \t\n]+" (line-beginning-position))
-      (skip-chars-backward " \t\n"))
-     ;; Word characters: delete word (stop at _ and -)
-     (t
-      (skip-chars-backward "[:alnum:]")))
-    (delete-region (point) start)))
+  (let* ((start (point))
+        (end (save-excursion
+               (cond
+                ((bobp) (point))
+                ;; Whitespace: delete it, and following word if single space
+                ((looking-back "[ \t\n]" (1- (point)))
+                 (skip-chars-backward " \t\n")
+                 (when (and (= (- start (point)) 1)
+                            (looking-back "[[:alnum:]]" (1- (point))))
+                   (skip-chars-backward "[:alnum:]"))
+                 (point))
+                ;; Underscores/hyphens: delete them
+                ((looking-back "[_-]+" (line-beginning-position))
+                 (skip-chars-backward "_-")
+                 (point))
+                ;; Punctuation: delete sequence
+                ((looking-back "[^[:alnum:][:space:]_-]" (1- (point)))
+                 (skip-chars-backward "^[:alnum:][:space:]_-")
+                 (point))
+                ;; Word: stop at separators
+                (t
+                 (skip-chars-backward "[:alnum:]")
+                 (point))))))
+    (kill-region end start)))
 
 ;;; Window commands
 
