@@ -11,29 +11,11 @@
                                 "LICENSE" "README*" "*-pkg.el"))
                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
                      "e1ef5dad75fa502d761f70d9ddf1aeb1c423f41d"))
- (anzu :source "elpaca-menu-lock-file" :recipe
-       (:package "anzu" :fetcher github :repo "emacsorphanage/anzu" :files
-                 ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                  "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info" "docs/*.texi"
-                  "docs/*.texinfo"
-                  (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el" "LICENSE"
-                            "README*" "*-pkg.el"))
-                 :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
-                 "21cb5ab2295614372cb9f1a21429381e49a6255f"))
  (apheleia :source "elpaca-menu-lock-file" :recipe
            (:package "apheleia" :fetcher github :repo "radian-software/apheleia" :files
                      (:defaults ("scripts" "scripts/formatters")) :source "elpaca-menu-lock-file"
                      :protocol https :inherit t :depth treeless :wait t :ref
                      "143c1dffed15f1cab3eb06e148fe11224e39471c"))
- (async :source "elpaca-menu-lock-file" :recipe
-        (:package "async" :repo "jwiegley/emacs-async" :fetcher github :files
-                  ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                   "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info" "docs/*.texi"
-                   "docs/*.texinfo"
-                   (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                             "LICENSE" "README*" "*-pkg.el"))
-                  :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
-                  "31cb2fea8f4bc7a593acd76187a89075d8075500"))
  (browse-at-remote :source "elpaca-menu-lock-file" :recipe
                    (:package "browse-at-remote" :repo "rmuslimov/browse-at-remote" :fetcher github
                              :files
@@ -222,15 +204,6 @@
                  (:defaults "doc/build/texinfo/evil.texi" (:exclude "evil-test-helpers.el")) :source
                  "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :wait t :ref
                  "729d9a58b387704011a115c9200614e32da3cefc"))
- (evil-anzu :source "elpaca-menu-lock-file" :recipe
-            (:package "evil-anzu" :fetcher github :repo "emacsorphanage/evil-anzu" :files
-                      ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                       "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info"
-                       "docs/*.texi" "docs/*.texinfo"
-                       (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                 "LICENSE" "README*" "*-pkg.el"))
-                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
-                      :wait t :ref "7309650425797420944075c9c1556c7c1ff960b3"))
  (evil-collection :source "elpaca-menu-lock-file" :recipe
                   (:package "evil-collection" :fetcher github :repo "emacs-evil/evil-collection"
                             :files (:defaults "modes") :source "elpaca-menu-lock-file" :protocol
@@ -550,15 +523,6 @@
            (:package "pinentry" :repo ("https://github.com/ueno/pinentry-el.git" . "pinentry")
                      :files ("*" (:exclude ".git")) :source "elpaca-menu-lock-file" :protocol https
                      :inherit t :depth treeless :ref "0079964a1dde954ccb2ce8a28613d8020c549a36"))
- (posframe :source "elpaca-menu-lock-file" :recipe
-           (:package "posframe" :fetcher github :repo "tumashu/posframe" :files
-                     ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                      "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info"
-                      "docs/*.texi" "docs/*.texinfo"
-                      (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                "LICENSE" "README*" "*-pkg.el"))
-                     :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
-                     "4fc893c3c9ea3f6b5099ac1b369abb3c6da40b1e"))
  (python-pytest :source "elpaca-menu-lock-file" :recipe
                 (:package "python-pytest" :fetcher github :repo "wbolster/emacs-python-pytest"
                           :files
@@ -608,8 +572,8 @@
                        "docs/*.texi" "docs/*.texinfo"
                        (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
                                  "LICENSE" "README*" "*-pkg.el"))
-                      :source "MELPA" :protocol https :inherit t :depth treeless :ref
-                      "74eb1e6986461baed9a9269566ff838530b4379b"))
+                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
+                      :ref "74eb1e6986461baed9a9269566ff838530b4379b"))
  (symbol-overlay :source "elpaca-menu-lock-file" :recipe
                  (:package "symbol-overlay" :fetcher github :repo "wolray/symbol-overlay" :files
                            ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
