@@ -1,7 +1,7 @@
 ;;; sw-eglot.el --- Eglot configuration -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Eglot LSP client configuration (built-in since Emacs 29).
+;; Eglot LSP client configuration
 
 ;;; Code:
 

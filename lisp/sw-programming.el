@@ -5,7 +5,7 @@
 
 ;;; Code:
 
-;;; Tree-sitter (built-in since Emacs 29)
+;;; Tree-sitter
 
 (use-package treesit
   :ensure nil
@@ -295,7 +295,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 (use-package terraform-mode
   :mode "\\.tf\\'")
 
-;;; Misc modes
+;;; Misc
 
 (use-package lua-mode
   :mode "\\.lua\\'")
