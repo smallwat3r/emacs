@@ -1,72 +1,31 @@
-;;; sw-modeline.el --- Frame title info -*- lexical-binding: t -*-
+;;; sw-modeline.el --- Echo area info -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Display buffer info in frame title, no modeline.
+;; Display buffer info in echo area, minimal modeline as window border.
 
 ;;; Code:
 
-(require 'sw-workspaces)
+;; Echo area info display
+(defun sw--update-echo-area ()
+  "Update echo area with buffer info."
+  (unless (active-minibuffer-window)
+    (let* ((info (format "%s%s  %s %s,%d"
+                         (if (buffer-modified-p) "** " "")
+                         (buffer-name)
+                         (format-mode-line "%p")
+                         (format-mode-line "%l")
+                         (current-column)))
+           (cur (or (current-message) ""))
+           (padding (- (frame-width) (length cur) (length info) 1))
+           (msg (concat cur (make-string (max 1 padding) ?\s) info)))
+      (let ((message-log-max nil))
+        (message "%s" msg)))))
 
-;; Show counter while in search modes
-(use-package evil-anzu
-  :ensure (:wait t)
-  :after evil
-  :demand t
-  :config
-  (global-anzu-mode 1))
+(add-hook 'post-command-hook #'sw--update-echo-area)
 
-;; Buffer count
-(defvar sw--buffer-count-cache nil
-  "Cached (workspace . total) buffer counts.")
 
-(defvar sw--buffer-count-tick 0
-  "Tick to invalidate buffer count cache.")
-
-(defun sw--invalidate-buffer-count ()
-  "Mark buffer count cache as stale."
-  (cl-incf sw--buffer-count-tick))
-
-(add-hook 'kill-buffer-hook #'sw--invalidate-buffer-count)
-(add-hook 'find-file-hook #'sw--invalidate-buffer-count)
-
-(defun sw--buffer-counts ()
-  "Return (workspace . total) buffer counts, cached per tick."
-  (unless (eq (car sw--buffer-count-cache) sw--buffer-count-tick)
-    (setq sw--buffer-count-cache
-          (cons sw--buffer-count-tick
-                (cons (length (sw-workspace-buffer-list))
-                      (cl-count-if
-                       (lambda (b)
-                         (or (buffer-file-name b)
-                             (not (string-prefix-p " " (buffer-name b)))))
-                       (buffer-list))))))
-  (cdr sw--buffer-count-cache))
-
-(defun sw-number-of-buffers ()
-  "Return the count of user-visible buffers."
-  (cdr (sw--buffer-counts)))
-
-(defun sw-number-of-workspace-buffers ()
-  "Return the count of workspace buffers."
-  (car (sw--buffer-counts)))
-
-;; Frame title with position info
-(defun sw--frame-title ()
-  "Return frame title string."
-  (format "%s%s  %s %s,%d"
-          (if (buffer-modified-p) "** " "")
-          (buffer-name)
-          (format-mode-line "%p")
-          (format-mode-line "%l")
-          (current-column)))
-
-(defun sw--update-frame-title ()
-  "Update frame title with current position."
-  (set-frame-parameter nil 'name (sw--frame-title)))
-
-(add-hook 'post-command-hook #'sw--update-frame-title)
-
-;; Minimal modeline as colored border, hidden when single window
+;; Modeline is only used to distinguish active window via color.
+;; Hide it when there's only one window since there's nothing to distinguish.
 (defun sw--update-mode-line-visibility ()
   "Show mode-line only when frame has multiple windows."
   (let ((fmt (if (> (count-windows) 1) " " nil)))
