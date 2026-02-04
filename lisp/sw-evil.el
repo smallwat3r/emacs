@@ -132,7 +132,12 @@
   :custom
   (which-key-idle-delay 0.3)
   (which-key-idle-secondary-delay 0.05)
-  (which-key-add-column-padding 0))
+  (which-key-separator "  ")
+  (which-key-add-column-padding 2)
+  (which-key-max-display-columns 4)
+  (which-key-sort-order 'which-key-key-order)
+  :config
+  (set-face-attribute 'which-key-key-face nil :weight 'bold))
 
 (provide 'sw-evil)
 ;;; sw-evil.el ends here

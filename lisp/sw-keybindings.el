@@ -176,6 +176,10 @@
   "g[" '(diff-hl-previous-hunk :wk "Previous hunk")
   "g]" '(diff-hl-next-hunk :wk "Next hunk")
 
+  ;; Help
+  "h" '(:ignore t :wk "Help")
+  "hr" '(restart-emacs :wk "Restart Emacs")
+
   ;; Toggle
   "t" '(:ignore t :wk "Toggle")
   "tt" '(toggle-truncate-lines :wk "Truncate lines")
