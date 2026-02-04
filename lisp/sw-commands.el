@@ -70,7 +70,8 @@ Preserves *scratch* and *Messages* buffers."
 
 (defun sw-backward-kill-word ()
   "Kill backward more gradually than `backward-kill-word'.
-Stops at word boundaries including underscores and hyphens."
+Stops at word boundaries including underscores and hyphens.
+When deleting single space, also deletes trailing symbol and word."
   (interactive)
   (let* ((start (point))
         (end (save-excursion
@@ -79,17 +80,24 @@ Stops at word boundaries including underscores and hyphens."
                 ;; Whitespace: delete it, and following word if single space
                 ((looking-back "[ \t\n]" (1- (point)))
                  (skip-chars-backward " \t\n")
-                 (when (and (= (- start (point)) 1)
-                            (looking-back "[[:alnum:]]" (1- (point))))
-                   (skip-chars-backward "[:alnum:]"))
+                 (when (= (- start (point)) 1)
+                   ;; Single space: delete trailing symbol if any, then word
+                   (when (looking-back "[^[:alnum:][:space:]]" (1- (point)))
+                     (skip-chars-backward "^[:alnum:][:space:]"))
+                   (when (looking-back "[[:alnum:]]" (1- (point)))
+                     (skip-chars-backward "[:alnum:]")))
                  (point))
-                ;; Underscores/hyphens: delete them
+                ;; Underscores/hyphens: delete them and preceding word
                 ((looking-back "[_-]+" (line-beginning-position))
                  (skip-chars-backward "_-")
+                 (when (looking-back "[[:alnum:]]" (1- (point)))
+                   (skip-chars-backward "[:alnum:]"))
                  (point))
-                ;; Punctuation: delete sequence
+                ;; Punctuation: delete sequence and preceding word
                 ((looking-back "[^[:alnum:][:space:]_-]" (1- (point)))
                  (skip-chars-backward "^[:alnum:][:space:]_-")
+                 (when (looking-back "[[:alnum:]]" (1- (point)))
+                   (skip-chars-backward "[:alnum:]"))
                  (point))
                 ;; Word: stop at separators
                 (t
