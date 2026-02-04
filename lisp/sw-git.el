@@ -73,8 +73,11 @@
   :hook (sw-first-file . global-diff-hl-mode)
   :custom
   (diff-hl-draw-borders nil)
+  (diff-hl-show-staged-changes nil)
   :config
   (diff-hl-flydiff-mode 1)
+  ;; Show deleted lines indicator in margin (more visible than fringe)
+  (diff-hl-margin-mode 1)
   ;; Integration with magit
   (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
