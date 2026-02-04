@@ -115,20 +115,20 @@ Stops at word boundaries including underscores and hyphens."
   "Current font size in points. Initialized from sw-font-size.")
 
 (defun sw-text-scale-increase ()
-  "Increase font size globally by 1pt."
+  "Increase font size globally by 2pt."
   (interactive)
   (unless sw--current-font-size
     (setq sw--current-font-size sw-font-size))
-  (setq sw--current-font-size (1+ sw--current-font-size))
+  (setq sw--current-font-size (+ sw--current-font-size 2))
   (set-face-attribute 'default nil :height (* sw--current-font-size 10))
   (message "Font size: %dpt" sw--current-font-size))
 
 (defun sw-text-scale-decrease ()
-  "Decrease font size globally by 1pt."
+  "Decrease font size globally by 2pt."
   (interactive)
   (unless sw--current-font-size
     (setq sw--current-font-size sw-font-size))
-  (setq sw--current-font-size (max 8 (1- sw--current-font-size)))
+  (setq sw--current-font-size (max 8 (- sw--current-font-size 2)))
   (set-face-attribute 'default nil :height (* sw--current-font-size 10))
   (message "Font size: %dpt" sw--current-font-size))
 
