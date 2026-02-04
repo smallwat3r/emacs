@@ -32,14 +32,3 @@ $ make
   link       Symlink this directory to ~/.emacs.d
   clean      Remove all installed packages
 ```
-
-## Testing
-
-Test startup time with:
-
-```
-./test-startup.el        # default 1s threshold
-./test-startup.el 0.5    # custom threshold
-```
-
-Shows per-module breakdown and fails if total exceeds threshold.
