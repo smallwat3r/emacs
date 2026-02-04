@@ -270,8 +270,8 @@
                        "docs/*.texi" "docs/*.texinfo"
                        (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
                                  "LICENSE" "README*" "*-pkg.el"))
-                      :source "MELPA" :protocol https :inherit t :depth treeless :wait t :ref
-                      "5a0bca151466960e090d1803c4c5ded88875f90a"))
+                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
+                      :wait t :ref "5a0bca151466960e090d1803c4c5ded88875f90a"))
  (evil-nerd-commenter :source "elpaca-menu-lock-file" :recipe
                       (:package "evil-nerd-commenter" :fetcher github :repo
                                 "redguardtoo/evil-nerd-commenter" :files
@@ -363,7 +363,7 @@
                     "docs/*.texinfo"
                     (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
                               "LICENSE" "README*" "*-pkg.el"))
-                   :source "MELPA" :protocol https :inherit t :depth treeless :ref
+                   :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
                    "490189e68d743a851bfb42d0017428a7550e8615"))
  (goto-chg :source "elpaca-menu-lock-file" :recipe
            (:package "goto-chg" :repo "emacs-evil/goto-chg" :fetcher github :files
@@ -585,8 +585,8 @@
                            "docs/*.info" "docs/*.texi" "docs/*.texinfo"
                            (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
                                      "LICENSE" "README*" "*-pkg.el"))
-                          :source "MELPA" :protocol https :inherit t :depth treeless :ref
-                          "78b5ea1d19c7e365ac00649d13c733954b11f822"))
+                          :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
+                          :ref "78b5ea1d19c7e365ac00649d13c733954b11f822"))
  (rainbow-delimiters :source "elpaca-menu-lock-file" :recipe
                      (:package "rainbow-delimiters" :fetcher github :repo
                                "Fanael/rainbow-delimiters" :files
@@ -677,6 +677,10 @@
           (:package "vertico" :repo "minad/vertico" :files (:defaults "extensions/vertico-*.el")
                     :fetcher github :source "elpaca-menu-lock-file" :protocol https :inherit t
                     :depth treeless :ref "c6f6d0674cfeb4374a77dde5e5f899e0fe62dd32"))
+ (warm-mode :source "elpaca-menu-lock-file" :recipe
+            (:source nil :protocol https :inherit t :depth treeless :host github :repo
+                     "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
+                     "6fd52c85200d13516dfa9497d8bf7567e90518a3"))
  (web-mode :source "elpaca-menu-lock-file" :recipe
            (:package "web-mode" :repo "fxbois/web-mode" :fetcher github :files
                      ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"

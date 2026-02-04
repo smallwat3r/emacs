@@ -173,6 +173,7 @@
   "tw" '(whitespace-mode :wk "Whitespace")
   "tb" '(blamer-mode :wk "Git blame")
   "tf" '(load-theme :wk "Load theme")
+  "ta" '(warm-mode :wk "Warm mode")
 
   ;; Workspaces (tab-bar)
   "TAB" '(:ignore t :wk "Workspace")

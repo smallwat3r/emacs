@@ -84,5 +84,9 @@
   (set-face-background 'auto-dim-other-buffers-face "#E8D8B8")
   (auto-dim-other-buffers-mode 1))
 
+;; Warm colors for nighttime coding
+(use-package warm-mode
+  :ensure (:host github :repo "smallwat3r/emacs-warm-mode"))
+
 (provide 'sw-theme)
 ;;; sw-theme.el ends here
