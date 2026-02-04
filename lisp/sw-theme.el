@@ -86,7 +86,10 @@
 
 ;; Warm colors for nighttime coding
 (use-package warm-mode
-  :ensure (:host github :repo "smallwat3r/emacs-warm-mode"))
+  :ensure (:host github :repo "smallwat3r/emacs-warm-mode")
+  :custom
+  (warm-mode-warmth 0.25)
+  (warm-mode-dim 0.9))
 
 (provide 'sw-theme)
 ;;; sw-theme.el ends here
