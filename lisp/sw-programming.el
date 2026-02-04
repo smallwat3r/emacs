@@ -103,18 +103,28 @@ For Python, handles indented code by dedenting before formatting."
              (input (buffer-substring-no-properties beg end))
              (indent (sw--string-min-indent input))
              (dedented (sw--string-reindent input indent 0))
+             (err-file (make-temp-file "fmt-err"))
+             (exit-code nil)
              (output (with-temp-buffer
                        (insert dedented)
-                       (when (zerop (apply #'call-process-region
-                                           (point-min) (point-max) cmd t t nil args))
-                         (buffer-string)))))
+                       (setq exit-code
+                             (apply #'call-process-region
+                                    (point-min) (point-max) cmd t
+                                    (list t err-file) nil args))
+                       (when (zerop exit-code)
+                         (buffer-string))))
+             (err-msg (unless (zerop exit-code)
+                        (with-temp-buffer
+                          (insert-file-contents err-file)
+                          (string-trim (buffer-string))))))
+        (ignore-errors (delete-file err-file))
         (if output
             (save-excursion
               (delete-region beg end)
               (goto-char beg)
               (insert (sw--string-reindent output 0 indent))
               (message "Formatted region (%s)" cmd))
-          (message "%s formatting failed" cmd))))
+          (message "%s failed: %s" cmd (or err-msg "unknown error")))))
      ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
       (eglot-format beg end)
       (message "Formatted region (eglot)"))

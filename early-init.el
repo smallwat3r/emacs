@@ -160,8 +160,7 @@
 (setq load-prefer-newer t)
 
 ;; Remove .so from load-suffixes to reduce file operations during load
-(when (member ".so" load-suffixes)
-  (setq load-suffixes (remove ".so" load-suffixes)))
+(setq load-suffixes (remove ".so" load-suffixes))
 
 ;; Disable bidirectional text scanning for performance
 (setq-default bidi-display-reordering 'left-to-right

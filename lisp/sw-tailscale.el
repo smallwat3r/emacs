@@ -20,7 +20,7 @@
 (defun sw-tailscale--devices ()
   "Return alist of Tailscale devices as (name . ip)."
   (sw-tailscale--with-cli
-    (condition-case nil
+    (condition-case err
         (let* ((json (shell-command-to-string "tailscale status --json 2>/dev/null"))
                (data (json-parse-string json :object-type 'alist))
                (peers (alist-get 'Peer data)))
@@ -31,7 +31,9 @@
                            (ip (aref (alist-get 'TailscaleIPs info) 0)))
                       (cons name ip)))
                   peers))
-      (error nil))))
+      (error
+       (message "Tailscale: %s" (error-message-string err))
+       nil))))
 
 (defun sw-tailscale-switch (account)
   "Switch Tailscale to ACCOUNT (alias from `sw-tailscale-accounts')."

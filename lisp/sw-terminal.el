@@ -186,7 +186,11 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
                            (>= attempts max-attempts)
                            (not (process-live-p proc)))
                        (cancel-timer timer)
-                     (sw-eat--try-send-tramp-init proc tramp-prefix)))))))))
+                     (sw-eat--try-send-tramp-init proc tramp-prefix)))))
+          ;; Cancel timer if buffer is killed before initialization completes
+          (add-hook 'kill-buffer-hook
+                    (lambda () (when timer (cancel-timer timer)))
+                    nil t)))))
 
   (add-hook 'eat-exec-hook #'sw-eat-setup-tramp))
 
@@ -302,6 +306,7 @@ Current input becomes a prefix filter (^pattern)."
   (unless (bound-and-true-p eat-terminal)
     (user-error "No eat process in current buffer"))
   (let* ((history (sw-zsh-history-candidates))
+         (_ (unless history (user-error "No zsh history found")))
          (collection (lambda (str pred action)
                        (if (eq action 'metadata)
                            '(metadata (display-sort-function . identity)
