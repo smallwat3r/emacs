@@ -15,56 +15,61 @@
   :config
   (global-anzu-mode 1))
 
-;; Buffer count cache
-(defvar sw-buffer-count-cache 0
-  "Cached count of user-visible buffers.")
+;; Buffer count
+(defvar sw--buffer-count-cache nil
+  "Cached (workspace . total) buffer counts.")
 
-(defvar sw-workspace-buffer-count-cache 0
-  "Cached count of buffers in current workspace.")
+(defvar sw--buffer-count-tick 0
+  "Tick to invalidate buffer count cache.")
 
-(defun sw-update-buffer-count ()
-  "Update the cached buffer counts for modeline display.
-Updates both `sw-buffer-count-cache' (all user-visible buffers) and
-`sw-workspace-buffer-count-cache' (buffers in current workspace)."
-  (setq sw-buffer-count-cache
-        (cl-count-if
-         (lambda (b)
-           (or (buffer-file-name b)
-               (not (string-match "^ " (buffer-name b)))))
-         (buffer-list)))
-  (setq sw-workspace-buffer-count-cache
-        (length (sw-workspace-buffer-list))))
+(defun sw--invalidate-buffer-count ()
+  "Mark buffer count cache as stale."
+  (cl-incf sw--buffer-count-tick))
 
-(add-hook 'buffer-list-update-hook #'sw-update-buffer-count)
+(add-hook 'kill-buffer-hook #'sw--invalidate-buffer-count)
+(add-hook 'find-file-hook #'sw--invalidate-buffer-count)
+
+(defun sw--buffer-counts ()
+  "Return (workspace . total) buffer counts, cached per tick."
+  (unless (eq (car sw--buffer-count-cache) sw--buffer-count-tick)
+    (setq sw--buffer-count-cache
+          (cons sw--buffer-count-tick
+                (cons (length (sw-workspace-buffer-list))
+                      (cl-count-if
+                       (lambda (b)
+                         (or (buffer-file-name b)
+                             (not (string-prefix-p " " (buffer-name b)))))
+                       (buffer-list))))))
+  (cdr sw--buffer-count-cache))
 
 (defun sw-number-of-buffers ()
-  "Return the cached count of buffers."
-  sw-buffer-count-cache)
+  "Return the count of user-visible buffers."
+  (cdr (sw--buffer-counts)))
 
 (defun sw-number-of-workspace-buffers ()
-  "Return the cached count of workspace buffers."
-  sw-workspace-buffer-count-cache)
+  "Return the count of workspace buffers."
+  (car (sw--buffer-counts)))
 
 ;; Custom mode-line format
-;; Displays: buffer status, buffer name, buffer count, position, VC info, major mode
 (setq-default mode-line-format
-              `("%e"
-                ,mode-line-front-space
-                ,mode-line-client
-                ,mode-line-modified
-                ,mode-line-remote
-                ,mode-line-frame-identification
-                ,mode-line-buffer-identification
-                (:eval (format "  b(%s/%s)"
+              '("%e"
+                " "
+                mode-line-modified
+                mode-line-remote
+                " "
+                mode-line-buffer-identification
+                "  "
+                "%p %l,%c"
+                "  "
+                (:eval (format "%d:%d"
                                (sw-number-of-workspace-buffers)
                                (sw-number-of-buffers)))
-                " %p %l,%c  "
-                (vc-mode vc-mode)
-                " "
-                ,mode-name
-                " "
-                ,mode-line-misc-info
-                ,mode-line-end-spaces))
+                mode-line-format-right-align
+                (:eval (when vc-mode
+                         (propertize (substring vc-mode 1) 'face 'bold)))
+                "  "
+                mode-name
+                " "))
 
 ;; Orange modeline for active window
 (set-face-attribute 'mode-line nil
