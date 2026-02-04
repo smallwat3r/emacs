@@ -16,7 +16,7 @@
 
 ;;; Custom initialization hooks
 ;; These hooks allow deferring initialization until truly needed.
-;; Use (add-hook 'sw-first-input-hook #'some-mode) in use-package :config blocks.
+;; Use (add-hook 'sw-first-input-hook #'some-mode) in use-package :hook blocks.
 
 (defvar sw-first-input-hook nil
   "Transient hook run before the first user input.")
@@ -27,42 +27,32 @@
 (defvar sw-first-buffer-hook nil
   "Transient hook run before the first buffer switch.")
 
-;; Explicit mapping of transient hooks to their Emacs trigger hooks.
-;; Avoids fragile intern-based function name construction.
-(defvar sw--hook-triggers nil
-  "Alist mapping (hook-var . (trigger-hook . trigger-fn)).")
+(defun sw--run-first-input ()
+  "Run `sw-first-input-hook' once then remove trigger."
+  (when sw-first-input-hook
+    (run-hooks 'sw-first-input-hook)
+    (setq sw-first-input-hook nil)
+    (remove-hook 'pre-command-hook #'sw--run-first-input)))
 
-(defun sw--run-hook-once (hook-var)
-  "Run HOOK-VAR once, then remove its trigger from the parent hook."
-  (when (and after-init-time (symbol-value hook-var))
-    (run-hooks hook-var)
-    (set hook-var nil)
-    (when-let ((entry (assq hook-var sw--hook-triggers)))
-      (remove-hook (cadr entry) (cddr entry)))))
+(defun sw--run-first-file ()
+  "Run `sw-first-file-hook' once then remove trigger."
+  (when sw-first-file-hook
+    (run-hooks 'sw-first-file-hook)
+    (setq sw-first-file-hook nil)
+    (remove-hook 'find-file-hook #'sw--run-first-file)))
 
-(defun sw--trigger-first-input ()
-  "Trigger `sw-first-input-hook'."
-  (sw--run-hook-once 'sw-first-input-hook))
+(defun sw--run-first-buffer (&rest _)
+  "Run `sw-first-buffer-hook' once then remove trigger."
+  (when sw-first-buffer-hook
+    (run-hooks 'sw-first-buffer-hook)
+    (setq sw-first-buffer-hook nil)
+    (remove-hook 'window-buffer-change-functions #'sw--run-first-buffer)))
 
-(defun sw--trigger-first-file ()
-  "Trigger `sw-first-file-hook'."
-  (sw--run-hook-once 'sw-first-file-hook))
-
-(defun sw--trigger-first-buffer (&rest _)
-  "Trigger `sw-first-buffer-hook'."
-  (sw--run-hook-once 'sw-first-buffer-hook))
-
-(defun sw-setup-initial-hooks ()
-  "Set up triggers for first-* hooks. Call this after init."
-  (setq sw--hook-triggers
-        `((sw-first-input-hook  . (pre-command-hook . sw--trigger-first-input))
-          (sw-first-file-hook   . (find-file-hook . sw--trigger-first-file))
-          (sw-first-buffer-hook . (window-buffer-change-functions
-                                   . sw--trigger-first-buffer))))
-  (dolist (entry sw--hook-triggers)
-    (add-hook (cadr entry) (cddr entry))))
-
-(add-hook 'emacs-startup-hook #'sw-setup-initial-hooks)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (add-hook 'pre-command-hook #'sw--run-first-input)
+            (add-hook 'find-file-hook #'sw--run-first-file)
+            (add-hook 'window-buffer-change-functions #'sw--run-first-buffer)))
 
 ;; Increase gc threshold during startup for faster loading
 ;; gcmh-mode (loaded in init.el) handles GC during idle time

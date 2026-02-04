@@ -14,8 +14,7 @@
   (treesit-font-lock-level 2)
   :config
   (setq major-mode-remap-alist
-        '((bash-mode . bash-ts-mode)
-          (c-mode . c-ts-mode)
+        '((c-mode . c-ts-mode)
           (c++-mode . c++-ts-mode)
           (cmake-mode . cmake-ts-mode)
           (css-mode . css-ts-mode)
