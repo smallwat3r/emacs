@@ -61,7 +61,8 @@
   ;; Optimized fd args (fdfind on Debian/Ubuntu, fd elsewhere)
   (setq consult-fd-args
         `(,(if (executable-find "fdfind") "fdfind" "fd")
-          "--color=never" "--hidden" "--exclude" ".git")))
+          "--color=never" "--hidden" "--exclude" ".git"))
+  (setq consult-async-split-style 'semicolon))
 
 ;; Embark - contextual actions
 (use-package embark
