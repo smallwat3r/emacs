@@ -680,7 +680,7 @@
  (warm-mode :source "elpaca-menu-lock-file" :recipe
             (:source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :host github
                      :repo "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
-                     "6fd52c85200d13516dfa9497d8bf7567e90518a3"))
+                     "d1787b7e86b3e0985fa441074047ad899b295a2f"))
  (web-mode :source "elpaca-menu-lock-file" :recipe
            (:package "web-mode" :repo "fxbois/web-mode" :fetcher github :files
                      ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
