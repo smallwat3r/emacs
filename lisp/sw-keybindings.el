@@ -46,12 +46,12 @@
 (when (eq system-type 'darwin)
   (global-set-key (kbd "A-<backspace>") #'sw-backward-kill-word))
 
-;;; Text scaling
+;;; Text scaling (global)
 
-(global-set-key (kbd "C-=") #'text-scale-increase)
-(global-set-key (kbd "C-+") #'text-scale-increase)
-(global-set-key (kbd "C--") #'text-scale-decrease)
-(global-set-key (kbd "C-0") #'text-scale-adjust)
+(global-set-key (kbd "C-=") #'sw-text-scale-increase)
+(global-set-key (kbd "C-+") #'sw-text-scale-increase)
+(global-set-key (kbd "C--") #'sw-text-scale-decrease)
+(global-set-key (kbd "C-0") #'sw-text-scale-reset)
 
 ;;; Leader key bindings
 

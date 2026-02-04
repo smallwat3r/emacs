@@ -126,15 +126,15 @@
 (defvar sw-font-emoji nil
   "Font for emoji characters. Set after init.")
 
-(defvar sw-font-height (if sw-is-mac 130 100)
-  "Default font height in 1/10 points.")
+(defvar sw-font-size (if sw-is-mac 13 10)
+  "Default font size in points.")
 
-(defvar sw-font-variable-pitch-height sw-font-height
-  "Variable-pitch font height in 1/10 points.")
+(defvar sw-font-variable-pitch-size sw-font-size
+  "Variable-pitch font size in points.")
 
 ;; Set primary font early to prevent random sizing
-(set-face-attribute 'default nil :family sw-font-family :height sw-font-height)
-(push `(font . ,(format "%s-%d" sw-font-family (/ sw-font-height 10)))
+(set-face-attribute 'default nil :family sw-font-family :height (* sw-font-size 10))
+(push `(font . ,(format "%s-%d" sw-font-family sw-font-size))
       default-frame-alist)
 
 ;; Prevent font cache compaction for better performance

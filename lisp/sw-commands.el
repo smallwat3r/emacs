@@ -109,5 +109,35 @@ Stops at word boundaries including underscores and hyphens."
   (interactive)
   (select-window (split-window-below)))
 
+;;; Text scaling
+
+(defvar sw--current-font-size nil
+  "Current font size in points. Initialized from sw-font-size.")
+
+(defun sw-text-scale-increase ()
+  "Increase font size globally by 1pt."
+  (interactive)
+  (unless sw--current-font-size
+    (setq sw--current-font-size sw-font-size))
+  (setq sw--current-font-size (1+ sw--current-font-size))
+  (set-face-attribute 'default nil :height (* sw--current-font-size 10))
+  (message "Font size: %dpt" sw--current-font-size))
+
+(defun sw-text-scale-decrease ()
+  "Decrease font size globally by 1pt."
+  (interactive)
+  (unless sw--current-font-size
+    (setq sw--current-font-size sw-font-size))
+  (setq sw--current-font-size (max 8 (1- sw--current-font-size)))
+  (set-face-attribute 'default nil :height (* sw--current-font-size 10))
+  (message "Font size: %dpt" sw--current-font-size))
+
+(defun sw-text-scale-reset ()
+  "Reset font size to default."
+  (interactive)
+  (setq sw--current-font-size sw-font-size)
+  (set-face-attribute 'default nil :height (* sw-font-size 10))
+  (message "Font size: %dpt" sw-font-size))
+
 (provide 'sw-commands)
 ;;; sw-commands.el ends here
