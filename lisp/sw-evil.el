@@ -14,7 +14,7 @@
         evil-want-keybinding nil
         evil-want-C-u-scroll t
         evil-want-C-i-jump t
-        evil-want-Y-yank-to-eol t)  ; Y yanks to end of line (like Doom)
+        evil-want-Y-yank-to-eol t)
   :custom
   (evil-want-fine-undo t)
   (evil-undo-system 'undo-redo)
