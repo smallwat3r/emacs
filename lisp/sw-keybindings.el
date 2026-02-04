@@ -182,7 +182,6 @@
   "tn" '(display-line-numbers-mode :wk "Line numbers")
   "ti" '(imenu-list-smart-toggle :wk "Imenu list")
   "tw" '(whitespace-mode :wk "Whitespace")
-  "tb" '(blamer-mode :wk "Git blame")
   "tf" '(load-theme :wk "Load theme")
   "ta" '(warm-mode :wk "Warm mode")
 

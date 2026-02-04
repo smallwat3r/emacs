@@ -92,16 +92,6 @@
 ;; Git modes for config files
 (use-package git-modes)
 
-;; Show blame inline
-(use-package blamer
-  :custom
-  (blamer-idle-time 0.5)
-  (blamer-min-offset 70)
-  (blamer-author-formatter " %s ")
-  (blamer-datetime-formatter "[%s]")
-  (blamer-commit-formatter " - %s")
-  :commands blamer-mode)
-
 ;; Open remote repo in browser
 (use-package browse-at-remote)
 

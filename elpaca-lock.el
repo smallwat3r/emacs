@@ -34,15 +34,6 @@
                              "LICENSE" "README*" "*-pkg.el"))
                   :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
                   "31cb2fea8f4bc7a593acd76187a89075d8075500"))
- (blamer :source "elpaca-menu-lock-file" :recipe
-         (:package "blamer" :repo "Artawower/blamer.el" :fetcher github :files
-                   ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                    "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info" "docs/*.texi"
-                    "docs/*.texinfo"
-                    (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                              "LICENSE" "README*" "*-pkg.el"))
-                   :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
-                   "aa9b22d4e847d15a5c4659c0407aa8bf4242cc94"))
  (browse-at-remote :source "elpaca-menu-lock-file" :recipe
                    (:package "browse-at-remote" :repo "rmuslimov/browse-at-remote" :fetcher github
                              :files
