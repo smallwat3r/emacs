@@ -11,17 +11,25 @@
   :ensure nil
   :demand t
   :custom
-  (treesit-font-lock-level 4))
-
-;; Auto-install and remap to tree-sitter modes
-(use-package treesit-auto
-  :ensure (:wait t)
-  :demand t
-  :custom
-  (treesit-auto-install 'prompt)
+  (treesit-font-lock-level 4)
   :config
-  (treesit-auto-add-to-auto-mode-alist 'all)
-  (global-treesit-auto-mode 1))
+  (setq major-mode-remap-alist
+        '((bash-mode . bash-ts-mode)
+          (c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (cmake-mode . cmake-ts-mode)
+          (css-mode . css-ts-mode)
+          (go-mode . go-ts-mode)
+          (html-mode . html-ts-mode)
+          (java-mode . java-ts-mode)
+          (js-mode . js-ts-mode)
+          (json-mode . json-ts-mode)
+          (python-mode . python-ts-mode)
+          (ruby-mode . ruby-ts-mode)
+          (rust-mode . rust-ts-mode)
+          (sh-mode . bash-ts-mode)
+          (toml-mode . toml-ts-mode)
+          (yaml-mode . yaml-ts-mode))))
 
 ;;; Formatting
 

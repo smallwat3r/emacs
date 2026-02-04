@@ -655,15 +655,6 @@
                                  "LICENSE" "README*" "*-pkg.el"))
                       :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
                       :wait t :ref "66be2fa4c80577646c549bfc592deddbb97c1b7a"))
- (treesit-auto :source "elpaca-menu-lock-file" :recipe
-               (:package "treesit-auto" :fetcher github :repo "renzmann/treesit-auto" :files
-                         ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
-                          "doc/*.info" "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir"
-                          "docs/*.info" "docs/*.texi" "docs/*.texinfo"
-                          (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                    "LICENSE" "README*" "*-pkg.el"))
-                         :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
-                         :wait t :ref "016bd286a1ba4628f833a626f8b9d497882ecdf3"))
  (vertico :source "elpaca-menu-lock-file" :recipe
           (:package "vertico" :repo "minad/vertico" :files (:defaults "extensions/vertico-*.el")
                     :fetcher github :source "elpaca-menu-lock-file" :protocol https :inherit t
