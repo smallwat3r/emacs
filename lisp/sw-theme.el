@@ -70,7 +70,7 @@
 (use-package highlight-numbers
   :hook (prog-mode . highlight-numbers-mode))
 
-;; Symbol overlay for manual highlighting (SPC c h)
+;; Symbol overlay for manual highlighting
 (use-package symbol-overlay
   :commands (symbol-overlay-put symbol-overlay-remove-all))
 
