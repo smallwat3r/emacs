@@ -11,7 +11,7 @@
   :ensure nil
   :demand t
   :custom
-  (treesit-font-lock-level 4)
+  (treesit-font-lock-level 2)
   :config
   (setq major-mode-remap-alist
         '((bash-mode . bash-ts-mode)
