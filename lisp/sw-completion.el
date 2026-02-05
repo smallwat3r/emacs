@@ -57,7 +57,7 @@
   (setq consult-ripgrep-args
         (concat "rg --null --line-buffered --color=never --max-columns=1000 "
                 "--path-separator / --smart-case --no-heading --line-number "
-                "--hidden --glob !.git ."))
+                "--hidden --glob !.git"))
   ;; Optimized fd args (fdfind on Debian/Ubuntu, fd elsewhere)
   (setq consult-fd-args
         `(,(if (executable-find "fdfind") "fdfind" "fd")
