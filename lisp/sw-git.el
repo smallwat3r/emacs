@@ -37,14 +37,6 @@
   ;; Ensure commit buffer is focused in daemon mode
   (add-hook 'server-switch-hook #'raise-frame)
 
-  ;; Kill all COMMIT_EDITMSG buffers after committing
-  (with-eval-after-load 'with-editor
-    (add-hook 'with-editor-post-finish-hook
-              (lambda ()
-                (dolist (buf (buffer-list))
-                  (when (string-prefix-p "COMMIT_EDITMSG" (buffer-name buf))
-                    (kill-buffer buf))))))
-
   ;; Git rebase keybindings for moving commits
   ;; n, a bindings match custom keyboard layout (up/down)
   (with-eval-after-load 'git-rebase
