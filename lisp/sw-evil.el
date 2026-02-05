@@ -25,6 +25,7 @@
   (evil-search-module 'evil-search)
   (evil-kbd-macro-suppress-motion-error t)  ; don't abort macros on motion errors
   (evil-ex-interactive-search-highlight 'selected-window)  ; only highlight in current window
+  (evil-ex-search-highlight-all t)
   :config
   (evil-mode 1)
 
@@ -35,7 +36,7 @@
   (defun sw-slow-down-evil-highlighting ()
     (setq-local evil-ex-hl-update-delay 0.25))
   (dolist (hook '(magit-mode-hook so-long-minor-mode-hook))
-    (add-hook hook #'sw-slow-down-evil-highlighting))
+    (add-hook hook #'sw-slow-down-evil-highlighting)))
 
 ;; Evil keybindings for many modes
 (use-package evil-collection
@@ -85,15 +86,41 @@
   :config
   (global-evil-surround-mode 1))
 
-;; Search for visual selection with * and #
-(use-package evil-visualstar
-  :ensure (:wait t)
-  :after evil
-  :demand t
-  :config
-  (evil-define-key* 'visual 'global
-    "*" #'evil-visualstar/begin-search-forward
-    "#" #'evil-visualstar/begin-search-backward))
+;; Highlight symbol under cursor with */# without jumping (use n/N to navigate)
+(defun sw-highlight-symbol-at-point (&optional backward)
+  "Highlight symbol at point without moving. Use n/N to jump."
+  (interactive)
+  (let* ((symbol (thing-at-point 'symbol t))
+         (pattern (format "\\_<%s\\_>" (regexp-quote symbol)))
+         (direction (if backward 'backward 'forward)))
+    (setq evil-ex-search-pattern (evil-ex-make-search-pattern pattern)
+          evil-ex-search-direction direction)
+    (evil-push-search-history pattern (not backward))
+    ;; Activate highlighting
+    (evil-ex-delete-hl 'evil-ex-search)
+    (evil-ex-make-hl 'evil-ex-search)
+    (evil-ex-hl-change 'evil-ex-search evil-ex-search-pattern)
+    (evil-ex-hl-update-highlights)))
+
+(defun sw-highlight-symbol-at-point-backward ()
+  "Highlight symbol at point, search backward with n."
+  (interactive)
+  (sw-highlight-symbol-at-point t))
+
+(defun sw-clear-search-highlight ()
+  "Clear search highlight."
+  (interactive)
+  (evil-ex-nohighlight))
+
+(with-eval-after-load 'evil
+  (evil-define-key* 'normal 'global
+    "*" #'sw-highlight-symbol-at-point
+    "#" #'sw-highlight-symbol-at-point-backward
+    [escape] #'sw-clear-search-highlight)
+  ;; Ensure n/N use evil-ex-search, not snipe
+  (evil-define-key* 'normal 'global
+    "n" #'evil-ex-search-next
+    "N" #'evil-ex-search-previous))
 
 ;; Align text with gl/gL operator (e.g., glip= to align paragraph by =)
 (use-package evil-lion
