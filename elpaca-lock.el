@@ -256,15 +256,6 @@
                                      "LICENSE" "README*" "*-pkg.el"))
                           :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
                           :wait t :ref "da05c60b0621cf33161bb4335153f75ff5c29d91"))
- (evil-visualstar :source "elpaca-menu-lock-file" :recipe
-                  (:package "evil-visualstar" :repo "bling/evil-visualstar" :fetcher github :files
-                            ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
-                             "doc/*.info" "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir"
-                             "docs/*.info" "docs/*.texi" "docs/*.texinfo"
-                             (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el"
-                                       "*-tests.el" "LICENSE" "README*" "*-pkg.el"))
-                            :source "elpaca-menu-lock-file" :protocol https :inherit t :depth
-                            treeless :wait t :ref "06c053d8f7381f91c53311b1234872ca96ced752"))
  (f :source "elpaca-menu-lock-file" :recipe
     (:package "f" :fetcher github :repo "rejeep/f.el" :files
               ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
