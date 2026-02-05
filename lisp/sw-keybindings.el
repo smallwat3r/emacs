@@ -61,15 +61,11 @@
   "1"   '(sw-show-buffer-path :wk "Show path")
   "."   '(find-file :wk "Find file")
   ","   '(consult-buffer :wk "Switch buffer")
-  "`"   '(evil-switch-to-windows-last-buffer :wk "Last buffer")
-  ";"   '(pp-eval-expression :wk "Eval expression")
+  "a"   '(evil-switch-to-windows-last-buffer :wk "Last buffer")
   ":"   '(execute-extended-command :wk "M-x")
   "'"   '(vertico-repeat :wk "Resume last search")
-  "*"   '(sw-consult-ripgrep-project-symbol :wk "Search symbol in project")
-  "/"   '(sw-consult-ripgrep-project :wk "Search project")
   "x"   '(scratch-buffer :wk "Scratch buffer")
   "RET" '(bookmark-jump :wk "Jump to bookmark")
-  "§"   '(other-frame :wk "Other frame")
   "u"   '(universal-argument :wk "Universal arg")
 
   ;; Buffers
