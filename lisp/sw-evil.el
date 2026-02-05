@@ -86,41 +86,19 @@
   :config
   (global-evil-surround-mode 1))
 
-;; Highlight symbol under cursor with */# without jumping (use n/N to navigate)
-(defun sw-highlight-symbol-at-point (&optional backward)
+;; Highlight symbol under cursor
+(defun sw-highlight-symbol-at-point ()
   "Highlight symbol at point without moving. Use n/N to jump."
   (interactive)
   (let* ((symbol (thing-at-point 'symbol t))
-         (pattern (format "\\_<%s\\_>" (regexp-quote symbol)))
-         (direction (if backward 'backward 'forward)))
+         (pattern (format "\\_<%s\\_>" (regexp-quote symbol))))
     (setq evil-ex-search-pattern (evil-ex-make-search-pattern pattern)
-          evil-ex-search-direction direction)
-    (evil-push-search-history pattern (not backward))
-    ;; Activate highlighting
+          evil-ex-search-direction 'forward)
+    (evil-push-search-history pattern t)
     (evil-ex-delete-hl 'evil-ex-search)
     (evil-ex-make-hl 'evil-ex-search)
     (evil-ex-hl-change 'evil-ex-search evil-ex-search-pattern)
     (evil-ex-hl-update-highlights)))
-
-(defun sw-highlight-symbol-at-point-backward ()
-  "Highlight symbol at point, search backward with n."
-  (interactive)
-  (sw-highlight-symbol-at-point t))
-
-(defun sw-clear-search-highlight ()
-  "Clear search highlight."
-  (interactive)
-  (evil-ex-nohighlight))
-
-(with-eval-after-load 'evil
-  (evil-define-key* 'normal 'global
-    "*" #'sw-highlight-symbol-at-point
-    "#" #'sw-highlight-symbol-at-point-backward
-    [escape] #'sw-clear-search-highlight)
-  ;; Ensure n/N use evil-ex-search, not snipe
-  (evil-define-key* 'normal 'global
-    "n" #'evil-ex-search-next
-    "N" #'evil-ex-search-previous))
 
 ;; Align text with gl/gL operator (e.g., glip= to align paragraph by =)
 (use-package evil-lion

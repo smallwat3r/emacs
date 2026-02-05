@@ -320,7 +320,13 @@
  "gL" 'evil-lion-right
 
  ;; Quick commands with ;
- ";w" 'save-buffer)
+ ";w" 'save-buffer
+
+ ;; Symbol highlight (stay at point, use n/N to navigate)
+ "*" 'sw-highlight-symbol-at-point
+ "n" 'evil-ex-search-next
+ "N" 'evil-ex-search-previous
+ [escape] 'evil-ex-nohighlight)
 
 ;;; Evil visual state bindings
 
