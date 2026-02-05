@@ -84,9 +84,15 @@
   "bs" '(save-buffer :wk "Save buffer")
   "bS" '(evil-write-all :wk "Save all buffers")
   "bx" '(scratch-buffer :wk "Scratch buffer")
-  "be" '(:ignore t :wk "Eat")
-  "bek" '(sw-eat-kill-other :wk "Kill other eat buffers")
-  "beK" '(sw-eat-kill-all :wk "Kill all eat buffers")
+
+  ;; Eat terminal
+  "e" '(:ignore t :wk "Eat")
+  "ee" '(sw-eat-here :wk "Eat at root")
+  "et" '(sw-eat-toggle :wk "Toggle eat at root")
+  "eE" '(sw-eat-here-current-buffer :wk "Eat at buffer")
+  "eT" '(sw-eat-toggle-current-buffer :wk "Toggle eat at buffer")
+  "ek" '(sw-eat-kill-other :wk "Kill other eat buffers")
+  "eK" '(sw-eat-kill-all :wk "Kill all eat buffers")
 
   ;; Files
   "f" '(:ignore t :wk "File")
@@ -215,10 +221,6 @@
   ;; Open/Apps
   "o" '(:ignore t :wk "Open")
   "o1" '(sw-terminal-here :wk "External terminal")
-  "oT" '(sw-eat-here :wk "Eat at root")
-  "ot" '(sw-eat-toggle :wk "Toggle eat at root")
-  "oV" '(sw-eat-here-current-buffer :wk "Eat at buffer")
-  "ov" '(sw-eat-toggle-current-buffer :wk "Toggle eat at buffer")
   "o." '(sw-tramp-connect :wk "TRAMP SSH")
   "os" '(sw-ssh-external :wk "SSH external term")
   "od" '(dired-jump :wk "Dired")
