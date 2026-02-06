@@ -13,6 +13,7 @@
   :hook (rust-ts-mode . eglot-ensure)
   :hook (typescript-ts-mode . eglot-ensure)
   :hook (js-ts-mode . eglot-ensure)
+  :hook (sh-mode . eglot-ensure)
   :hook (terraform-mode . eglot-ensure)
   :init
   ;; Prevent eglot from managing flymake
@@ -29,15 +30,6 @@
   (eglot-ignored-server-capabilities '(:inlayHintProvider))
 
   :config
-  ;; Warn about missing LSP servers
-  (dolist (server '(("basedpyright-langserver" . "Python")
-                    ("rust-analyzer" . "Rust")
-                    ("gopls" . "Go")
-                    ("typescript-language-server" . "TypeScript")))
-    (unless (executable-find (car server))
-      (warn "LSP server '%s' (%s) not found in PATH"
-            (car server) (cdr server))))
-
   ;; Server configurations
   (dolist (server '(((python-mode python-ts-mode)
                      "basedpyright-langserver" "--stdio")
@@ -51,6 +43,18 @@
                      "terraform-ls" "serve")))
     (add-to-list 'eglot-server-programs
                  (cons (car server) (cdr server)))))
+
+;; Warn about missing LSP servers when their mode loads
+(dolist (entry '((python . "basedpyright-langserver")
+                 (rust-ts-mode . "rust-analyzer")
+                 (go-ts-mode . "gopls")
+                 (typescript-ts-mode . "typescript-language-server")
+                 (sh-script . "bash-language-server")))
+  (let ((feature (car entry))
+        (server (cdr entry)))
+    (with-eval-after-load feature
+      (unless (executable-find server)
+        (warn "LSP server '%s' not found in PATH" server)))))
 
 ;; Consult integration for eglot
 (use-package consult-eglot

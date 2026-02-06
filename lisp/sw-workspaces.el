@@ -6,6 +6,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 ;; Faces for workspace display
 (defface sw-workspace-tab-face
   '((t (:inherit default)))

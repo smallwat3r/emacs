@@ -112,19 +112,25 @@ For Python, handles indented code by dedenting before formatting."
              (dedented (sw--string-reindent input indent 0))
              (err-file (make-temp-file "fmt-err"))
              (exit-code nil)
-             (output (with-temp-buffer
-                       (insert dedented)
-                       (setq exit-code
-                             (apply #'call-process-region
-                                    (point-min) (point-max) cmd t
-                                    (list t err-file) nil args))
-                       (when (zerop exit-code)
-                         (buffer-string))))
-             (err-msg (unless (zerop exit-code)
-                        (with-temp-buffer
-                          (insert-file-contents err-file)
-                          (string-trim (buffer-string))))))
-        (ignore-errors (delete-file err-file))
+             output err-msg)
+        (unwind-protect
+            (progn
+              (setq output
+                    (with-temp-buffer
+                      (insert dedented)
+                      (setq exit-code
+                            (apply #'call-process-region
+                                   (point-min) (point-max)
+                                   cmd t
+                                   (list t err-file) nil args))
+                      (when (zerop exit-code)
+                        (buffer-string))))
+              (setq err-msg
+                    (unless (zerop exit-code)
+                      (with-temp-buffer
+                        (insert-file-contents err-file)
+                        (string-trim (buffer-string))))))
+          (ignore-errors (delete-file err-file)))
         (if output
             (save-excursion
               (delete-region beg end)

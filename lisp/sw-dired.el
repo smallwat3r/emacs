@@ -8,7 +8,8 @@
 (use-package dired
   :ensure nil
   :custom
-  (dired-listing-switches "-alh --group-directories-first")
+  (dired-listing-switches (if sw-is-mac "-alh"
+                           "-alh --group-directories-first"))
   (dired-dwim-target t)
   (dired-recursive-copies 'always)
   (dired-recursive-deletes 'always)

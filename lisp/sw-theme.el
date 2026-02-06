@@ -28,8 +28,13 @@
   (when sw-font-emoji
     (set-fontset-font t 'emoji sw-font-emoji nil 'prepend)))
 
+(defun sw-setup-fontsets-once ()
+  "Run `sw-setup-fontsets' once, then remove from hook."
+  (sw-setup-fontsets)
+  (remove-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once))
+
 (if (daemonp)
-    (add-hook 'server-after-make-frame-hook #'sw-setup-fontsets)
+    (add-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)
   (add-hook 'after-init-hook #'sw-setup-fontsets))
 
 (setq-default line-spacing 2)

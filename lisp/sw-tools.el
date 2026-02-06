@@ -7,7 +7,8 @@
 
 ;;; Browser configuration
 
-(setq browse-url-browser-function 'browse-url-xdg-open)
+(when sw-is-linux
+  (setq browse-url-browser-function 'browse-url-xdg-open))
 
 ;;; Goto address - highlight URLs and email addresses
 

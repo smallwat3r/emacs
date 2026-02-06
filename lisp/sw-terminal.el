@@ -241,7 +241,7 @@ For local directories, uses the user's default shell."
                (shell (or (cdr (assoc method eat-tramp-shells)) "/bin/bash"))
                (buffer (get-buffer-create buf-name)))
           (with-current-buffer buffer
-            (unless (eq major-mode #'eat-mode)
+            (unless (eq major-mode 'eat-mode)
               (eat-mode))
             (unless (and (bound-and-true-p eat-terminal)
                          (eat-term-parameter eat-terminal 'eat--process))
@@ -251,7 +251,7 @@ For local directories, uses the user's default shell."
       (let ((shell (or (getenv "SHELL") "/bin/bash"))
             (buffer (get-buffer-create buf-name)))
         (with-current-buffer buffer
-          (unless (eq major-mode #'eat-mode)
+          (unless (eq major-mode 'eat-mode)
             (eat-mode))
           (unless (and (bound-and-true-p eat-terminal)
                        (eat-term-parameter eat-terminal 'eat--process))

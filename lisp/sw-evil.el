@@ -90,7 +90,8 @@
 (defun sw-highlight-symbol-at-point ()
   "Highlight symbol at point without moving. Use n/N to jump."
   (interactive)
-  (let* ((symbol (thing-at-point 'symbol t))
+  (let* ((symbol (or (thing-at-point 'symbol t)
+                     (user-error "No symbol at point")))
          (pattern (format "\\_<%s\\_>" (regexp-quote symbol))))
     (setq evil-ex-search-pattern (evil-ex-make-search-pattern pattern)
           evil-ex-search-direction 'forward)
