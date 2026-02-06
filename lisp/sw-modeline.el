@@ -6,8 +6,13 @@
 ;;; Code:
 
 ;; Echo area info display
+(defvar sw--echo-area-last-info nil
+  "Cached (INFO . CUR-MSG) from the last echo area update.")
+
 (defun sw--update-echo-area ()
-  "Update echo area with buffer info."
+  "Update echo area with buffer info.
+Skips redisplay when neither the info string nor the current
+message have changed since the last call."
   (unless (active-minibuffer-window)
     (let* ((info (format "%s%s  %s %s,%d"
                          (if (buffer-modified-p) "** " "")
@@ -15,11 +20,18 @@
                          (format-mode-line "%p")
                          (format-mode-line "%l")
                          (current-column)))
-           (cur (or (current-message) ""))
-           (padding (- (frame-width) (length cur) (length info) 1))
-           (msg (concat cur (make-string (max 1 padding) ?\s) info)))
-      (let ((message-log-max nil))
-        (message "%s" msg)))))
+           (cur (or (current-message) "")))
+      (unless (and sw--echo-area-last-info
+                   (equal info (car sw--echo-area-last-info))
+                   (equal cur (cdr sw--echo-area-last-info)))
+        (setq sw--echo-area-last-info (cons info cur))
+        (let* ((padding (- (frame-width)
+                           (length cur) (length info) 1))
+               (msg (concat cur
+                            (make-string (max 1 padding) ?\s)
+                            info))
+               (message-log-max nil))
+          (message "%s" msg))))))
 
 (add-hook 'post-command-hook #'sw--update-echo-area)
 

@@ -5,11 +5,6 @@
 
 ;;; Code:
 
-(defvar sw-tailscale-accounts
-  '(("work" . "d52c")
-    ("home" . "a195"))
-  "Alist mapping account aliases to Tailscale account IDs.")
-
 (defmacro sw-tailscale--with-cli (&rest body)
   "Execute BODY if tailscale CLI is available, else signal error."
   (declare (indent 0))
@@ -17,11 +12,30 @@
        (progn ,@body)
      (user-error "tailscale not found")))
 
+(defun sw-tailscale--accounts ()
+  "Return alist of Tailscale accounts as (DISPLAY . ID).
+DISPLAY is \"account (tailnet)\", parsed from `tailscale switch --list'."
+  (let* ((output (shell-command-to-string
+                  "sudo tailscale switch --list 2>/dev/null"))
+         (lines (cdr (split-string output "\n" t)))
+         accounts)
+    (dolist (line lines)
+      (when (string-match
+             "^\\([^ ]+\\)\\s-+\\([^ ]+\\)\\s-+\\([^ *]+\\)"
+             line)
+        (let ((id (match-string 1 line))
+              (tailnet (match-string 2 line))
+              (account (match-string 3 line)))
+          (push (cons (format "%s (%s)" account tailnet) id)
+                accounts))))
+    (nreverse accounts)))
+
 (defun sw-tailscale--devices ()
   "Return alist of Tailscale devices as (name . ip)."
   (sw-tailscale--with-cli
     (condition-case err
-        (let* ((json (shell-command-to-string "tailscale status --json 2>/dev/null"))
+        (let* ((json (shell-command-to-string
+                      "tailscale status --json 2>/dev/null"))
                (data (json-parse-string json :object-type 'alist))
                (peers (alist-get 'Peer data)))
           (mapcar (lambda (peer)
@@ -36,16 +50,22 @@
        nil))))
 
 (defun sw-tailscale-switch (account)
-  "Switch Tailscale to ACCOUNT (alias from `sw-tailscale-accounts')."
+  "Switch Tailscale to ACCOUNT, parsed from CLI."
   (interactive
-   (list (completing-read "Tailscale account: "
-                          (mapcar #'car sw-tailscale-accounts)
-                          nil t)))
+   (list (sw-tailscale--with-cli
+           (let ((accounts (sw-tailscale--accounts)))
+             (unless accounts
+               (user-error "No Tailscale accounts found"))
+             (completing-read "Tailscale account: "
+                              (mapcar #'car accounts)
+                              nil t)))))
   (sw-tailscale--with-cli
-    (if-let ((id (alist-get account sw-tailscale-accounts nil nil #'equal)))
-        (let ((cmd (format "sudo tailscale switch %s" id)))
+    (if-let ((id (alist-get account (sw-tailscale--accounts)
+                            nil nil #'equal)))
+        (progn
           (message "Switching to %s..." account)
-          (if (zerop (shell-command cmd))
+          (if (zerop (shell-command
+                      (format "sudo tailscale switch %s" id)))
               (message "Switched to %s" account)
             (message "Failed to switch to %s" account)))
       (user-error "Unknown account: %s" account))))

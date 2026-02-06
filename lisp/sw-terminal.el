@@ -7,7 +7,7 @@
 
 ;;; SSH config files
 
-(defvar sw-ssh-config-files
+(defconst sw-ssh-config-files
   '("~/.ssh/config"
     "~/.ssh/work"
     "~/.ssh/private")
@@ -31,7 +31,8 @@ Parses config files fresh each call (fast enough that caching is unnecessary)."
           (while (re-search-forward "^[Hh]ost[ \t]+\\(.+\\)$" nil t)
             (let ((raw (match-string 1)))
               (dolist (h (split-string raw "[ \t]+" t))
-                (unless (string-match-p "[*?]" h)
+                (when (string-match-p
+                       "\\`[a-zA-Z0-9._-]+\\'" h)
                   (push h hosts))))))))
     (delete-dups hosts)))
 
@@ -54,6 +55,9 @@ LIMIT defaults to 10000."
   (find-file (read-file-name "SSH target: " "/ssh:")))
 
 ;;; Eat - Emulate A Terminal
+
+(defconst sw-eat-prompt-chars "[$#>❯→%]"
+  "Character class matching common shell prompt characters.")
 
 (use-package eat
   :commands (eat eat-project eat-other-window)
@@ -145,7 +149,9 @@ LIMIT defaults to 10000."
   (defun sw-eat--tramp-init-string (prefix)
     "Return shell initialization string for TRAMP with PREFIX."
     (format "export TERM=xterm-256color
-e() { local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
+e() { [ -z \"$1\" ] && { echo 'usage: e FILE' >&2; return 1; }; \
+local f=\"$1\"; [[ \"$f\" != /* ]] && f=\"$PWD/$f\"; \
+[ ! -e \"$f\" ] && { echo \"e: $f: no such file\" >&2; return 1; }; \
 printf '\\033]51;e;M;%%s;%%s\\033\\\\' \"$(printf 'find-file' | base64)\" \
 \"$(printf '%s%%s' \"$f\" | base64)\"; }
 clear\n" prefix))
@@ -157,11 +163,17 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
                (buffer-live-p (process-buffer proc)))
       (with-current-buffer (process-buffer proc)
         (unless sw-eat-tramp-initialized
-          ;; Check if terminal has received any output (shell is ready)
+          ;; Check if the last line shows a shell prompt
           (when (and (bound-and-true-p eat-terminal)
-                     (> (buffer-size) 0))
+                     (save-excursion
+                       (goto-char (point-max))
+                       (forward-line 0)
+                       (looking-at-p
+                      (concat ".*" sw-eat-prompt-chars
+                              "\\s-*$"))))
             (setq sw-eat-tramp-initialized t)
-            (process-send-string proc (sw-eat--tramp-init-string tramp-prefix)))))))
+            (process-send-string
+             proc (sw-eat--tramp-init-string tramp-prefix)))))))
 
   (defun sw-eat-setup-tramp (proc)
     "Configure eat for TRAMP: rename buffer, set TERM, inject `e` file opener."
@@ -291,8 +303,7 @@ Extracts text after common prompt characters ($, #, >, ❯, →, %)."
   (when (derived-mode-p 'eat-mode)
     (let* ((line (buffer-substring-no-properties
                   (line-beginning-position) (point)))
-           ;; Best guess to find start of prompt
-           (prompt-re ".*?[$#>❯→%]\\s-*")
+           (prompt-re (concat ".*?" sw-eat-prompt-chars "\\s-*"))
            (input (if (string-match prompt-re line)
                       (substring line (match-end 0))
                     (string-trim line))))

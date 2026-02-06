@@ -29,6 +29,15 @@
   (eglot-ignored-server-capabilities '(:inlayHintProvider))
 
   :config
+  ;; Warn about missing LSP servers
+  (dolist (server '(("basedpyright-langserver" . "Python")
+                    ("rust-analyzer" . "Rust")
+                    ("gopls" . "Go")
+                    ("typescript-language-server" . "TypeScript")))
+    (unless (executable-find (car server))
+      (warn "LSP server '%s' (%s) not found in PATH"
+            (car server) (cdr server))))
+
   ;; Server configurations
   (dolist (server '(((python-mode python-ts-mode)
                      "basedpyright-langserver" "--stdio")
