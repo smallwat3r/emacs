@@ -55,7 +55,7 @@
       (funcall center sw-dashboard--os-version)
       (funcall center (if (daemonp) "Mode: Daemon" "Mode: Standalone"))
       (insert "\n")
-      (funcall center (format "Loaded in %.2fs, %d GCs" load-time gcs-done)))
+      (funcall center (format "Loaded in %.2fs" load-time)))
     (goto-char (point-min)))
   (setq-local buffer-read-only t
               cursor-type nil
