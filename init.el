@@ -111,6 +111,13 @@
 (when (file-exists-p custom-file)
   (load custom-file 'noerror 'nomessage))
 
+;;; Sync shell PATH into Emacs
+
+(use-package exec-path-from-shell
+  :demand t
+  :config
+  (exec-path-from-shell-initialize))
+
 ;;; Early dependencies
 
 ;; Transient needs to be updated before magit/claude-code load
