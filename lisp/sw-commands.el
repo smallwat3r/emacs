@@ -122,13 +122,20 @@ When deleting single space, also deletes trailing symbol and word."
 (defvar sw--current-font-size nil
   "Current font size in points. Initialized from sw-font-size.")
 
+(defun sw--set-all-font-sizes (size)
+  "Set SIZE (in points) on all text faces."
+  (let ((height (* size 10)))
+    (dolist (face '(default fixed-pitch fixed-pitch-serif
+                            variable-pitch))
+      (set-face-attribute face nil :height height))))
+
 (defun sw-text-scale-increase ()
   "Increase font size globally by 2pt."
   (interactive)
   (unless sw--current-font-size
     (setq sw--current-font-size sw-font-size))
   (setq sw--current-font-size (+ sw--current-font-size 2))
-  (set-face-attribute 'default nil :height (* sw--current-font-size 10))
+  (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
 (defun sw-text-scale-decrease ()
@@ -137,14 +144,14 @@ When deleting single space, also deletes trailing symbol and word."
   (unless sw--current-font-size
     (setq sw--current-font-size sw-font-size))
   (setq sw--current-font-size (max 8 (- sw--current-font-size 2)))
-  (set-face-attribute 'default nil :height (* sw--current-font-size 10))
+  (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
 (defun sw-text-scale-reset ()
   "Reset font size to default."
   (interactive)
   (setq sw--current-font-size sw-font-size)
-  (set-face-attribute 'default nil :height (* sw-font-size 10))
+  (sw--set-all-font-sizes sw-font-size)
   (message "Font size: %dpt" sw-font-size))
 
 (provide 'sw-commands)
