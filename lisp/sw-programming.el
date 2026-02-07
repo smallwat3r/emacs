@@ -5,6 +5,9 @@
 
 ;;; Code:
 
+;; Enable ANSI colors in compilation buffers
+(add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
+
 ;;; Tree-sitter
 
 (use-package treesit

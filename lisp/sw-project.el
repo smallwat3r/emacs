@@ -20,9 +20,6 @@
         '(".project" ".projectile" "Cargo.toml" "go.mod" "package.json"
           "pyproject.toml" "setup.py" "Makefile" ".git")))
 
-;; Enable ANSI colors in compilation buffers
-(add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
-
 ;; Auto-discover projects in these directories
 (defvar sw-project-directories '("~/code" "~/work" "~/dotfiles")
   "Directories to scan for projects.")
