@@ -84,7 +84,9 @@
   :after evil
   :demand t
   :config
-  (global-evil-surround-mode 1))
+  (global-evil-surround-mode 1)
+  (push '(?< . ("<" . ">")) evil-surround-pairs-alist)
+  (push '(?> . ("<" . ">")) evil-surround-pairs-alist))
 
 ;; Highlight symbol under cursor
 (defun sw-highlight-symbol-at-point ()
