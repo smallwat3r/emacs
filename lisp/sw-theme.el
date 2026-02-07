@@ -61,7 +61,7 @@
   :hook (prog-mode . hl-todo-mode)
   :custom
   (hl-todo-keyword-faces
-   '(("TODO" . "#ff6c6b")
+   '(("TODO" . "#cc0000")
      ("FIXME" . "#ff6c6b")
      ("HACK" . "#b8860b")
      ("NOTE" . "#4682b4")
