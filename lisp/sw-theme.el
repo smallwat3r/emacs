@@ -82,10 +82,6 @@
 ;; Warm colors for nighttime coding
 (use-package warm-mode
   :ensure (:host github :repo "smallwat3r/emacs-warm-mode")
-  :init
-  (setq warm-mode-refresh-packages
-        '(magit org org-modern diredfl diff-hl corfu embark marginalia consult
-          vertico markdown-mode web-mode evil-goggles symbol-overlay pdf-tools))
   :custom
   (warm-mode-warmth 0.25)
   (warm-mode-dim 0.9))
