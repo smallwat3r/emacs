@@ -141,11 +141,9 @@ If a workspace for the project already exists, switch to it."
 (advice-add 'tab-bar-close-tab :after #'sw-workspace--display-after-close)
 
 ;; Tab-bar configuration
+;; Hide the built-in tab bar, we display workspaces in the echo area
 (setq tab-bar-show nil
-      tab-bar-new-tab-choice #'sw-fallback-buffer
-      tab-bar-tab-hints t
-      tab-bar-tab-name-function (lambda () "")
-      tab-bar-format '(tab-bar-format-tabs))
+      tab-bar-new-tab-choice #'sw-fallback-buffer)
 (tab-bar-mode 1)
 
 ;; Name the initial workspace "main" and show workspaces on startup
