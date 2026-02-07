@@ -45,6 +45,9 @@
   :demand t
   :custom
   (evil-collection-magit-want-horizontal-movement t)
+  ;; Prevent evil-collection from binding SPC in modes it manages
+  ;; (e.g. magit, dired), so our SPC leader always takes priority.
+  (evil-collection-key-blacklist '("SPC"))
   :config
   (evil-collection-init))
 
@@ -108,36 +111,6 @@
   :ensure (:wait t)
   :after evil
   :demand t)
-
-;; Leader key support
-(use-package general
-  :ensure (:wait t)
-  :demand t
-  :config
-  (general-create-definer sw-leader
-    :states '(normal visual motion)
-    :keymaps 'override
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (general-create-definer sw-local-leader
-    :states '(normal visual motion)
-    :prefix "SPC m"
-    :global-prefix "C-SPC m"))
-
-;; Which-key for discoverability
-(use-package which-key
-  :ensure nil
-  :hook (sw-first-input . which-key-mode)
-  :custom
-  (which-key-idle-delay 0.3)
-  (which-key-idle-secondary-delay 0.05)
-  (which-key-separator "  ")
-  (which-key-add-column-padding 2)
-  (which-key-max-display-columns 4)
-  (which-key-sort-order 'which-key-key-order)
-  :config
-  (set-face-attribute 'which-key-key-face nil :weight 'bold))
 
 (provide 'sw-evil)
 ;;; sw-evil.el ends here

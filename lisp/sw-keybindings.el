@@ -1,34 +1,96 @@
 ;;; sw-keybindings.el --- Keybindings -*- lexical-binding: t -*-
 
 ;;; Commentary:
-;; Global and mode-specific keybindings using general.el
+;; Global and mode-specific keybindings.
 
 ;;; Code:
 
-(require 'general)
 (require 'sw-commands)
 
-;;; Window navigation macro
-;; Generates arrow keys, YNAE keys (custom layout), and split bindings for a prefix.
+;;; Which-key for discoverability
 
-(defmacro sw-define-window-nav-keys (prefix label)
-  "Define window navigation bindings under PREFIX with LABEL for which-key."
-  (let ((p prefix))
-    `(sw-leader
-       ,(concat p "") '(:ignore t :wk ,label)
-       ;; Arrow keys
-       ,(concat p " <left>") '(evil-window-left :wk "Window left")
-       ,(concat p " <right>") '(evil-window-right :wk "Window right")
-       ,(concat p " <up>") '(evil-window-up :wk "Window up")
-       ,(concat p " <down>") '(evil-window-down :wk "Window down")
-       ;; YNAE keys (custom keyboard layout)
-       ,(concat p "y") '(evil-window-left :wk "Window left")
-       ,(concat p "n") '(evil-window-down :wk "Window down")
-       ,(concat p "a") '(evil-window-up :wk "Window up")
-       ,(concat p "e") '(evil-window-right :wk "Window right")
-       ;; Splits (auto-select new window)
-       ,(concat p "v") '(sw-split-window-right :wk "Split right")
-       ,(concat p "s") '(sw-split-window-below :wk "Split below"))))
+(use-package which-key
+  :ensure nil
+  :demand t
+  :hook (sw-first-input . which-key-mode)
+  :custom
+  (which-key-idle-delay 0.3)
+  (which-key-idle-secondary-delay 0.05)
+  (which-key-separator "  ")
+  (which-key-add-column-padding 2)
+  (which-key-max-display-columns 4)
+  (which-key-sort-order 'which-key-key-order)
+  :config
+  (set-face-attribute
+   'which-key-key-face nil :weight 'bold))
+
+;;; Leader key infrastructure
+
+(defvar sw-leader-map (make-sparse-keymap)
+  "Keymap for SPC leader bindings.")
+
+(define-minor-mode sw-leader-mode
+  "Global minor mode providing SPC as leader key."
+  :global t :lighter nil
+  :keymap (make-sparse-keymap))
+
+(sw-leader-mode 1)
+
+(evil-define-key* '(normal visual motion) sw-leader-mode-map
+  (kbd "SPC") sw-leader-map)
+(global-set-key (kbd "C-SPC") sw-leader-map)
+
+(defvar sw-local-leader-alist nil
+  "Alist of (MODE . KEYMAP) for SPC m bindings.")
+
+(defun sw-local-leader-keymap ()
+  "Return the local leader keymap for the current major mode."
+  (or (alist-get major-mode sw-local-leader-alist)
+      (cl-loop for (m . km) in sw-local-leader-alist
+               when (derived-mode-p m) return km)))
+
+(defun sw-define-keys (keymap bindings)
+  "Define BINDINGS in KEYMAP with which-key labels.
+BINDINGS is a list of (KEY DEF LABEL) entries.
+DEF is a command or nil (prefix-only label)."
+  (let (wk-args)
+    (dolist (b bindings)
+      (pcase-let ((`(,key ,def ,label) b))
+        (when def
+          (define-key keymap (kbd key) def))
+        (when label
+          (push key wk-args)
+          (push label wk-args))))
+    (when wk-args
+      (apply #'which-key-add-keymap-based-replacements
+             keymap (nreverse wk-args)))))
+
+;;; Window navigation helper
+
+(defun sw-define-window-nav-keys (prefix label)
+  "Define window navigation bindings under PREFIX with LABEL."
+  (sw-define-keys sw-leader-map
+    `((,prefix nil ,label)
+      (,(concat prefix " <left>")
+       evil-window-left "Window left")
+      (,(concat prefix " <right>")
+       evil-window-right "Window right")
+      (,(concat prefix " <up>")
+       evil-window-up "Window up")
+      (,(concat prefix " <down>")
+       evil-window-down "Window down")
+      (,(concat prefix " y")
+       evil-window-left "Window left")
+      (,(concat prefix " n")
+       evil-window-down "Window down")
+      (,(concat prefix " a")
+       evil-window-up "Window up")
+      (,(concat prefix " e")
+       evil-window-right "Window right")
+      (,(concat prefix " v")
+       sw-split-window-right "Split right")
+      (,(concat prefix " s")
+       sw-split-window-below "Split below"))))
 
 ;;; Minibuffer bindings
 
@@ -55,402 +117,437 @@
 
 ;;; Leader key bindings
 
-(sw-leader
-  ;; Top level
-  "SPC" '(project-find-file :wk "Find file in project")
-  "1"   '(sw-show-buffer-path :wk "Show path")
-  "."   '(find-file :wk "Find file")
-  ","   '(consult-buffer :wk "Switch buffer")
-  "a"   '(evil-switch-to-windows-last-buffer :wk "Last buffer")
-  ":"   '(execute-extended-command :wk "M-x")
-  "'"   '(vertico-repeat :wk "Resume last search")
-  "x"   '(scratch-buffer :wk "Scratch buffer")
-  "RET" '(bookmark-jump :wk "Jump to bookmark")
-  "u"   '(universal-argument :wk "Universal arg")
+(sw-define-keys sw-leader-map
+  '(;; Top level
+    ("SPC" project-find-file "Find file in project")
+    ("1"   sw-show-buffer-path "Show path")
+    ("."   find-file "Find file")
+    (","   consult-buffer "Switch buffer")
+    ("a"   evil-switch-to-windows-last-buffer "Last buffer")
+    (":"   execute-extended-command "M-x")
+    ("'"   vertico-repeat "Resume last search")
+    ("x"   scratch-buffer "Scratch buffer")
+    ("RET" bookmark-jump "Jump to bookmark")
+    ("u"   universal-argument "Universal arg")
 
-  ;; Buffers
-  "b" '(:ignore t :wk "Buffer")
-  "bb" '(sw-workspace-switch-buffer :wk "Switch buffer")
-  "bB" '(sw-switch-buffer-global :wk "Switch buffer (all)")
-  "bd" '(kill-current-buffer :wk "Kill buffer")
-  "bD" '(sw-workspace-kill-all-buffers :wk "Kill workspace buffers")
-  "bi" '(ibuffer :wk "Ibuffer")
-  "bl" '(evil-switch-to-windows-last-buffer :wk "Last buffer")
-  "bm" '(bookmark-set :wk "Set bookmark")
-  "bM" '(bookmark-delete :wk "Delete bookmark")
-  "bn" '(next-buffer :wk "Next buffer")
-  "bp" '(previous-buffer :wk "Previous buffer")
-  "br" '(revert-buffer :wk "Revert buffer")
-  "bs" '(save-buffer :wk "Save buffer")
-  "bS" '(evil-write-all :wk "Save all buffers")
-  "bx" '(scratch-buffer :wk "Scratch buffer")
+    ;; Buffers
+    ("b"   nil "Buffer")
+    ("b b" sw-workspace-switch-buffer "Switch buffer")
+    ("b B" sw-switch-buffer-global "Switch buffer (all)")
+    ("b d" kill-current-buffer "Kill buffer")
+    ("b D" sw-workspace-kill-all-buffers
+     "Kill workspace buffers")
+    ("b i" ibuffer "Ibuffer")
+    ("b l" evil-switch-to-windows-last-buffer "Last buffer")
+    ("b m" bookmark-set "Set bookmark")
+    ("b M" bookmark-delete "Delete bookmark")
+    ("b n" next-buffer "Next buffer")
+    ("b p" previous-buffer "Previous buffer")
+    ("b r" revert-buffer "Revert buffer")
+    ("b s" save-buffer "Save buffer")
+    ("b S" evil-write-all "Save all buffers")
+    ("b x" scratch-buffer "Scratch buffer")
 
-  ;; Eat terminal
-  "e" '(:ignore t :wk "Eat")
-  "ee" '(sw-eat-here :wk "Eat at root")
-  "et" '(sw-eat-toggle :wk "Toggle eat at root")
-  "eE" '(sw-eat-here-current-buffer :wk "Eat at buffer")
-  "eT" '(sw-eat-toggle-current-buffer :wk "Toggle eat at buffer")
-  "ek" '(sw-eat-kill-other :wk "Kill other eat buffers")
-  "eK" '(sw-eat-kill-all :wk "Kill all eat buffers")
+    ;; Eat terminal
+    ("e"   nil "Eat")
+    ("e e" sw-eat-here "Eat at root")
+    ("e t" sw-eat-toggle "Toggle eat at root")
+    ("e E" sw-eat-here-current-buffer "Eat at buffer")
+    ("e T" sw-eat-toggle-current-buffer
+     "Toggle eat at buffer")
+    ("e k" sw-eat-kill-other "Kill other eat buffers")
+    ("e K" sw-eat-kill-all "Kill all eat buffers")
 
-  ;; Files
-  "f" '(:ignore t :wk "File")
-  "ff" '(find-file :wk "Find file")
-  "fF" '(consult-find :wk "Find file from here")
-  "fd" '(dired-jump :wk "Find directory")
-  "fr" '(consult-recent-file :wk "Recent files")
-  "fs" '(save-buffer :wk "Save file")
-  "fS" '(write-file :wk "Save file as")
-  "fu" '(sudo-edit :wk "Sudo this file")
-  "fU" '(sudo-edit-find-file :wk "Sudo find file")
-  "fD" '(sw-delete-this-file :wk "Delete this file")
-  "fy" '(sw-copy-file-path :wk "Yank file path")
-  "f." '(sw-workspace-find-dotfiles :wk "Find in dotfiles")
-  "fe" '(sw-workspace-find-emacs-config :wk "Find in .emacs.d")
+    ;; Files
+    ("f"   nil "File")
+    ("f f" find-file "Find file")
+    ("f F" consult-find "Find file from here")
+    ("f d" dired-jump "Find directory")
+    ("f r" consult-recent-file "Recent files")
+    ("f s" save-buffer "Save file")
+    ("f S" write-file "Save file as")
+    ("f u" sudo-edit "Sudo this file")
+    ("f U" sudo-edit-find-file "Sudo find file")
+    ("f D" sw-delete-this-file "Delete this file")
+    ("f y" sw-copy-file-path "Yank file path")
+    ("f ." sw-workspace-find-dotfiles "Find in dotfiles")
+    ("f e" sw-workspace-find-emacs-config
+     "Find in .emacs.d")
 
-  ;; Project
-  "p" '(:ignore t :wk "Project")
-  "pp" '(sw-workspace-switch-to-project :wk "Switch project")
-  "pf" '(sw-project-find-file :wk "Find file in project")
-  "pg" '(sw-consult-ripgrep-project :wk "Grep project")
-  "pd" '(project-find-dir :wk "Find dir")
-  "pb" '(project-switch-to-buffer :wk "Project buffer")
-  "pk" '(project-kill-buffers :wk "Kill project buffers")
-  "pK" '(sw-kill-all-projects-and-buffers :wk "Kill all projects")
-  "pm" '(sw-project-make :wk "Run make")
-  "pi" '(sw-project-refresh :wk "Refresh projects")
+    ;; Project
+    ("p"   nil "Project")
+    ("p p" sw-workspace-switch-to-project
+     "Switch project")
+    ("p f" sw-project-find-file "Find file in project")
+    ("p g" sw-consult-ripgrep-project "Grep project")
+    ("p d" project-find-dir "Find dir")
+    ("p b" project-switch-to-buffer "Project buffer")
+    ("p k" project-kill-buffers "Kill project buffers")
+    ("p K" sw-kill-all-projects-and-buffers
+     "Kill all projects")
+    ("p m" sw-project-make "Run make")
+    ("p i" sw-project-refresh "Refresh projects")
 
-  ;; Search
-  "s" '(:ignore t :wk "Search")
-  "ss" '(consult-line :wk "Search buffer")
-  "sS" '(consult-line-multi :wk "Search all buffers")
-  "sp" '(sw-consult-ripgrep-project :wk "Search project")
-  "sw" '(sw-consult-ripgrep-project-symbol :wk "Search symbol")
-  "si" '(consult-imenu :wk "Imenu")
-  "sI" '(consult-imenu-multi :wk "Imenu all")
-  "sr" '(consult-ripgrep :wk "Ripgrep")
-  "sf" '(consult-find :wk "Find file")
-  "sm" '(consult-mark :wk "Marks")
-  "so" '(consult-outline :wk "Outline")
+    ;; Search
+    ("s"   nil "Search")
+    ("s s" consult-line "Search buffer")
+    ("s S" consult-line-multi "Search all buffers")
+    ("s p" sw-consult-ripgrep-project "Search project")
+    ("s w" sw-consult-ripgrep-project-symbol
+     "Search symbol")
+    ("s i" consult-imenu "Imenu")
+    ("s I" consult-imenu-multi "Imenu all")
+    ("s r" consult-ripgrep "Ripgrep")
+    ("s f" consult-find "Find file")
+    ("s m" consult-mark "Marks")
+    ("s o" consult-outline "Outline")
 
-  ;; Code/LSP
-  "c" '(:ignore t :wk "Code")
-  "ca" '(eglot-code-actions :wk "Code actions")
-  "cr" '(eglot-rename :wk "Rename")
-  "cf" '(apheleia-format-buffer :wk "Format buffer")
-  "cd" '(xref-find-definitions :wk "Go to definition")
-  "cD" '(xref-find-references :wk "Find references")
-  "ci" '(eglot-find-implementation :wk "Find impl")
-  "ct" '(eglot-find-typeDefinition :wk "Find type def")
-  "ck" '(eldoc :wk "Show docs")
-  "ch" '(symbol-overlay-put :wk "Highlight symbol")
-  "cH" '(symbol-overlay-remove-all :wk "Clear highlights")
+    ;; Code/LSP
+    ("c"   nil "Code")
+    ("c a" eglot-code-actions "Code actions")
+    ("c r" eglot-rename "Rename")
+    ("c f" apheleia-format-buffer "Format buffer")
+    ("c d" xref-find-definitions "Go to definition")
+    ("c D" xref-find-references "Find references")
+    ("c i" eglot-find-implementation "Find impl")
+    ("c t" eglot-find-typeDefinition "Find type def")
+    ("c k" eldoc "Show docs")
+    ("c h" symbol-overlay-put "Highlight symbol")
+    ("c H" symbol-overlay-remove-all
+     "Clear highlights")
 
-  ;; Git (Doom-style)
-  "g" '(:ignore t :wk "Git")
-  "g/" '(magit-dispatch :wk "Magit dispatch")
-  "g." '(magit-file-dispatch :wk "File dispatch")
-  "gb" '(magit-branch-checkout :wk "Switch branch")
-  "gB" '(magit-blame-addition :wk "Blame")
-  "gc" '(:ignore t :wk "Create")
-  "gcc" '(magit-commit-create :wk "Commit")
-  "gcf" '(magit-commit-fixup :wk "Fixup")
-  "gcb" '(magit-branch-and-checkout :wk "Branch")
-  "gd" '(magit-diff-dwim :wk "Diff")
-  "gf" '(:ignore t :wk "Find")
-  "gff" '(magit-find-file :wk "Find file")
-  "gfc" '(magit-show-commit :wk "Find commit")
-  "gF" '(magit-fetch :wk "Fetch")
-  "gg" '(magit-status :wk "Status")
-  "gG" '(magit-status-here :wk "Status here")
-  "gl" '(:ignore t :wk "List")
-  "glr" '(magit-list-repositories :wk "Repositories")
-  "gL" '(magit-log-buffer-file :wk "Log file")
-  "gr" '(diff-hl-revert-hunk :wk "Revert hunk")
-  "gs" '(diff-hl-stage-current-hunk :wk "Stage hunk")
-  "gS" '(magit-file-stage :wk "Stage file")
-  "gU" '(magit-file-unstage :wk "Unstage file")
-  "gt" '(git-timemachine-toggle :wk "Timemachine")
-  "go" '(:ignore t :wk "Open")
-  "goo" '(browse-at-remote :wk "Browse remote")
-  "goy" '(browse-at-remote-kill :wk "Copy remote URL")
-  "g[" '(diff-hl-previous-hunk :wk "Previous hunk")
-  "g]" '(diff-hl-next-hunk :wk "Next hunk")
+    ;; Git
+    ("g"     nil "Git")
+    ("g /"   magit-dispatch "Magit dispatch")
+    ("g ."   magit-file-dispatch "File dispatch")
+    ("g b"   magit-branch-checkout "Switch branch")
+    ("g B"   magit-blame-addition "Blame")
+    ("g c"   nil "Create")
+    ("g c c" magit-commit-create "Commit")
+    ("g c f" magit-commit-fixup "Fixup")
+    ("g c b" magit-branch-and-checkout "Branch")
+    ("g d"   magit-diff-dwim "Diff")
+    ("g f"   nil "Find")
+    ("g f f" magit-find-file "Find file")
+    ("g f c" magit-show-commit "Find commit")
+    ("g F"   magit-fetch "Fetch")
+    ("g g"   magit-status "Status")
+    ("g G"   magit-status-here "Status here")
+    ("g l"   nil "List")
+    ("g l r" magit-list-repositories "Repositories")
+    ("g L"   magit-log-buffer-file "Log file")
+    ("g r"   diff-hl-revert-hunk "Revert hunk")
+    ("g s"   diff-hl-stage-current-hunk "Stage hunk")
+    ("g S"   magit-file-stage "Stage file")
+    ("g U"   magit-file-unstage "Unstage file")
+    ("g t"   git-timemachine-toggle "Timemachine")
+    ("g o"   nil "Open")
+    ("g o o" browse-at-remote "Browse remote")
+    ("g o y" browse-at-remote-kill "Copy remote URL")
+    ("g ["   diff-hl-previous-hunk "Previous hunk")
+    ("g ]"   diff-hl-next-hunk "Next hunk")
 
-  ;; Help
-  "h" '(:ignore t :wk "Help")
-  "hr" '(restart-emacs :wk "Restart Emacs")
+    ;; Help
+    ("h"   nil "Help")
+    ("h r" restart-emacs "Restart Emacs")
+    ("h f" helpful-callable "Function")
+    ("h F" describe-char "Face at point")
+    ("h v" helpful-variable "Variable")
+    ("h k" helpful-key "Key")
+    ("h p" helpful-at-point "At point")
+    ("h i" info "Info")
+    ("h m" describe-mode "Mode")
 
-  ;; Toggle
-  "t" '(:ignore t :wk "Toggle")
-  "tt" '(toggle-truncate-lines :wk "Truncate lines")
-  "tn" '(display-line-numbers-mode :wk "Line numbers")
-  "ti" '(imenu-list-smart-toggle :wk "Imenu list")
-  "tw" '(whitespace-mode :wk "Whitespace")
-  "tf" '(load-theme :wk "Load theme")
-  "ta" '(warm-mode :wk "Warm mode")
+    ;; Toggle
+    ("t"   nil "Toggle")
+    ("t t" toggle-truncate-lines "Truncate lines")
+    ("t n" display-line-numbers-mode "Line numbers")
+    ("t i" imenu-list-smart-toggle "Imenu list")
+    ("t w" whitespace-mode "Whitespace")
+    ("t f" load-theme "Load theme")
+    ("t a" warm-mode "Warm mode")
 
-  ;; Workspaces (tab-bar)
-  "TAB" '(:ignore t :wk "Workspace")
-  "TAB TAB" '(sw-workspace-display :wk "Display workspaces")
-  "TAB ." '(tab-bar-switch-to-tab :wk "Switch workspace")
-  "TAB n" '(sw-workspace-new :wk "New workspace")
-  "TAB d" '(tab-bar-close-tab :wk "Close workspace")
-  "TAB r" '(tab-bar-rename-tab :wk "Rename workspace")
-  "TAB ]" '(tab-bar-switch-to-next-tab :wk "Next workspace")
-  "TAB [" '(tab-bar-switch-to-prev-tab :wk "Prev workspace")
-  "TAB 1" '(sw-workspace-switch-to-1 :wk "Workspace 1")
-  "TAB 2" '(sw-workspace-switch-to-2 :wk "Workspace 2")
-  "TAB 3" '(sw-workspace-switch-to-3 :wk "Workspace 3")
-  "TAB 4" '(sw-workspace-switch-to-4 :wk "Workspace 4")
-  "TAB 5" '(sw-workspace-switch-to-5 :wk "Workspace 5")
-  "TAB 6" '(sw-workspace-switch-to-6 :wk "Workspace 6")
-  "TAB 7" '(sw-workspace-switch-to-7 :wk "Workspace 7")
-  "TAB 8" '(sw-workspace-switch-to-8 :wk "Workspace 8")
-  "TAB 9" '(sw-workspace-switch-to-9 :wk "Workspace 9")
+    ;; Workspaces (tab-bar)
+    ("TAB"     nil "Workspace")
+    ("TAB TAB" sw-workspace-display
+     "Display workspaces")
+    ("TAB ." tab-bar-switch-to-tab "Switch workspace")
+    ("TAB n" sw-workspace-new "New workspace")
+    ("TAB d" tab-bar-close-tab "Close workspace")
+    ("TAB r" tab-bar-rename-tab "Rename workspace")
+    ("TAB ]" tab-bar-switch-to-next-tab
+     "Next workspace")
+    ("TAB [" tab-bar-switch-to-prev-tab
+     "Prev workspace")
+    ("TAB 1" sw-workspace-switch-to-1 "Workspace 1")
+    ("TAB 2" sw-workspace-switch-to-2 "Workspace 2")
+    ("TAB 3" sw-workspace-switch-to-3 "Workspace 3")
+    ("TAB 4" sw-workspace-switch-to-4 "Workspace 4")
+    ("TAB 5" sw-workspace-switch-to-5 "Workspace 5")
+    ("TAB 6" sw-workspace-switch-to-6 "Workspace 6")
+    ("TAB 7" sw-workspace-switch-to-7 "Workspace 7")
+    ("TAB 8" sw-workspace-switch-to-8 "Workspace 8")
+    ("TAB 9" sw-workspace-switch-to-9 "Workspace 9")
 
-  ;; Window (unique bindings only, navigation via macro below)
-  "w" '(:ignore t :wk "Window")
-  "ww" '(other-window :wk "Other window")
-  "wd" '(delete-window :wk "Delete window")
-  "wD" '(delete-other-windows :wk "Delete others")
-  "w=" '(balance-windows :wk "Balance")
-  "wm" '(maximize-window :wk "Maximize")
+    ;; Window (unique bindings, navigation via function below)
+    ("w"   nil "Window")
+    ("w w" other-window "Other window")
+    ("w d" delete-window "Delete window")
+    ("w D" delete-other-windows "Delete others")
+    ("w =" balance-windows "Balance")
+    ("w m" maximize-window "Maximize")
 
-  ;; Open/Apps
-  "o" '(:ignore t :wk "Open")
-  "o1" '(sw-terminal-here :wk "External terminal")
-  "o." '(sw-tramp-connect :wk "TRAMP SSH")
-  "os" '(sw-ssh-external :wk "SSH external term")
-  "od" '(dired-jump :wk "Dired")
-  "op" '(pass :wk "Pass")
-  "ol" '(browse-url-at-point :wk "Open URL")
+    ;; Open/Apps
+    ("o"   nil "Open")
+    ("o 1" sw-terminal-here "External terminal")
+    ("o ." sw-tramp-connect "TRAMP SSH")
+    ("o s" sw-ssh-external "SSH external term")
+    ("o d" dired-jump "Dired")
+    ("o p" pass "Pass")
+    ("o l" browse-url-at-point "Open URL")
 
-  ;; Tailscale
-  "T" '(:ignore t :wk "Tailscale")
-  "Ts" '(sw-tailscale-switch :wk "Switch account")
-  "TS" '(sw-tailscale-status :wk "Status")
-  "Tc" '(sw-tailscale-ssh :wk "SSH to device")
+    ;; Tailscale
+    ("T"   nil "Tailscale")
+    ("T s" sw-tailscale-switch "Switch account")
+    ("T S" sw-tailscale-status "Status")
+    ("T c" sw-tailscale-ssh "SSH to device")
 
-  ;; Claude AI / LSP
-  "r" '(:ignore t :wk "AI/LSP")
-  "rc" '(claude-code :wk "Claude chat")
-  "rC" '(claude-code-continue :wk "Claude continue")
-  "rR" '(claude-code-resume :wk "Claude resume")
-  "rn" '(claude-code-new-instance :wk "New instance")
-  "rd" '(claude-code-start-in-directory :wk "Start in directory")
-  "rs" '(claude-code-select-buffer :wk "Switch buffer")
-  "rt" '(sw-claude-code-toggle :wk "Toggle Claude")
-  "rr" '(claude-code-send-region :wk "Send region")
-  "rp" '(claude-code-send-command :wk "Send command")
-  "rx" '(claude-code-send-command-with-context :wk "Send with context")
-  "rb" '(claude-code-send-buffer-file :wk "Send buffer file")
-  "re" '(claude-code-fix-error-at-point :wk "Fix error at point")
-  "rm" '(claude-code-cycle-mode :wk "Cycle mode")
-  "rM" '(claude-code-transient :wk "Transient menu")
-  "rk" '(claude-code-kill :wk "Kill session")
-  "rw" '(eglot-reconnect :wk "Reconnect Eglot")
+    ;; AI/LSP
+    ("r"   nil "AI/LSP")
+    ("r c" claude-code "Claude chat")
+    ("r C" claude-code-continue "Claude continue")
+    ("r R" claude-code-resume "Claude resume")
+    ("r n" claude-code-new-instance "New instance")
+    ("r d" claude-code-start-in-directory
+     "Start in directory")
+    ("r s" claude-code-select-buffer "Switch buffer")
+    ("r t" sw-claude-code-toggle "Toggle Claude")
+    ("r r" claude-code-send-region "Send region")
+    ("r p" claude-code-send-command "Send command")
+    ("r x" claude-code-send-command-with-context
+     "Send with context")
+    ("r b" claude-code-send-buffer-file
+     "Send buffer file")
+    ("r e" claude-code-fix-error-at-point
+     "Fix error at point")
+    ("r m" claude-code-cycle-mode "Cycle mode")
+    ("r M" claude-code-transient "Transient menu")
+    ("r k" claude-code-kill "Kill session")
+    ("r w" eglot-reconnect "Reconnect Eglot")
 
-  ;; Insert
-  "i" '(:ignore t :wk "Insert")
-  "id" '(sw-insert-date :wk "Date")
-  "it" '(sw-insert-datetime :wk "Datetime")
-  "ie" '(sw-insert-email :wk "Email")
-  "iy" '(consult-yank-pop :wk "From kill ring")
-  "is" '(yas-insert-snippet :wk "Snippet")
+    ;; Insert
+    ("i"   nil "Insert")
+    ("i d" sw-insert-date "Date")
+    ("i t" sw-insert-datetime "Datetime")
+    ("i e" sw-insert-email "Email")
+    ("i y" consult-yank-pop "From kill ring")
+    ("i s" yas-insert-snippet "Snippet")
 
-  ;; Notes
-  "n" '(:ignore t :wk "Notes")
-  "nd" '(deft :wk "Deft")
-  "nj" '(org-journal-new-entry :wk "Journal entry")
+    ;; Notes
+    ("n"   nil "Notes")
+    ("n d" deft "Deft")
+    ("n j" org-journal-new-entry "Journal entry")))
 
-  ;; Help
-  "h" '(:ignore t :wk "Help")
-  "hf" '(helpful-callable :wk "Function")
-  "hF" '(describe-char :wk "Face at point")
-  "hv" '(helpful-variable :wk "Variable")
-  "hk" '(helpful-key :wk "Key")
-  "hp" '(helpful-at-point :wk "At point")
-  "hi" '(info :wk "Info")
-  "hm" '(describe-mode :wk "Mode")
+;; SPC m dispatches to the mode-local keymap via menu-item filter.
+;; which-key can't introspect :filter, so the label is set separately.
+(define-key sw-leader-map "m"
+  `(menu-item "Local mode" nil
+    :filter ,(lambda (&optional _)
+               (sw-local-leader-keymap))))
+(which-key-add-key-based-replacements "SPC m" "Local mode")
 
-  ;; Local/Mode (placeholder for which-key)
-  "m" '(:ignore t :wk "Local mode"))
-
-;; Window navigation bindings (arrows, YNAE, splits) for both prefixes.
-;; "w" makes sense (for window), "l" is kept for muscle memory.
+;; Window navigation bindings (arrows, YNAE, splits).
+;; "w" for window, "l" kept for muscle memory.
 (sw-define-window-nav-keys "w" "Window")
 (sw-define-window-nav-keys "l" "Window")
 
 ;;; Evil normal state bindings
 
-(general-define-key
- :states 'normal
- ;; Window navigation (HJKL and YNAE for custom layout)
- "C-h" 'evil-window-left
- "C-j" 'evil-window-down
- "C-l" 'evil-window-right
- "C-y" 'evil-window-left
- "C-n" 'evil-window-down
- "C-e" 'evil-window-right
+(evil-define-key* 'normal 'global
+  ;; Window navigation (HJKL and YNAE for custom layout)
+  (kbd "C-h") #'evil-window-left
+  (kbd "C-j") #'evil-window-down
+  (kbd "C-l") #'evil-window-right
+  (kbd "C-y") #'evil-window-left
+  (kbd "C-n") #'evil-window-down
+  (kbd "C-e") #'evil-window-right
 
- ;; Line operations
- "M-o" 'delete-blank-lines
- "C-k" 'join-line
- "C-a" 'join-line
- "B" 'beginning-of-line-text
- "E" 'end-of-line
+  ;; Line operations
+  (kbd "M-o") #'delete-blank-lines
+  (kbd "C-k") #'join-line
+  (kbd "C-a") #'join-line
+  (kbd "B")   #'beginning-of-line-text
+  (kbd "E")   #'end-of-line
 
- ;; Buffer navigation
- "]b" 'next-buffer
- "[b" 'previous-buffer
+  ;; Buffer navigation
+  (kbd "]b") #'next-buffer
+  (kbd "[b") #'previous-buffer
 
- ;; Git hunk navigation
- "]g" 'diff-hl-next-hunk
- "[g" 'diff-hl-previous-hunk
+  ;; Git hunk navigation
+  (kbd "]g") #'diff-hl-next-hunk
+  (kbd "[g") #'diff-hl-previous-hunk
 
- ;; Commenting (gc is an operator, gcc handled by evil-nerd-commenter)
- "gc" 'evilnc-comment-operator
+  ;; Commenting
+  (kbd "gc") #'evilnc-comment-operator
 
- ;; Alignment (gl/gL operator, e.g., glip= to align paragraph by =)
- "gl" 'evil-lion-left
- "gL" 'evil-lion-right
+  ;; Alignment
+  (kbd "gl") #'evil-lion-left
+  (kbd "gL") #'evil-lion-right
 
- ;; Quick commands with ;
- ";w" 'save-buffer
+  ;; Quick commands with ;
+  (kbd ";w") #'save-buffer
 
- ;; Symbol highlight (stay at point, use n/N to navigate)
- "*" 'sw-highlight-symbol-at-point
- "n" 'evil-ex-search-next
- "N" 'evil-ex-search-previous
- [escape] 'evil-ex-nohighlight)
+  ;; Symbol highlight (stay at point, use n/N to navigate)
+  (kbd "*")  #'sw-highlight-symbol-at-point
+  (kbd "n")  #'evil-ex-search-next
+  (kbd "N")  #'evil-ex-search-previous
+  [escape]   #'evil-ex-nohighlight)
 
 ;;; Evil visual state bindings
 
-(general-define-key
- :states 'visual
- "gc" 'evilnc-comment-operator
- "gl" 'evil-lion-left
- "gL" 'evil-lion-right
- ";f" 'sw-format-region)
+(evil-define-key* 'visual 'global
+  (kbd "gc") #'evilnc-comment-operator
+  (kbd "gl") #'evil-lion-left
+  (kbd "gL") #'evil-lion-right
+  (kbd ";f") #'sw-format-region)
 
 ;;; Emacs Lisp mode bindings
 
-(sw-local-leader
-  :keymaps '(emacs-lisp-mode-map lisp-interaction-mode-map)
-  "e" '(:ignore t :wk "Eval")
-  "eb" '(eval-buffer :wk "Eval buffer")
-  "er" '(eval-region :wk "Eval region")
-  "ee" '(eval-last-sexp :wk "Eval last sexp")
-  "ed" '(eval-defun :wk "Eval defun"))
+(defvar sw-elisp-local-map (make-sparse-keymap)
+  "Local leader keymap for Emacs Lisp modes.")
+
+(sw-define-keys sw-elisp-local-map
+  '(("e"   nil "Eval")
+    ("e b" eval-buffer "Eval buffer")
+    ("e r" eval-region "Eval region")
+    ("e e" eval-last-sexp "Eval last sexp")
+    ("e d" eval-defun "Eval defun")))
+
+(dolist (mode '(emacs-lisp-mode lisp-interaction-mode))
+  (push (cons mode sw-elisp-local-map)
+        sw-local-leader-alist))
 
 ;;; Python mode bindings
 
 (with-eval-after-load 'python
-  (sw-local-leader
-    :keymaps '(python-mode-map python-ts-mode-map)
-    "f" '(sw-python-toggle-fstring :wk "Toggle f-string")
-    "i" '(:ignore t :wk "Import")
-    "io" '(sw-python-isort :wk "Optimize (isort)")
-    "t" '(:ignore t :wk "Test")
-    "tt" '(python-pytest-run-def-or-class-at-point :wk "Test at point")
-    "tf" '(python-pytest-file-dwim :wk "Test file")
-    "ta" '(python-pytest :wk "Test all")
-    "tr" '(python-pytest-repeat :wk "Repeat last")
-    "tp" '(python-pytest-dispatch :wk "Pytest dispatch")))
+  (defvar sw-python-local-map (make-sparse-keymap)
+    "Local leader keymap for Python modes.")
+
+  (sw-define-keys sw-python-local-map
+    '(("f"   sw-python-toggle-fstring "Toggle f-string")
+      ("i"   nil "Import")
+      ("i o" sw-python-isort "Optimize (isort)")
+      ("t"   nil "Test")
+      ("t t" python-pytest-run-def-or-class-at-point
+       "Test at point")
+      ("t f" python-pytest-file-dwim "Test file")
+      ("t a" python-pytest "Test all")
+      ("t r" python-pytest-repeat "Repeat last")
+      ("t p" python-pytest-dispatch
+       "Pytest dispatch")))
+
+  (dolist (mode '(python-mode python-ts-mode))
+    (push (cons mode sw-python-local-map)
+          sw-local-leader-alist)))
 
 ;;; Go mode bindings
 
 (with-eval-after-load 'go-ts-mode
-  (sw-local-leader
-    :keymaps 'go-ts-mode-map
-    "t" '(:ignore t :wk "Test")
-    "tt" '(go-test-current-test :wk "Test at point")
-    "tf" '(go-test-current-file :wk "Test file")
-    "ta" '(go-test-current-project :wk "Test all")
-    "b" '(:ignore t :wk "Build")
-    "br" '((lambda () (interactive) (compile "go run .")) :wk "Run")
-    "bb" '((lambda () (interactive) (compile "go build")) :wk "Build")))
+  (defvar sw-go-local-map (make-sparse-keymap)
+    "Local leader keymap for Go modes.")
+
+  (sw-define-keys sw-go-local-map
+    `(("t"   nil "Test")
+      ("t t" go-test-current-test "Test at point")
+      ("t f" go-test-current-file "Test file")
+      ("t a" go-test-current-project "Test all")
+      ("b"   nil "Build")
+      ("b r" ,(lambda () (interactive)
+                (compile "go run ."))
+       "Run")
+      ("b b" ,(lambda () (interactive)
+                (compile "go build"))
+       "Build")))
+
+  (push (cons 'go-ts-mode sw-go-local-map)
+        sw-local-leader-alist))
 
 ;;; Eat mode bindings
 
 (with-eval-after-load 'eat
-  (general-define-key
-   :keymaps 'eat-mode-map
-   :states 'normal
-   "B" 'beginning-of-line
-   "E" 'end-of-line
-   "0" 'beginning-of-line
-   "$" 'end-of-line
-   "G" 'end-of-buffer
-   "gg" 'beginning-of-buffer
-   "C-u" 'evil-scroll-up
-   "C-d" 'evil-scroll-down
-   "RET" 'evil-insert-state
-   "dd" 'sw-eat-interrupt
-   "p" 'sw-eat-yank)
+  (evil-define-key* 'normal eat-mode-map
+    (kbd "B")   #'beginning-of-line
+    (kbd "E")   #'end-of-line
+    (kbd "0")   #'beginning-of-line
+    (kbd "$")   #'end-of-line
+    (kbd "G")   #'end-of-buffer
+    (kbd "gg")  #'beginning-of-buffer
+    (kbd "C-u") #'evil-scroll-up
+    (kbd "C-d") #'evil-scroll-down
+    (kbd "RET") #'evil-insert-state
+    (kbd "dd")  #'sw-eat-interrupt
+    (kbd "p")   #'sw-eat-yank)
 
-  (general-define-key
-   :keymaps 'eat-mode-map
-   :states '(normal insert)
-   "C-," 'sw-eat-zsh-history-pick)
+  (evil-define-key* '(normal insert) eat-mode-map
+    (kbd "C-,") #'sw-eat-zsh-history-pick)
 
   ;; Semi-char mode bindings
-  (general-define-key
-   :keymaps 'eat-semi-char-mode-map
-   "<escape>" 'evil-normal-state
-   "C-<backspace>" 'sw-eat-backward-kill-word
-   "M-<backspace>" 'eat-self-input
-   "M-d" 'eat-self-input
-   "M-f" 'eat-self-input
-   "M-b" 'eat-self-input
-   "C-<left>" 'eat-self-input
-   "C-<right>" 'eat-self-input
-   "C-k" 'eat-self-input
-   "C-j" 'eat-self-input
-   "C-y" 'sw-eat-yank
-   "C-," 'sw-eat-zsh-history-pick))
+  (define-key eat-semi-char-mode-map
+    (kbd "<escape>") #'evil-normal-state)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-<backspace>") #'sw-eat-backward-kill-word)
+  (define-key eat-semi-char-mode-map
+    (kbd "M-<backspace>") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "M-d") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "M-f") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "M-b") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-<left>") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-<right>") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-k") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-j") #'eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-y") #'sw-eat-yank)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-,") #'sw-eat-zsh-history-pick))
 
 ;;; Dired mode bindings
 
 (with-eval-after-load 'dired
-  (general-define-key
-   :keymaps 'dired-mode-map
-   :states 'normal
-   "TAB" 'dired-subtree-toggle
-   "<backtab>" 'dired-subtree-remove
-   "/" 'dired-narrow-fuzzy))
+  (evil-define-key* 'normal dired-mode-map
+    (kbd "TAB")      #'dired-subtree-toggle
+    (kbd "<backtab>") #'dired-subtree-remove
+    (kbd "/")        #'dired-narrow-fuzzy))
 
 ;;; Git timemachine bindings
 
 (with-eval-after-load 'git-timemachine
-  (general-define-key
-   :keymaps 'git-timemachine-mode-map
-   :states 'normal
-   "C-n" 'git-timemachine-show-previous-revision
-   "C-a" 'git-timemachine-show-next-revision))
+  (evil-define-key* 'normal git-timemachine-mode-map
+    (kbd "C-n") #'git-timemachine-show-previous-revision
+    (kbd "C-a") #'git-timemachine-show-next-revision))
 
 ;;; Deft mode bindings
 
 (with-eval-after-load 'deft
-  (general-define-key
-   :keymaps 'deft-mode-map
-   :states 'normal
-   "gr" 'deft-refresh
-   "a"  'deft-new-file
-   "A"  'deft-new-file-named
-   "d"  'deft-delete-file
-   "D"  'deft-archive-file
-   "r"  'deft-rename-file
-   "q"  'kill-current-buffer)
+  (evil-define-key* 'normal deft-mode-map
+    (kbd "gr") #'deft-refresh
+    (kbd "a")  #'deft-new-file
+    (kbd "A")  #'deft-new-file-named
+    (kbd "d")  #'deft-delete-file
+    (kbd "D")  #'deft-archive-file
+    (kbd "r")  #'deft-rename-file
+    (kbd "q")  #'kill-current-buffer)
 
-  (general-define-key
-   :keymaps 'deft-mode-map
-   :states 'insert
-   "C-n" 'deft-new-file
-   "C-d" 'deft-delete-file
-   "C-r" 'deft-rename-file))
+  (evil-define-key* 'insert deft-mode-map
+    (kbd "C-n") #'deft-new-file
+    (kbd "C-d") #'deft-delete-file
+    (kbd "C-r") #'deft-rename-file))
 
 (provide 'sw-keybindings)
 ;;; sw-keybindings.el ends here
