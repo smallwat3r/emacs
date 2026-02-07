@@ -198,6 +198,22 @@ Handles combined prefixes like `rf' or `fr' correctly."
              (t
               (insert "f"))))))))
 
+  (defun sw-python-repl-toggle ()
+    "Toggle a project-scoped Python REPL using the venv."
+    (interactive)
+    (let* ((python
+            (or (and (fboundp 'pet-executable-find)
+                     (pet-executable-find "python"))
+                python-shell-interpreter))
+           (python-shell-interpreter python)
+           (proc-name
+            (python-shell-get-process-name 'project))
+           (buf (get-buffer
+                 (format "*%s*" proc-name))))
+      (if-let ((win (and buf (get-buffer-window buf))))
+          (delete-window win)
+        (run-python nil 'project t))))
+
   (defun sw-python-isort ()
     "Run isort on the current buffer."
     (interactive)
