@@ -335,6 +335,11 @@ Handles combined prefixes like `rf' or `fr' correctly."
 (use-package terraform-mode
   :mode "\\.tf\\'")
 
+;;; Emacs Lisp
+
+(use-package package-lint
+  :commands package-lint-current-buffer)
+
 ;;; Misc
 
 (use-package lua-mode

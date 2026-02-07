@@ -464,6 +464,10 @@
                                   "LICENSE" "README*" "*-pkg.el"))
                        :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
                        :ref "b4b5b1c864f1fdf240d1bbd7093529f5a75e8a06"))
+ (package-lint :source "elpaca-menu-lock-file" :recipe
+               (:package "package-lint" :fetcher github :repo "purcell/package-lint" :files
+                         (:defaults "data" (:exclude "*flymake.el")) :source "MELPA" :protocol https
+                         :inherit t :depth treeless :ref "1c37329703a507fa357302cf6fc29d4f2fe631a8"))
  (parent-mode :source "elpaca-menu-lock-file" :recipe
               (:package "parent-mode" :fetcher github :repo "Fanael/parent-mode" :files
                         ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
@@ -616,8 +620,8 @@
                     :fetcher github :source "elpaca-menu-lock-file" :protocol https :inherit t
                     :depth treeless :ref "c6f6d0674cfeb4374a77dde5e5f899e0fe62dd32"))
  (warm-mode :source "elpaca-menu-lock-file" :recipe
-            (:source nil :protocol https :inherit t :depth treeless :host github :repo
-                     "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
+            (:source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :host github
+                     :repo "smallwat3r/emacs-warm-mode" :package "warm-mode" :ref
                      "f609d2ad4c0af311162444a84f427c566802c0db"))
  (web-mode :source "elpaca-menu-lock-file" :recipe
            (:package "web-mode" :repo "fxbois/web-mode" :fetcher github :files
