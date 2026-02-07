@@ -23,8 +23,8 @@
   (evil-vsplit-window-right t)
   (evil-respect-visual-line-mode t)
   (evil-search-module 'evil-search)
-  (evil-kbd-macro-suppress-motion-error t)  ; don't abort macros on motion errors
-  (evil-ex-interactive-search-highlight 'selected-window)  ; only highlight in current window
+  (evil-kbd-macro-suppress-motion-error t)
+  (evil-ex-interactive-search-highlight 'selected-window)
   (evil-ex-search-highlight-all t)
   :config
   (evil-mode 1)
