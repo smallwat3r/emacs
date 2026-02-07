@@ -174,20 +174,45 @@ Handles combined prefixes like `rf' or `fr' correctly."
       (when in-string
         (save-excursion
           (goto-char string-start)
-          (cond
-           ;; Immediate prefix char is f/F, remove it
-           ((memq (char-before string-start) '(?f ?F))
-            (delete-char -1))
-           ;; Combined prefix like rf/fr
-           ((and (> string-start 1)
-                 (memq (char-before (1- string-start)) '(?f ?F))
-                 (memq (char-before string-start) '(?r ?R ?b ?B ?u ?U)))
-            (goto-char (1- string-start))
-            (delete-char -1))
-           ;; No f-prefix, add it
-           (t
-            (goto-char string-start)
-            (insert "f")))))))
+          ;; For triple-quoted strings, syntax-ppss reports
+          ;; string-start at the last quote of the opening
+          ;; delimiter. Move back to the first quote.
+          (let ((q (char-after)))
+            (when (and (memq q '(?\" ?'))
+                       (> (point) 1)
+                       (eq (char-before) q)
+                       (eq (char-before (1- (point))) q))
+              (backward-char 2)))
+          (let ((start (point)))
+            (cond
+             ;; Immediate prefix char is f, remove it
+             ((eq (char-before start) ?f)
+              (delete-char -1))
+             ;; Combined prefix fr (raw f-string)
+             ((and (> start 1)
+                   (eq (char-before (1- start)) ?f)
+                   (memq (char-before start) '(?r ?R)))
+              (goto-char (1- start))
+              (delete-char -1))
+             ;; No f-prefix, add it
+             (t
+              (insert "f"))))))))
+
+  (defun sw-python-repl-toggle ()
+    "Toggle a project-scoped Python REPL using the venv."
+    (interactive)
+    (let* ((python
+            (or (and (fboundp 'pet-executable-find)
+                     (pet-executable-find "python"))
+                python-shell-interpreter))
+           (python-shell-interpreter python)
+           (proc-name
+            (python-shell-get-process-name 'project))
+           (buf (get-buffer
+                 (format "*%s*" proc-name))))
+      (if-let ((win (and buf (get-buffer-window buf))))
+          (delete-window win)
+        (run-python nil 'project t))))
 
   (defun sw-python-isort ()
     "Run isort on the current buffer."

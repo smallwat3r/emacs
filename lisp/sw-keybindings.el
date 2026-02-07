@@ -396,6 +396,7 @@ DEF is a command or nil (prefix-only label)."
 
   ;; Quick commands with ;
   (kbd ";w") #'save-buffer
+  (kbd ";q") #'evil-quit
 
   ;; Symbol highlight (stay at point, use n/N to navigate)
   (kbd "*")  #'sw-highlight-symbol-at-point
@@ -435,6 +436,7 @@ DEF is a command or nil (prefix-only label)."
 
   (sw-define-keys sw-python-local-map
     '(("f"   sw-python-toggle-fstring "Toggle f-string")
+      ("r"   sw-python-repl-toggle "Toggle REPL")
       ("i"   nil "Import")
       ("i o" sw-python-isort "Optimize (isort)")
       ("t"   nil "Test")
