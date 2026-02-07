@@ -281,7 +281,7 @@
 ;; Window navigation bindings (arrows, YNAE, splits) for both prefixes.
 ;; "w" makes sense (for window), "l" is kept for muscle memory.
 (sw-define-window-nav-keys "w" "Window")
-(sw-define-window-nav-keys "l" "Select window")
+(sw-define-window-nav-keys "l" "Window")
 
 ;;; Evil normal state bindings
 
