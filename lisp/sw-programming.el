@@ -326,19 +326,6 @@ Handles combined prefixes like `rf' or `fr' correctly."
   :hook (sh-mode . (lambda ()
                      (setq-local indent-tabs-mode nil))))
 
-;;; Docker
-
-(use-package dockerfile-mode
-  :mode "Dockerfile\\'")
-
-(use-package docker
-  :commands docker)
-
-;;; Terraform
-
-(use-package terraform-mode
-  :mode "\\.tf\\'")
-
 ;;; SQL
 
 (use-package sql
@@ -369,7 +356,16 @@ Handles combined prefixes like `rf' or `fr' correctly."
 (use-package package-lint
   :commands package-lint-current-buffer)
 
-;;; Misc
+;;; Other file types
+
+(use-package dockerfile-mode
+  :mode "Dockerfile\\'")
+
+(use-package docker
+  :commands docker)
+
+(use-package terraform-mode
+  :mode "\\.tf\\'")
 
 (use-package lua-mode
   :mode "\\.lua\\'")
@@ -377,15 +373,11 @@ Handles combined prefixes like `rf' or `fr' correctly."
 (use-package nginx-mode
   :mode ("nginx\\.conf\\'" "/nginx/.+\\.conf\\'"))
 
-;;; Makefile
-
 (use-package make-mode
   :ensure nil
   :mode ("Makefile.*" . makefile-mode))
 
-;;; Additional file type associations
-
-;; ROS (Robot Operating System) launch files are XML
+;; ROS launch files are XML
 (add-to-list 'auto-mode-alist
              '("\\.launch\\'" . xml-mode))
 
