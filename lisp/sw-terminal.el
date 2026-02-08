@@ -56,8 +56,6 @@ LIMIT defaults to 10000."
 
 ;;; Eat - Emulate A Terminal
 
-(defconst sw-eat-prompt-chars "[$#>❯→%]"
-  "Character class matching common shell prompt characters.")
 
 (use-package eat
   :commands (eat eat-project eat-other-window)
@@ -163,14 +161,9 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
                (buffer-live-p (process-buffer proc)))
       (with-current-buffer (process-buffer proc)
         (unless sw-eat-tramp-initialized
-          ;; Check if the last line shows a shell prompt
           (when (and (bound-and-true-p eat-terminal)
-                     (save-excursion
-                       (goto-char (point-max))
-                       (forward-line 0)
-                       (looking-at-p
-                      (concat ".*" sw-eat-prompt-chars
-                              "\\s-*$"))))
+                     (= (eat-term-end eat-terminal)
+                        (point-max)))
             (setq sw-eat-tramp-initialized t)
             (process-send-string
              proc (sw-eat--tramp-init-string tramp-prefix)))))))
@@ -299,14 +292,22 @@ For remote directories, opens a shell on the remote host."
 
 (defun sw-eat--current-input ()
   "Return current input in eat, or nil if empty.
-Extracts text after common prompt characters ($, #, >, ❯, →, %)."
-  (when (derived-mode-p 'eat-mode)
-    (let* ((line (buffer-substring-no-properties
-                  (line-beginning-position) (point)))
-           (prompt-re (concat ".*?" sw-eat-prompt-chars "\\s-*"))
-           (input (if (string-match prompt-re line)
-                      (substring line (match-end 0))
-                    (string-trim line))))
+Uses eat's shell integration prompt-end text property to locate
+where user input begins (set via OSC 51 B/C sequences from the
+zsh integration script). Uses point (terminal cursor) as the end
+boundary to exclude zsh autosuggestion ghost text."
+  (when (and (derived-mode-p 'eat-mode)
+             (bound-and-true-p eat-terminal))
+    (let* ((cursor (point))
+           (prompt-end
+            (save-excursion
+              (goto-char cursor)
+              (or (previous-single-property-change
+                   (point) 'eat--shell-prompt-end)
+                  (eat-term-end eat-terminal))))
+           (input (string-trim
+                   (buffer-substring-no-properties
+                    prompt-end cursor))))
       (unless (string-empty-p input) input))))
 
 (defun sw--zsh-history-collection (history)
