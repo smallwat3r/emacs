@@ -419,7 +419,8 @@ DEF is a command or nil (prefix-only label)."
   "Local leader keymap for Emacs Lisp modes.")
 
 (sw-define-keys sw-elisp-local-map
-  '(("e"   nil "Eval")
+  '(("r"   sw-ielm-toggle "Toggle REPL")
+    ("e"   nil "Eval")
     ("e b" eval-buffer "Eval buffer")
     ("e r" eval-region "Eval region")
     ("e e" eval-last-sexp "Eval last sexp")

@@ -20,6 +20,7 @@ auto-save-list/
 tramp
 tramp-autosave/
 places
+ielm-history.eld
 
 # Backup files
 *~

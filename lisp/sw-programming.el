@@ -337,6 +337,14 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 ;;; Emacs Lisp
 
+(defun sw-ielm-toggle ()
+  "Toggle an IELM (Emacs Lisp REPL) window."
+  (interactive)
+  (let ((buf (get-buffer "*ielm*")))
+    (if-let ((win (and buf (get-buffer-window buf))))
+        (delete-window win)
+      (ielm))))
+
 (use-package package-lint
   :commands package-lint-current-buffer)
 
