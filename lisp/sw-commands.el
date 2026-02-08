@@ -154,5 +154,27 @@ When deleting single space, also deletes trailing symbol and word."
   (sw--set-all-font-sizes sw-font-size)
   (message "Font size: %dpt" sw-font-size))
 
+(defun sw-copy-dedented (beg end)
+  "Copy region between BEG and END with common indentation removed."
+  (interactive "r")
+  (let* ((text (buffer-substring-no-properties beg end))
+         (lines (split-string text "\n"))
+         (min-indent most-positive-fixnum))
+    (dolist (l lines)
+      (when (string-match "\\`\\( *\\)\\S-" l)
+        (setq min-indent
+              (min min-indent (match-end 1)))))
+    (when (= min-indent most-positive-fixnum)
+      (setq min-indent 0))
+    (kill-new
+     (mapconcat
+      (lambda (l)
+        (if (>= (length l) min-indent)
+            (substring l min-indent)
+          l))
+      lines "\n"))
+    (deactivate-mark)
+    (message "Copied dedented text")))
+
 (provide 'sw-commands)
 ;;; sw-commands.el ends here
