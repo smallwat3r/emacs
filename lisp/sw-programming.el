@@ -244,6 +244,10 @@ Handles combined prefixes like `rf' or `fr' correctly."
                 (setq-local eglot-workspace-configuration
                             `(:basedpyright (:pythonPath ,python)))))))
 
+;; Poetry lock files are TOML
+(add-to-list 'auto-mode-alist
+             '("poetry\\.lock\\'" . conf-toml-mode))
+
 ;;; Go
 
 (use-package go-ts-mode
@@ -342,16 +346,6 @@ Handles combined prefixes like `rf' or `fr' correctly."
   :mode (("\\.sql\\'" . sql-mode)
          ("\\.mysql\\'" . sql-mode)
          ("\\.pgsql\\'" . sql-mode))
-  :custom
-  (sql-mysql-options '("--ssl-mode=DISABLED"))
-  (sql-mysql-login-params '((user :default "root")
-                            password database
-                            (server :default "127.0.0.1")
-                            (port :default 3306)))
-  (sql-postgres-login-params '((user :default "postgres")
-                               password database
-                               (server :default "127.0.0.1")
-                               (port :default 5432)))
   :config
   (defun sw-sql-repl-toggle ()
     "Toggle a SQL REPL window."
@@ -382,6 +376,26 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 (use-package nginx-mode
   :mode ("nginx\\.conf\\'" "/nginx/.+\\.conf\\'"))
+
+;;; Makefile
+
+(use-package make-mode
+  :ensure nil
+  :mode ("Makefile.*" . makefile-mode))
+
+;;; Additional file type associations
+
+;; ROS (Robot Operating System) launch files are XML
+(add-to-list 'auto-mode-alist
+             '("\\.launch\\'" . xml-mode))
+
+;; Conky config files are Lua
+(add-to-list 'auto-mode-alist
+             '("conky\\.conf\\'" . lua-mode))
+
+;; Djot (use markdown-mode as syntax is similar)
+(add-to-list 'auto-mode-alist
+             '("\\.dj\\'" . markdown-mode))
 
 ;;; Editorconfig
 
