@@ -165,7 +165,8 @@ When deleting single space, also deletes trailing symbol and word."
   "Increase font size globally by 2pt."
   (interactive)
   (sw--ensure-font-size)
-  (setq sw--current-font-size (+ sw--current-font-size 2))
+  (setq sw--current-font-size
+        (min 26 (+ sw--current-font-size 2)))
   (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
