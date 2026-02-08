@@ -66,6 +66,8 @@
 
 ;; Embark - contextual actions
 (use-package embark
+  :bind
+  ("C-." . embark-export)
   :custom
   (prefix-help-command #'embark-prefix-help-command)
   :config
@@ -78,6 +80,11 @@
 (use-package embark-consult
   :after (embark consult)
   :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+;; Writable grep buffers
+(use-package wgrep
+  :custom
+  (wgrep-auto-save-buffer t))
 
 ;;; In-buffer completion with Corfu
 

@@ -256,6 +256,13 @@
                                      "LICENSE" "README*" "*-pkg.el"))
                           :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
                           :wait t :ref "da05c60b0621cf33161bb4335153f75ff5c29d91"))
+ (evil-textobj-tree-sitter :source "elpaca-menu-lock-file" :recipe
+                           (:package "evil-textobj-tree-sitter" :fetcher github :repo
+                                     "meain/evil-textobj-tree-sitter" :files
+                                     (:defaults "queries" "treesit-queries") :old-names
+                                     (evil-textobj-treesitter) :source "MELPA" :protocol https
+                                     :inherit t :depth treeless :ref
+                                     "38e6cc59c29a1d86030364bccd89b78b44054396"))
  (exec-path-from-shell :source "elpaca-menu-lock-file" :recipe
                        (:package "exec-path-from-shell" :fetcher github :repo
                                  "purcell/exec-path-from-shell" :files
@@ -466,8 +473,9 @@
                        :ref "b4b5b1c864f1fdf240d1bbd7093529f5a75e8a06"))
  (package-lint :source "elpaca-menu-lock-file" :recipe
                (:package "package-lint" :fetcher github :repo "purcell/package-lint" :files
-                         (:defaults "data" (:exclude "*flymake.el")) :source "MELPA" :protocol https
-                         :inherit t :depth treeless :ref "1c37329703a507fa357302cf6fc29d4f2fe631a8"))
+                         (:defaults "data" (:exclude "*flymake.el")) :source "elpaca-menu-lock-file"
+                         :protocol https :inherit t :depth treeless :ref
+                         "1c37329703a507fa357302cf6fc29d4f2fe631a8"))
  (parent-mode :source "elpaca-menu-lock-file" :recipe
               (:package "parent-mode" :fetcher github :repo "Fanael/parent-mode" :files
                         ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
@@ -632,6 +640,10 @@
                                 "LICENSE" "README*" "*-pkg.el"))
                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
                      "1e7694aee87722f9e51b6e39c35d175d83a1fb2c"))
+ (wgrep :source "elpaca-menu-lock-file" :recipe
+        (:package "wgrep" :fetcher github :repo "mhayashi1120/Emacs-wgrep" :files ("wgrep.el")
+                  :source "MELPA" :protocol https :inherit t :depth treeless :ref
+                  "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f"))
  (with-editor :source "elpaca-menu-lock-file"
    :recipe
    (:package "with-editor" :fetcher github :repo "magit/with-editor" :files

@@ -535,6 +535,15 @@ DEF is a command or nil (prefix-only label)."
   (define-key eat-semi-char-mode-map
     (kbd "C-,") #'sw-eat-zsh-history-pick))
 
+;;; Wgrep mode bindings
+
+(with-eval-after-load 'wgrep
+  (evil-define-key* 'normal grep-mode-map
+    "i"  #'wgrep-change-to-wgrep-mode)
+  (evil-define-key* 'normal wgrep-mode-map
+    ";w" #'wgrep-finish-edit
+    ";q" #'wgrep-abort-changes))
+
 ;;; Dired mode bindings
 
 (with-eval-after-load 'dired
