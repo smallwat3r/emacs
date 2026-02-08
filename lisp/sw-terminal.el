@@ -309,6 +309,24 @@ Extracts text after common prompt characters ($, #, >, ❯, →, %)."
                     (string-trim line))))
       (unless (string-empty-p input) input))))
 
+(defun sw--zsh-history-collection (history)
+  "Return a completion table for HISTORY with ^ prefix filtering."
+  (lambda (str pred action)
+    (if (eq action 'metadata)
+        '(metadata (display-sort-function . identity)
+                   (cycle-sort-function . identity))
+      (let* ((prefix-p (string-prefix-p "^" str))
+             (pattern (if prefix-p (substring str 1) str))
+             (candidates
+              (if prefix-p
+                  (seq-filter
+                   (lambda (h)
+                     (string-prefix-p pattern h))
+                   history)
+                history)))
+        (complete-with-action
+         action candidates pattern pred)))))
+
 (defun sw-eat-zsh-history-pick ()
   "Prompt from zsh history and insert into eat.
 Current input becomes a prefix filter (^pattern)."
@@ -317,23 +335,17 @@ Current input becomes a prefix filter (^pattern)."
   (unless (bound-and-true-p eat-terminal)
     (user-error "No eat process in current buffer"))
   (let* ((history (sw-zsh-history-candidates))
-         (_ (unless history (user-error "No zsh history found")))
-         (collection (lambda (str pred action)
-                       (if (eq action 'metadata)
-                           '(metadata (display-sort-function . identity)
-                                      (cycle-sort-function . identity))
-                         (let* ((prefix-p (string-prefix-p "^" str))
-                                (pattern (if prefix-p (substring str 1) str))
-                                (candidates (if prefix-p
-                                                (seq-filter
-                                                 (lambda (h) (string-prefix-p pattern h))
-                                                 history)
-                                              history)))
-                           (complete-with-action action candidates pattern pred)))))
+         (_ (unless history
+              (user-error "No zsh history found")))
          (input (sw-eat--current-input))
-         (choice (completing-read "zsh history: " collection nil nil
-                                  (if input (concat "^" input) ""))))
-    (when input (eat-term-send-string eat-terminal "\C-u"))
+         (choice
+          (completing-read
+           "zsh history: "
+           (sw--zsh-history-collection history)
+           nil nil
+           (if input (concat "^" input) ""))))
+    (when input
+      (eat-term-send-string eat-terminal "\C-u"))
     (eat-term-send-string eat-terminal choice)))
 
 (defun sw-eat-project ()
