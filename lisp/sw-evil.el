@@ -71,9 +71,37 @@
   (evil-snipe-repeat-scope 'visible)
   (evil-snipe-spillover-scope nil)
   :config
-  ;; Use n/N to repeat snipes (in addition to ;/,)
-  (define-key evil-snipe-parent-transient-map "n" #'evil-snipe-repeat)
-  (define-key evil-snipe-parent-transient-map "N" #'evil-snipe-repeat-reverse))
+  (defvar sw--last-search-was-snipe nil
+    "Non-nil if the last search action was an evil-snipe.")
+
+  (defun sw--snipe-set-flag (&rest _)
+    "Record that the last search was a snipe."
+    (setq sw--last-search-was-snipe t))
+
+  (defun sw--search-clear-flag (&rest _)
+    "Record that the last search was an evil-search."
+    (setq sw--last-search-was-snipe nil))
+
+  (advice-add 'evil-snipe-s :after #'sw--snipe-set-flag)
+  (advice-add 'evil-snipe-S :after #'sw--snipe-set-flag)
+  (advice-add 'evil-ex-search-forward
+              :after #'sw--search-clear-flag)
+  (advice-add 'evil-ex-search-backward
+              :after #'sw--search-clear-flag)
+
+  (defun sw-search-next ()
+    "Repeat last search: snipe or evil-search."
+    (interactive)
+    (if sw--last-search-was-snipe
+        (evil-snipe-repeat)
+      (evil-ex-search-next)))
+
+  (defun sw-search-previous ()
+    "Repeat last search in reverse: snipe or evil-search."
+    (interactive)
+    (if sw--last-search-was-snipe
+        (evil-snipe-repeat-reverse)
+      (evil-ex-search-previous))))
 
 ;; Comment with gc
 (use-package evil-nerd-commenter

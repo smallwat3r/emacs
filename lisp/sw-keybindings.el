@@ -403,8 +403,8 @@ DEF is a command or nil (prefix-only label)."
 
   ;; Symbol highlight (stay at point, use n/N to navigate)
   (kbd "*")  #'sw-highlight-symbol-at-point
-  (kbd "n")  #'evil-ex-search-next
-  (kbd "N")  #'evil-ex-search-previous
+  (kbd "n")  #'sw-search-next
+  (kbd "N")  #'sw-search-previous
   [escape]   #'evil-ex-nohighlight)
 
 ;;; Evil visual state bindings
