@@ -68,42 +68,47 @@ Preserves *scratch* and *Messages* buffers."
 
 ;;; Editing commands
 
+(defun sw--skip-backward-word ()
+  "Skip backward over a word if one precedes point."
+  (when (looking-back "[[:alnum:]]" (1- (point)))
+    (skip-chars-backward "[:alnum:]")))
+
+(defun sw--skip-backward-symbol-and-word ()
+  "Skip backward over a symbol sequence then a word."
+  (when (looking-back "[^[:alnum:][:space:]]" (1- (point)))
+    (skip-chars-backward "^[:alnum:][:space:]"))
+  (sw--skip-backward-word))
+
+(defun sw--backward-kill-word-boundary (start)
+  "Return position of the backward kill boundary from START."
+  (save-excursion
+    (cond
+     ((bobp) (point))
+     ((looking-back "[ \t\n]" (1- (point)))
+      (skip-chars-backward " \t\n")
+      (when (= (- start (point)) 1)
+        (sw--skip-backward-symbol-and-word))
+      (point))
+     ((looking-back "[_-]+" (line-beginning-position))
+      (skip-chars-backward "_-")
+      (sw--skip-backward-word)
+      (point))
+     ((looking-back "[^[:alnum:][:space:]_-]" (1- (point)))
+      (skip-chars-backward "^[:alnum:][:space:]_-")
+      (sw--skip-backward-word)
+      (point))
+     (t
+      (skip-chars-backward "[:alnum:]")
+      (point)))))
+
 (defun sw-backward-kill-word ()
   "Kill backward more gradually than `backward-kill-word'.
 Stops at word boundaries including underscores and hyphens.
 When deleting single space, also deletes trailing symbol and word."
   (interactive)
-  (let* ((start (point))
-        (end (save-excursion
-               (cond
-                ((bobp) (point))
-                ;; Whitespace: delete it, and following word if single space
-                ((looking-back "[ \t\n]" (1- (point)))
-                 (skip-chars-backward " \t\n")
-                 (when (= (- start (point)) 1)
-                   ;; Single space: delete trailing symbol if any, then word
-                   (when (looking-back "[^[:alnum:][:space:]]" (1- (point)))
-                     (skip-chars-backward "^[:alnum:][:space:]"))
-                   (when (looking-back "[[:alnum:]]" (1- (point)))
-                     (skip-chars-backward "[:alnum:]")))
-                 (point))
-                ;; Underscores/hyphens: delete them and preceding word
-                ((looking-back "[_-]+" (line-beginning-position))
-                 (skip-chars-backward "_-")
-                 (when (looking-back "[[:alnum:]]" (1- (point)))
-                   (skip-chars-backward "[:alnum:]"))
-                 (point))
-                ;; Punctuation: delete sequence and preceding word
-                ((looking-back "[^[:alnum:][:space:]_-]" (1- (point)))
-                 (skip-chars-backward "^[:alnum:][:space:]_-")
-                 (when (looking-back "[[:alnum:]]" (1- (point)))
-                   (skip-chars-backward "[:alnum:]"))
-                 (point))
-                ;; Word: stop at separators
-                (t
-                 (skip-chars-backward "[:alnum:]")
-                 (point))))))
-    (kill-region end start)))
+  (let ((start (point)))
+    (kill-region
+     (sw--backward-kill-word-boundary start) start)))
 
 (defun sw-copy-dedented (beg end)
   "Copy region between BEG and END with common indentation removed."
@@ -144,6 +149,11 @@ When deleting single space, also deletes trailing symbol and word."
 (defvar sw--current-font-size nil
   "Current font size in points. Initialized from sw-font-size.")
 
+(defun sw--ensure-font-size ()
+  "Initialize `sw--current-font-size' from `sw-font-size' if unset."
+  (unless sw--current-font-size
+    (setq sw--current-font-size sw-font-size)))
+
 (defun sw--set-all-font-sizes (size)
   "Set SIZE (in points) on all text faces."
   (let ((height (* size 10)))
@@ -154,8 +164,7 @@ When deleting single space, also deletes trailing symbol and word."
 (defun sw-text-scale-increase ()
   "Increase font size globally by 2pt."
   (interactive)
-  (unless sw--current-font-size
-    (setq sw--current-font-size sw-font-size))
+  (sw--ensure-font-size)
   (setq sw--current-font-size (+ sw--current-font-size 2))
   (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
@@ -163,9 +172,9 @@ When deleting single space, also deletes trailing symbol and word."
 (defun sw-text-scale-decrease ()
   "Decrease font size globally by 2pt."
   (interactive)
-  (unless sw--current-font-size
-    (setq sw--current-font-size sw-font-size))
-  (setq sw--current-font-size (max 8 (- sw--current-font-size 2)))
+  (sw--ensure-font-size)
+  (setq sw--current-font-size
+        (max 8 (- sw--current-font-size 2)))
   (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
