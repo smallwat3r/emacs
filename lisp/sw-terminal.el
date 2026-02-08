@@ -168,34 +168,54 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
             (process-send-string
              proc (sw-eat--tramp-init-string tramp-prefix)))))))
 
+  (defvar-local sw-eat--tramp-timer nil
+    "Timer for TRAMP initialization polling.")
+
+  (defvar-local sw-eat--tramp-attempts 0
+    "Number of TRAMP initialization attempts.")
+
+  (defun sw-eat--tramp-init-poll (buf proc prefix)
+    "Poll until TRAMP init succeeds or times out.
+BUF is the eat buffer, PROC the shell process, PREFIX
+the TRAMP remote prefix."
+    (if (not (buffer-live-p buf))
+        nil
+      (let ((done (buffer-local-value
+                   'sw-eat-tramp-initialized buf))
+            (expired (>= (buffer-local-value
+                          'sw-eat--tramp-attempts buf)
+                         20))
+            (dead (not (process-live-p proc))))
+        (if (or done expired dead)
+            (when-let ((tm (buffer-local-value
+                            'sw-eat--tramp-timer buf)))
+              (cancel-timer tm))
+          (with-current-buffer buf
+            (cl-incf sw-eat--tramp-attempts)
+            (sw-eat--try-send-tramp-init
+             proc prefix))))))
+
   (defun sw-eat-setup-tramp (proc)
     "Configure eat for TRAMP: rename buffer, set TERM, inject `e` file opener."
     (when-let* ((buf (process-buffer proc))
                 (_ (buffer-live-p buf))
                 (_ (file-remote-p default-directory))
-                (tramp-prefix (file-remote-p default-directory)))
+                (prefix (file-remote-p default-directory)))
       (with-current-buffer buf
-        (rename-buffer (format "*eat@%s*" tramp-prefix) t)
+        (rename-buffer (format "*eat@%s*" prefix) t)
         (setq-local eat-enable-shell-integration nil)
         (setq-local sw-eat-tramp-initialized nil)
-        ;; Use a repeating timer that stops once initialization succeeds
-        (let ((timer nil)
-              (attempts 0)
-              (max-attempts 20))  ; 2 seconds max (20 * 100ms)
-          (setq timer
-                (run-with-timer
-                 0.1 0.1
-                 (lambda ()
-                   (setq attempts (1+ attempts))
-                   (if (or sw-eat-tramp-initialized
-                           (>= attempts max-attempts)
-                           (not (process-live-p proc)))
-                       (cancel-timer timer)
-                     (sw-eat--try-send-tramp-init proc tramp-prefix)))))
-          ;; Cancel timer if buffer is killed before initialization completes
-          (add-hook 'kill-buffer-hook
-                    (lambda () (when timer (cancel-timer timer)))
-                    nil t)))))
+        (setq-local sw-eat--tramp-attempts 0)
+        (setq sw-eat--tramp-timer
+              (run-with-timer
+               0.1 0.1
+               #'sw-eat--tramp-init-poll
+               buf proc prefix))
+        (add-hook 'kill-buffer-hook
+                  (lambda ()
+                    (when sw-eat--tramp-timer
+                      (cancel-timer sw-eat--tramp-timer)))
+                  nil t))))
 
   (add-hook 'eat-exec-hook #'sw-eat-setup-tramp))
 
