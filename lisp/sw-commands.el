@@ -132,6 +132,14 @@ When deleting single space, also deletes trailing symbol and word."
     (deactivate-mark)
     (message "Copied dedented text")))
 
+;;; Search commands
+
+(defun sw-consult-line-symbol ()
+  "Search for symbol at point in current buffer."
+  (interactive)
+  (require 'consult)
+  (consult-line (thing-at-point 'symbol t)))
+
 ;;; Window commands
 
 (defun sw-split-window-right ()

@@ -194,8 +194,10 @@ DEF is a command or nil (prefix-only label)."
     ("s s" consult-line "Search buffer")
     ("s S" consult-line-multi "Search all buffers")
     ("s p" sw-consult-ripgrep-project "Search project")
+    ("s b" sw-consult-line-symbol
+     "Search symbol in buffer")
     ("s w" sw-consult-ripgrep-project-symbol
-     "Search symbol")
+     "Search symbol in project")
     ("s i" consult-imenu "Imenu")
     ("s I" consult-imenu-multi "Imenu all")
     ("s r" consult-ripgrep "Ripgrep")
