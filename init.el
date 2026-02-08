@@ -91,10 +91,7 @@
   (add-hook 'sw-first-file-hook #'global-so-long-mode)
 
   ;; Disable blinking cursor
-  (blink-cursor-mode -1)
-
-  ;; Clean up whitespace on save
-  (add-hook 'before-save-hook #'whitespace-cleanup))
+  (blink-cursor-mode -1))
 
 ;;; Garbage collection during idle time
 

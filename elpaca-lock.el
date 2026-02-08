@@ -260,8 +260,8 @@
                            (:package "evil-textobj-tree-sitter" :fetcher github :repo
                                      "meain/evil-textobj-tree-sitter" :files
                                      (:defaults "queries" "treesit-queries") :old-names
-                                     (evil-textobj-treesitter) :source "MELPA" :protocol https
-                                     :inherit t :depth treeless :ref
+                                     (evil-textobj-treesitter) :source "elpaca-menu-lock-file"
+                                     :protocol https :inherit t :depth treeless :ref
                                      "38e6cc59c29a1d86030364bccd89b78b44054396"))
  (exec-path-from-shell :source "elpaca-menu-lock-file" :recipe
                        (:package "exec-path-from-shell" :fetcher github :repo
@@ -642,7 +642,7 @@
                      "1e7694aee87722f9e51b6e39c35d175d83a1fb2c"))
  (wgrep :source "elpaca-menu-lock-file" :recipe
         (:package "wgrep" :fetcher github :repo "mhayashi1120/Emacs-wgrep" :files ("wgrep.el")
-                  :source "MELPA" :protocol https :inherit t :depth treeless :ref
+                  :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
                   "49f09ab9b706d2312cab1199e1eeb1bcd3f27f6f"))
  (with-editor :source "elpaca-menu-lock-file"
    :recipe
@@ -654,6 +654,17 @@
                         "README*" "*-pkg.el"))
              :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless :ref
              "902b4d572af2c2f36060da01e3c33d194cdec32b"))
+ (ws-butler :source "elpaca-menu-lock-file" :recipe
+            (:package "ws-butler" :fetcher git :url
+                      "https://https.git.savannah.gnu.org/git/elpa/nongnu.git" :branch
+                      "elpa/ws-butler" :files
+                      ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
+                       "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info"
+                       "docs/*.texi" "docs/*.texinfo"
+                       (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
+                                 "LICENSE" "README*" "*-pkg.el"))
+                      :source "MELPA" :protocol https :inherit t :depth treeless :ref
+                      "67c49cfdf5a5a9f28792c500c8eb0017cfe74a3a"))
  (yasnippet :source "elpaca-menu-lock-file" :recipe
             (:package "yasnippet" :repo "joaotavora/yasnippet" :fetcher github :files
                       ("yasnippet.el" "snippets") :source "elpaca-menu-lock-file" :protocol https

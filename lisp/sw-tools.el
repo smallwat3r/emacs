@@ -83,5 +83,10 @@
              helpful-key
              helpful-at-point))
 
+;;; Whitespace cleanup (only on edited lines)
+
+(use-package ws-butler
+  :hook ((prog-mode text-mode) . ws-butler-mode))
+
 (provide 'sw-tools)
 ;;; sw-tools.el ends here
