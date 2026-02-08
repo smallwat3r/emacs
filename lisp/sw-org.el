@@ -68,16 +68,14 @@
   :custom
   (deft-directory sw-org-directory)
   (deft-extensions '("org" "md" "txt"))
-  (deft-default-extension "org")
+  (deft-default-extension "txt")
   (deft-recursive t)
-  (deft-use-filename-as-title nil)
+  (deft-use-filename-as-title t)
   (deft-use-filter-string-for-filename t)
   (deft-auto-save-interval -1.0)
   (deft-file-naming-rules '((noslash . "-")
                             (nospace . "-")
-                            (case-fn . downcase)))
-  :config
-  (evil-set-initial-state 'deft-mode 'insert))
+                            (case-fn . downcase))))
 
 (provide 'sw-org)
 ;;; sw-org.el ends here

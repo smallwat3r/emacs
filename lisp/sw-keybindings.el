@@ -562,6 +562,21 @@ DEF is a command or nil (prefix-only label)."
 ;;; Deft mode bindings
 
 (with-eval-after-load 'deft
+  (defvar sw-deft-local-map (make-sparse-keymap)
+    "Local leader keymap for Deft mode.")
+
+  (sw-define-keys sw-deft-local-map
+    '(("a" deft-new-file "New file")
+      ("A" deft-new-file-named "New file (named)")
+      ("d" deft-delete-file "Delete file")
+      ("D" deft-archive-file "Archive file")
+      ("r" deft-rename-file "Rename file")
+      ("g" deft-refresh "Refresh")
+      ("q" kill-current-buffer "Quit")))
+
+  (push (cons 'deft-mode sw-deft-local-map)
+        sw-local-leader-alist)
+
   (evil-define-key* 'normal deft-mode-map
     (kbd "gr") #'deft-refresh
     (kbd "a")  #'deft-new-file
