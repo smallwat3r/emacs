@@ -335,6 +335,33 @@ Handles combined prefixes like `rf' or `fr' correctly."
 (use-package terraform-mode
   :mode "\\.tf\\'")
 
+;;; SQL
+
+(use-package sql
+  :ensure nil
+  :mode (("\\.sql\\'" . sql-mode)
+         ("\\.mysql\\'" . sql-mode)
+         ("\\.pgsql\\'" . sql-mode))
+  :custom
+  (sql-mysql-options '("--ssl-mode=DISABLED"))
+  (sql-mysql-login-params '((user :default "root")
+                            password database
+                            (server :default "127.0.0.1")
+                            (port :default 3306)))
+  (sql-postgres-login-params '((user :default "postgres")
+                               password database
+                               (server :default "127.0.0.1")
+                               (port :default 5432)))
+  :config
+  (defun sw-sql-repl-toggle ()
+    "Toggle a SQL REPL window."
+    (interactive)
+    (let ((buf (sql-find-sqli-buffer)))
+      (if-let ((win (and buf
+                         (get-buffer-window buf))))
+          (delete-window win)
+        (sql-product-interactive)))))
+
 ;;; Emacs Lisp
 
 (defun sw-ielm-toggle ()

@@ -5,24 +5,6 @@
 
 ;;; Code:
 
-;;; SQL
-
-(use-package sql
-  :ensure nil
-  :mode (("\\.sql\\'" . sql-mode)
-         ("\\.mysql\\'" . sql-mode)
-         ("\\.pgsql\\'" . sql-mode))
-  :custom
-  (sql-mysql-options '("--ssl-mode=DISABLED"))
-  (sql-mysql-login-params '((user :default "root")
-                            password database
-                            (server :default "127.0.0.1")
-                            (port :default 3306)))
-  (sql-postgres-login-params '((user :default "postgres")
-                               password database
-                               (server :default "127.0.0.1")
-                               (port :default 5432))))
-
 ;;; Makefile
 
 (use-package make-mode

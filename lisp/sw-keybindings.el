@@ -454,6 +454,18 @@ DEF is a command or nil (prefix-only label)."
     (push (cons mode sw-python-local-map)
           sw-local-leader-alist)))
 
+;;; SQL mode bindings
+
+(with-eval-after-load 'sql
+  (defvar sw-sql-local-map (make-sparse-keymap)
+    "Local leader keymap for SQL modes.")
+
+  (sw-define-keys sw-sql-local-map
+    '(("r" sw-sql-repl-toggle "Toggle REPL")))
+
+  (push (cons 'sql-mode sw-sql-local-map)
+        sw-local-leader-alist))
+
 ;;; Go mode bindings
 
 (with-eval-after-load 'go-ts-mode
