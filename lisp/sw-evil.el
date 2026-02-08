@@ -106,6 +106,42 @@
     (evil-ex-hl-change 'evil-ex-search evil-ex-search-pattern)
     (evil-ex-hl-update-highlights)))
 
+;; Tree-sitter text objects (e.g., vaf, dif, vic, dia)
+(use-package evil-textobj-tree-sitter
+  :after evil
+  :demand t
+  :config
+  (define-key evil-outer-text-objects-map "f"
+    (evil-textobj-tree-sitter-get-textobj
+      "function.outer"))
+  (define-key evil-inner-text-objects-map "f"
+    (evil-textobj-tree-sitter-get-textobj
+      "function.inner"))
+  (define-key evil-outer-text-objects-map "c"
+    (evil-textobj-tree-sitter-get-textobj
+      "class.outer"))
+  (define-key evil-inner-text-objects-map "c"
+    (evil-textobj-tree-sitter-get-textobj
+      "class.inner"))
+  (define-key evil-outer-text-objects-map "a"
+    (evil-textobj-tree-sitter-get-textobj
+      "parameter.outer"))
+  (define-key evil-inner-text-objects-map "a"
+    (evil-textobj-tree-sitter-get-textobj
+      "parameter.inner"))
+  (define-key evil-outer-text-objects-map "i"
+    (evil-textobj-tree-sitter-get-textobj
+      "conditional.outer"))
+  (define-key evil-inner-text-objects-map "i"
+    (evil-textobj-tree-sitter-get-textobj
+      "conditional.inner"))
+  (define-key evil-outer-text-objects-map "l"
+    (evil-textobj-tree-sitter-get-textobj
+      "loop.outer"))
+  (define-key evil-inner-text-objects-map "l"
+    (evil-textobj-tree-sitter-get-textobj
+      "loop.inner")))
+
 ;; Align text with gl/gL operator (e.g., glip= to align paragraph by =)
 (use-package evil-lion
   :ensure (:wait t)
