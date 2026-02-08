@@ -8,13 +8,13 @@
 (use-package eglot
   :ensure nil
   :demand t
-  :hook (python-ts-mode . eglot-ensure)
-  :hook (go-ts-mode . eglot-ensure)
-  :hook (rust-ts-mode . eglot-ensure)
-  :hook (typescript-ts-mode . eglot-ensure)
-  :hook (js-ts-mode . eglot-ensure)
-  :hook (sh-mode . eglot-ensure)
-  :hook (terraform-mode . eglot-ensure)
+  :hook ((python-ts-mode
+          go-ts-mode
+          rust-ts-mode
+          typescript-ts-mode
+          js-ts-mode
+          sh-mode
+          terraform-mode) . eglot-ensure)
   :init
   ;; Prevent eglot from managing flymake
   (setq eglot-stay-out-of '(flymake))
