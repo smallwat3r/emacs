@@ -663,8 +663,8 @@
                        "docs/*.texi" "docs/*.texinfo"
                        (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
                                  "LICENSE" "README*" "*-pkg.el"))
-                      :source "MELPA" :protocol https :inherit t :depth treeless :ref
-                      "67c49cfdf5a5a9f28792c500c8eb0017cfe74a3a"))
+                      :source "elpaca-menu-lock-file" :protocol https :inherit t :depth treeless
+                      :ref "67c49cfdf5a5a9f28792c500c8eb0017cfe74a3a"))
  (yasnippet :source "elpaca-menu-lock-file" :recipe
             (:package "yasnippet" :repo "joaotavora/yasnippet" :fetcher github :files
                       ("yasnippet.el" "snippets") :source "elpaca-menu-lock-file" :protocol https
