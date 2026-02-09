@@ -68,10 +68,12 @@
   (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
 
 ;; Git modes for config files
-(use-package git-modes)
+(use-package git-modes
+  :defer t)
 
 ;; Open remote repo in browser
-(use-package browse-at-remote)
+(use-package browse-at-remote
+  :commands (browse-at-remote browse-at-remote-kill))
 
 (provide 'sw-git)
 ;;; sw-git.el ends here

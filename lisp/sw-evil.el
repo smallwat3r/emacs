@@ -138,6 +138,7 @@
 ;; Tree-sitter text objects (e.g., vaf, dif, vic, dia)
 (use-package evil-textobj-tree-sitter
   :after evil
+  :demand t
   :config
   (define-key evil-outer-text-objects-map "f"
     (evil-textobj-tree-sitter-get-textobj
