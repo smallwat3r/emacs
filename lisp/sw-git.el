@@ -54,6 +54,8 @@
   :config
   ;; Show deleted lines indicator in margin (more visible than fringe)
   (diff-hl-margin-mode 1)
+  ;; Update diff indicators as you type, not just on save
+  (diff-hl-flydiff-mode 1)
   ;; Integration with magit
   (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
