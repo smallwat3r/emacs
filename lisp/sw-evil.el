@@ -70,6 +70,12 @@
   (evil-snipe-scope 'visible)
   (evil-snipe-repeat-scope 'visible)
   (evil-snipe-spillover-scope nil)
+  (evil-snipe-smart-case t)
+  (evil-snipe-tab-increment t)
+  (evil-snipe-char-fold t)
+  (evil-snipe-aliases
+   '((?\( "[[{(]")
+     (?\) "[]})]")))
   :config
   (defvar sw--last-search-was-snipe nil
     "Non-nil if the last search action was an evil-snipe.")
