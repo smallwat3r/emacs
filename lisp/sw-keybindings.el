@@ -151,10 +151,10 @@ DEF is a command or nil (prefix-only label)."
     ;; Eat terminal
     ("e"   nil "Eat")
     ("e e" sw-eat-here "Eat at root")
-    ("e t" sw-eat-toggle "Toggle eat at root")
+    ("e t" sw-eat-show "Show eat at root")
     ("e E" sw-eat-here-current-buffer "Eat at buffer")
-    ("e T" sw-eat-toggle-current-buffer
-     "Toggle eat at buffer")
+    ("e T" sw-eat-show-current-buffer
+     "Show eat at buffer")
     ("e k" sw-eat-kill-other "Kill other eat buffers")
     ("e K" sw-eat-kill-all "Kill all eat buffers")
 

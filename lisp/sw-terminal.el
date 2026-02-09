@@ -288,27 +288,42 @@ For remote directories, opens a shell on the remote host."
   (require 'eat)
   (switch-to-buffer (sw-eat--new-buffer (sw-eat--determine-directory here))))
 
-(defun sw-eat-toggle (&optional here)
-  "Toggle eat buffer visibility.
-If HERE is non-nil, use buffer-specific directory.
-For remote directories, opens a shell on the remote host."
+(defun sw-eat--send-cd (buf dir)
+  "Send a cd command to eat BUF to change to DIR.
+Clears any existing input first."
+  (when-let ((proc (get-buffer-process buf)))
+    (when (process-live-p proc)
+      (with-current-buffer buf
+        (eat-term-send-string eat-terminal "\C-u")
+        (eat-term-send-string
+         eat-terminal
+         (format "cd %s\n"
+                 (shell-quote-argument
+                  (expand-file-name dir))))))))
+
+(defun sw-eat-show (&optional here)
+  "Show the project eat buffer and cd to the target directory.
+Reuses the project eat buffer. If HERE is non-nil, cd to the
+current buffer's directory, otherwise cd to project root."
   (interactive "P")
   (require 'eat)
-  (let* ((dir (sw-eat--determine-directory here))
-         (buf (get-buffer (sw-eat--buffer-for-dir dir))))
-    (if-let ((win (and buf (get-buffer-window buf))))
-        (delete-window win)
-      (pop-to-buffer (sw-eat--get-buffer dir)))))
+  (let* ((root (sw-eat--project-root))
+         (dir (sw-eat--determine-directory here))
+         (existing (get-buffer (sw-eat--buffer-for-dir root)))
+         (b (sw-eat--get-buffer root)))
+    (pop-to-buffer b)
+    (when existing
+      (sw-eat--send-cd b dir))))
 
 (defun sw-eat-here-current-buffer ()
   "Open an eat buffer from the current directory."
   (interactive)
   (sw-eat-here t))
 
-(defun sw-eat-toggle-current-buffer ()
+(defun sw-eat-show-current-buffer ()
   "Toggle an eat buffer from the current directory."
   (interactive)
-  (sw-eat-toggle t))
+  (sw-eat-show t))
 
 (defun sw-eat--current-input ()
   "Return current input in eat, or nil if empty.
