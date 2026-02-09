@@ -98,6 +98,10 @@
               :after #'sw--search-clear-flag)
   (advice-add 'evil-ex-search-backward
               :after #'sw--search-clear-flag)
+  (advice-add 'evil-ex-search-word-forward
+              :after #'sw--search-clear-flag)
+  (advice-add 'evil-ex-search-word-backward
+              :after #'sw--search-clear-flag)
 
   (defun sw-search-next ()
     "Repeat last search: snipe or evil-search."
@@ -132,7 +136,8 @@
                      (user-error "No symbol at point")))
          (pattern (format "\\_<%s\\_>" (regexp-quote symbol))))
     (setq evil-ex-search-pattern (evil-ex-make-search-pattern pattern)
-          evil-ex-search-direction 'forward)
+          evil-ex-search-direction 'forward
+          sw--last-search-was-snipe nil)
     (evil-push-search-history pattern t)
     (evil-ex-delete-hl 'evil-ex-search)
     (evil-ex-make-hl 'evil-ex-search)
