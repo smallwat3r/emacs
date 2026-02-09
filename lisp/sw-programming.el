@@ -36,8 +36,7 @@
 ;;; Formatting
 
 (use-package apheleia
-  :ensure (:wait t)
-  :demand t
+  :commands (apheleia-format-buffer apheleia-format-region)
   :config
   ;; Python formatters (black/isort read pyproject.toml automatically)
   (setf (alist-get 'black apheleia-formatters) '("black" "--quiet" "-"))
@@ -392,11 +391,9 @@ Handles combined prefixes like `rf' or `fr' correctly."
 ;;; Editorconfig
 
 (use-package editorconfig
-  :ensure (:wait t)
-  :demand t
+  :hook (sw-first-file . editorconfig-mode)
   :config
-  (setq editorconfig-exclude-modes '(tramp-mode))
-  (editorconfig-mode 1))
+  (setq editorconfig-exclude-modes '(tramp-mode)))
 
 (provide 'sw-programming)
 ;;; sw-programming.el ends here

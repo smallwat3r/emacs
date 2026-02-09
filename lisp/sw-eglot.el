@@ -7,7 +7,6 @@
 
 (use-package eglot
   :ensure nil
-  :demand t
   :hook ((python-ts-mode
           go-ts-mode
           rust-ts-mode

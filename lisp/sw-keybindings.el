@@ -11,7 +11,6 @@
 
 (use-package which-key
   :ensure nil
-  :demand t
   :hook (sw-first-input . which-key-mode)
   :custom
   (which-key-idle-delay 0.3)

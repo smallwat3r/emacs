@@ -111,17 +111,12 @@
 
 ;; Comment with gc
 (use-package evil-nerd-commenter
-  :ensure (:wait t)
-  :after evil
-  :demand t)
+  :commands evilnc-comment-operator)
 
 ;; Surround text objects
 (use-package evil-surround
-  :ensure (:wait t)
-  :after evil
-  :demand t
+  :hook (sw-first-input . global-evil-surround-mode)
   :config
-  (global-evil-surround-mode 1)
   (push '(?< . ("<" . ">")) evil-surround-pairs-alist)
   (push '(?> . ("<" . ">")) evil-surround-pairs-alist))
 
@@ -143,7 +138,6 @@
 ;; Tree-sitter text objects (e.g., vaf, dif, vic, dia)
 (use-package evil-textobj-tree-sitter
   :after evil
-  :demand t
   :config
   (define-key evil-outer-text-objects-map "f"
     (evil-textobj-tree-sitter-get-textobj
@@ -178,9 +172,7 @@
 
 ;; Align text with gl/gL operator (e.g., glip= to align paragraph by =)
 (use-package evil-lion
-  :ensure (:wait t)
-  :after evil
-  :demand t)
+  :commands (evil-lion-left evil-lion-right))
 
 (provide 'sw-evil)
 ;;; sw-evil.el ends here
