@@ -154,6 +154,15 @@ When deleting single space, also deletes trailing symbol and word."
 
 ;;; Text scaling
 
+(defvar sw-font-size-step 1
+  "Number of points to adjust when scaling font size.")
+
+(defvar sw-font-size-min 6
+  "Minimum font size in points.")
+
+(defvar sw-font-size-max 26
+  "Maximum font size in points.")
+
 (defvar sw--current-font-size nil
   "Current font size in points. Initialized from sw-font-size.")
 
@@ -170,20 +179,22 @@ When deleting single space, also deletes trailing symbol and word."
       (set-face-attribute face nil :height height))))
 
 (defun sw-text-scale-increase ()
-  "Increase font size globally by 2pt."
+  "Increase font size globally by `sw-font-size-step'."
   (interactive)
   (sw--ensure-font-size)
   (setq sw--current-font-size
-        (min 26 (+ sw--current-font-size 2)))
+        (min sw-font-size-max
+             (+ sw--current-font-size sw-font-size-step)))
   (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
 (defun sw-text-scale-decrease ()
-  "Decrease font size globally by 2pt."
+  "Decrease font size globally by `sw-font-size-step'."
   (interactive)
   (sw--ensure-font-size)
   (setq sw--current-font-size
-        (max 8 (- sw--current-font-size 2)))
+        (max sw-font-size-min
+             (- sw--current-font-size sw-font-size-step)))
   (sw--set-all-font-sizes sw--current-font-size)
   (message "Font size: %dpt" sw--current-font-size))
 
