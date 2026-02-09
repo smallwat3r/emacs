@@ -14,7 +14,8 @@
           typescript-ts-mode
           js-ts-mode
           sh-mode
-          terraform-mode) . eglot-ensure)
+          terraform-mode)
+         . eglot-ensure)
   :init
   ;; Prevent eglot from managing flymake
   (setq eglot-stay-out-of '(flymake))
