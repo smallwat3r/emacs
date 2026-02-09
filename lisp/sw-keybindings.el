@@ -537,9 +537,11 @@ DEF is a command or nil (prefix-only label)."
 ;;; Evil-snipe bindings
 
 (with-eval-after-load 'evil-snipe
-  ;; RET acts as an alias for n during active snipe
-  (define-key evil-snipe-active-mode-map
-              (kbd "RET") #'sw-search-next))
+  ;; RET/S-RET act as aliases for n/N during active snipe
+  (define-key evil-snipe-parent-transient-map
+              (kbd "RET") #'sw-search-next)
+  (define-key evil-snipe-parent-transient-map
+              (kbd "S-<return>") #'sw-search-previous))
 
 ;;; Wgrep mode bindings
 
