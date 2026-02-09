@@ -52,7 +52,6 @@
   (diff-hl-draw-borders nil)
   (diff-hl-show-staged-changes nil)
   :config
-  (diff-hl-flydiff-mode 1)
   ;; Show deleted lines indicator in margin (more visible than fringe)
   (diff-hl-margin-mode 1)
   ;; Integration with magit
