@@ -534,6 +534,13 @@ DEF is a command or nil (prefix-only label)."
   (define-key eat-semi-char-mode-map
     (kbd "C-,") #'sw-eat-zsh-history-pick))
 
+;;; Evil-snipe bindings
+
+(with-eval-after-load 'evil-snipe
+  ;; RET acts as an alias for n during active snipe
+  (define-key evil-snipe-active-mode-map
+              (kbd "RET") #'sw-search-next))
+
 ;;; Wgrep mode bindings
 
 (with-eval-after-load 'wgrep
