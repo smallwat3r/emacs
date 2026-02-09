@@ -321,7 +321,7 @@ current buffer's directory, otherwise cd to project root."
   (sw-eat-here t))
 
 (defun sw-eat-show-current-buffer ()
-  "Toggle an eat buffer from the current directory."
+  "Show the project eat buffer and cd to the current directory."
   (interactive)
   (sw-eat-show t))
 
