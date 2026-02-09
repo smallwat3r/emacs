@@ -9,6 +9,9 @@
 (defvar sw--echo-area-last-info nil
   "Cached (INFO . CUR-MSG) from the last echo area update.")
 
+(defvar sw--echo-area-last-message nil
+  "The last message string written by `sw--update-echo-area'.")
+
 (defun sw--update-echo-area ()
   "Update echo area with buffer info.
 Skips redisplay when neither the info string nor the current
@@ -20,7 +23,9 @@ message have changed since the last call."
                          (format-mode-line "%p")
                          (format-mode-line "%l")
                          (current-column)))
-           (cur (or (current-message) "")))
+           (raw (current-message))
+           (cur (if (equal raw sw--echo-area-last-message)
+                    "" (or raw ""))))
       (unless (and sw--echo-area-last-info
                    (equal info (car sw--echo-area-last-info))
                    (equal cur (cdr sw--echo-area-last-info)))
@@ -31,6 +36,7 @@ message have changed since the last call."
                             (make-string (max 1 padding) ?\s)
                             info))
                (message-log-max nil))
+          (setq sw--echo-area-last-message msg)
           (message "%s" msg))))))
 
 (add-hook 'post-command-hook #'sw--update-echo-area)
