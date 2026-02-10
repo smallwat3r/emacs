@@ -366,14 +366,6 @@ DEF is a command or nil (prefix-only label)."
 ;;; Evil normal state bindings
 
 (evil-define-key* 'normal 'global
-  ;; Window navigation (HJKL and YNAE for custom layout)
-  (kbd "C-h") #'evil-window-left
-  (kbd "C-j") #'evil-window-down
-  (kbd "C-l") #'evil-window-right
-  (kbd "C-y") #'evil-window-left
-  (kbd "C-n") #'evil-window-down
-  (kbd "C-e") #'evil-window-right
-
   ;; Line operations
   (kbd "M-o") #'delete-blank-lines
   (kbd "C-k") #'join-line
