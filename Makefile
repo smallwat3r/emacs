@@ -14,4 +14,4 @@ link: ## Symlink this directory to ~/.emacs.d
 	@echo "Linked $(CURDIR) -> ~/.emacs.d"
 
 clean: ## Remove all installed packages
-	rm -rf elpaca/
+	rm -rf elpaca/ elpa/ eln-cache/

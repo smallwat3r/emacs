@@ -22,7 +22,6 @@
           (cmake-mode . cmake-ts-mode)
           (css-mode . css-ts-mode)
           (go-mode . go-ts-mode)
-          (html-mode . html-ts-mode)
           (java-mode . java-ts-mode)
           (js-mode . js-ts-mode)
           (json-mode . json-ts-mode)

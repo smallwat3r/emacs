@@ -478,7 +478,7 @@ Configures terminal with xterm-256color TERM for foot compatibility."
   (tramp-verbose 1)
   (tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory))
   (tramp-persistency-file-name (expand-file-name "tramp" user-emacs-directory))
-  (tramp-use-ssh-controlmaster-options nil)
+  (tramp-use-connection-share nil)
   (remote-file-name-inhibit-cache nil)
 
   :config

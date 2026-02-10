@@ -43,14 +43,12 @@ and IS-CURRENT indicates if this is the active workspace."
   "Return formatted workspace tabline for echo area display."
   (let* ((tabs (funcall tab-bar-tabs-function))
          (current-index (tab-bar--current-tab-index tabs)))
-    (mapconcat
-     (lambda (tab)
-       (sw-workspace--format-tab
-        (cl-position tab tabs)
-        (alist-get 'name tab)
-        (eq (cl-position tab tabs) current-index)))
-     tabs
-     "")))
+    (cl-loop for tab in tabs
+             for idx from 0
+             concat (sw-workspace--format-tab
+                     idx
+                     (alist-get 'name tab)
+                     (eq idx current-index)))))
 
 ;; Interactive commands
 (defun sw-workspace-display ()

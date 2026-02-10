@@ -49,8 +49,6 @@
   (tab-width 4)
   (fill-column 100)
   (sentence-end-double-space nil)
-  (delete-selection-mode t)
-
   ;; Scrolling
   (scroll-margin 2)
   (scroll-conservatively 101)
@@ -63,7 +61,7 @@
   (indicate-buffer-boundaries nil)
 
   ;; Performance
-  (read-process-output-max (* 1024 1024))
+  (read-process-output-max (* 4 1024 1024))
   (process-adaptive-read-buffering nil)
 
   ;; Minibuffer
@@ -78,6 +76,7 @@
   (set-keyboard-coding-system 'utf-8)
 
   ;; Enable useful modes
+  (delete-selection-mode 1)
   (column-number-mode 1)
   (electric-pair-mode 1)
   (global-auto-revert-mode 1)

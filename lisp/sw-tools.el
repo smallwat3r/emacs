@@ -72,7 +72,6 @@
 (use-package pinentry
   :defer 2
   :config
-  (setenv "GPG_AGENT_INFO" nil)
   (pinentry-start))
 
 ;;; Helpful - better help buffers
