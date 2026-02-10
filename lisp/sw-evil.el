@@ -49,13 +49,7 @@
   ;; (e.g. magit, dired), so our SPC leader always takes priority.
   (evil-collection-key-blacklist '("SPC"))
   :config
-  (evil-collection-init
-   '(compile consult corfu custom dired
-     diff-hl docker eat ediff eglot
-     embark eldoc flymake forge help
-     ibuffer imenu imenu-list info magit
-     marginalia org pass pdf restclient
-     vertico wgrep xref)))
+  (evil-collection-init))
 
 ;; Visual hints for operations
 (use-package evil-goggles
