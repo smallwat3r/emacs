@@ -8,8 +8,10 @@
 ;;; Fonts (font variables defined in early-init.el)
 
 ;; Monospace faces
-(set-face-attribute 'fixed-pitch nil :family sw-font-family :height (* sw-font-size 10))
-(set-face-attribute 'fixed-pitch-serif nil :family sw-font-serif :height (* sw-font-size 10))
+(set-face-attribute 'fixed-pitch nil
+                    :family sw-font-family :height (* sw-font-size 10))
+(set-face-attribute 'fixed-pitch-serif nil
+                    :family sw-font-serif :height (* sw-font-size 10))
 
 ;; Variable-pitch face
 (set-face-attribute 'variable-pitch nil
