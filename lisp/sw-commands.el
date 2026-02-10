@@ -205,5 +205,19 @@ When deleting single space, also deletes trailing symbol and word."
   (sw--set-all-font-sizes sw-font-size)
   (message "Font size: %dpt" sw-font-size))
 
+;;; OS commands
+
+(defun sw-open-in-file-manager ()
+  "Open the current directory in the OS file manager."
+  (interactive)
+  (let ((dir (or (and (derived-mode-p 'dired-mode)
+                      (dired-current-directory))
+                 default-directory)))
+    (pcase system-type
+      ('darwin (call-process "open" nil 0 nil dir))
+      ('gnu/linux (call-process "xdg-open" nil 0 nil dir))
+      (_ (user-error "Unsupported system: %s"
+                     system-type)))))
+
 (provide 'sw-commands)
 ;;; sw-commands.el ends here

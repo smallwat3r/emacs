@@ -306,6 +306,7 @@ DEF is a command or nil (prefix-only label)."
     ("o s" sw-ssh-external "SSH external term")
     ("o d" dired-jump "Dired")
     ("o p" pass "Pass")
+    ("o f" sw-open-in-file-manager "File manager")
     ("o l" browse-url-at-point "Open URL")
 
     ;; Tailscale
