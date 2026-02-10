@@ -7,6 +7,8 @@
 
 (use-package eglot
   :ensure nil
+  :commands (eglot-code-actions eglot-rename
+             eglot-find-implementation)
   :hook ((python-ts-mode
           go-ts-mode
           rust-ts-mode
