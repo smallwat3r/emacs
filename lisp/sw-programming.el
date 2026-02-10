@@ -29,8 +29,7 @@ Runs after `treesit-major-mode-setup'."
                             (seq-difference l hit))
                           flist))
       (setf (nth 1 treesit-font-lock-feature-list)
-            (append (nth 1 treesit-font-lock-feature-list)
-                    hit))
+            (append (nth 1 treesit-font-lock-feature-list) hit))
       (treesit-font-lock-recompute-features)))
 
   (advice-add 'treesit-major-mode-setup :after
@@ -182,10 +181,7 @@ For Python, handles indented code by dedenting before formatting."
   (python-shell-completion-native-enable nil)
   :config
   (defun sw-python-font-lock-setup ()
-    "Add font-lock rules for f-string interpolations.
-Highlights braces and identifiers within f-string
-interpolation nodes.  Feature promotion to level 2 is
-handled globally by `sw-treesit-promote-font-lock-features'."
+    "Add font-lock rules for f-string interpolations."
     (setq-local treesit-font-lock-settings
                 (append
                  treesit-font-lock-settings
@@ -193,17 +189,13 @@ handled globally by `sw-treesit-promote-font-lock-features'."
                   :language 'python
                   :feature 'string-interpolation
                   :override t
-                  '((interpolation
-                     "{" @font-lock-bracket-face)
-                    (interpolation
-                     "}" @font-lock-bracket-face)
-                    (interpolation
-                     (identifier)
-                     @font-lock-variable-use-face)))))
+                  '((interpolation "{" @font-lock-bracket-face)
+                    (interpolation "}" @font-lock-bracket-face)
+                    (interpolation (identifier)
+                                   @font-lock-variable-use-face)))))
     (treesit-font-lock-recompute-features))
 
-  (add-hook 'python-ts-mode-hook
-            #'sw-python-font-lock-setup)
+  (add-hook 'python-ts-mode-hook #'sw-python-font-lock-setup)
 
   (defun sw-python-toggle-fstring ()
     "Toggle f-string prefix on the current Python string literal.
@@ -316,41 +308,35 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 ;;; JavaScript/TypeScript
 
-(defun sw-js-font-lock-setup ()
-  "Add font-lock rules for template literal interpolations.
-Highlights identifiers within template substitution nodes.
-Works for both JS and TypeScript tree-sitter modes.
-Feature promotion to level 2 is handled globally by
-`sw-treesit-promote-font-lock-features'; for TypeScript
-which lacks the feature entirely, it is added to level 2."
-  (let ((lang (treesit-language-at (point-min))))
-    ;; TypeScript has no string-interpolation feature;
-    ;; add it to level 2 so the rules below are enabled.
-    (unless (seq-some
-             (lambda (level)
-               (memq 'string-interpolation level))
-             treesit-font-lock-feature-list)
-      (setf (nth 1 treesit-font-lock-feature-list)
-            (append
-             (nth 1 treesit-font-lock-feature-list)
-             '(string-interpolation))))
-    (setq-local treesit-font-lock-settings
-                (append
-                 treesit-font-lock-settings
-                 (treesit-font-lock-rules
-                  :language lang
-                  :feature 'string-interpolation
-                  :override t
-                  '((template_substitution
-                     (identifier)
-                     @font-lock-variable-use-face)))))
-    (treesit-font-lock-recompute-features)))
-
 (use-package js
   :ensure nil
   :custom
   (js-indent-level 2)
   :config
+  (defun sw-js-font-lock-setup ()
+    "Add font-lock rules for template literal interpolations.
+Works for both JS and TypeScript tree-sitter modes."
+    (let ((lang (treesit-language-at (point-min))))
+      (unless (seq-some
+               (lambda (level)
+                 (memq 'string-interpolation level))
+               treesit-font-lock-feature-list)
+        (setf (nth 1 treesit-font-lock-feature-list)
+              (append
+               (nth 1 treesit-font-lock-feature-list)
+               '(string-interpolation))))
+      (setq-local treesit-font-lock-settings
+                  (append
+                   treesit-font-lock-settings
+                   (treesit-font-lock-rules
+                    :language lang
+                    :feature 'string-interpolation
+                    :override t
+                    '((template_substitution
+                       (identifier)
+                       @font-lock-variable-use-face)))))
+      (treesit-font-lock-recompute-features)))
+
   (add-hook 'js-ts-mode-hook #'sw-js-font-lock-setup))
 
 (use-package typescript-ts-mode
