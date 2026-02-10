@@ -390,10 +390,11 @@ Current input becomes a prefix filter (^pattern)."
   (sw-eat-here nil))
 
 (defun sw-eat--kill-buffers (&optional keep-current)
-  "Kill eat buffers. If KEEP-CURRENT, spare the current buffer."
+  "Kill eat buffers in the current workspace.
+If KEEP-CURRENT, spare the current buffer."
   (let ((count 0)
         (current (current-buffer)))
-    (dolist (buf (buffer-list))
+    (dolist (buf (sw-workspace-buffer-list))
       (when (and (eq (buffer-local-value 'major-mode buf) 'eat-mode)
                  (not (and keep-current (eq buf current))))
         (kill-buffer buf)
