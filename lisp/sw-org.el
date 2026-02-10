@@ -68,7 +68,7 @@
   :custom
   (deft-directory sw-org-directory)
   (deft-extensions '("org" "md" "txt"))
-  (deft-default-extension "txt")
+  (deft-default-extension "txt") ; prefer plain text for new notes
   (deft-recursive t)
   (deft-use-filename-as-title t)
   (deft-use-filter-string-for-filename t)
