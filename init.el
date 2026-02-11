@@ -140,6 +140,7 @@
 (require 'sw-tools)
 (require 'sw-claude)
 (require 'sw-workspaces)
+(require 'sw-center)
 (require 'sw-keybindings)
 (require 'sw-dashboard)
 

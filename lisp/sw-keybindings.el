@@ -275,6 +275,7 @@ DEF is a command or nil (prefix-only label)."
     ("t n" display-line-numbers-mode "Line numbers")
     ("t i" imenu-list-smart-toggle "Imenu list")
     ("t w" whitespace-mode "Whitespace")
+    ("t c" sw-center-mode "Center mode")
     ("t f" load-theme "Load theme")
     ("t a" warm-mode "Warm mode")
 
@@ -534,7 +535,17 @@ DEF is a command or nil (prefix-only label)."
   (define-key eat-semi-char-mode-map
     (kbd "C-y") #'sw-eat-yank)
   (define-key eat-semi-char-mode-map
-    (kbd "C-,") #'sw-eat-zsh-history-pick))
+    (kbd "C-,") #'sw-eat-zsh-history-pick)
+
+  ;; Text scaling (override eat-self-input)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-=") #'sw-text-scale-increase)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-+") #'sw-text-scale-increase)
+  (define-key eat-semi-char-mode-map
+    (kbd "C--") #'sw-text-scale-decrease)
+  (define-key eat-semi-char-mode-map
+    (kbd "C-0") #'sw-text-scale-reset))
 
 ;;; Evil-snipe bindings
 
