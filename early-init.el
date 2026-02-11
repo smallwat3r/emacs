@@ -142,9 +142,7 @@
 
 ;; Native compilation settings
 (setq native-comp-async-report-warnings-errors 'silent
-      native-comp-jit-compilation t
-      warning-suppress-log-types '((comp))
-      warning-suppress-types '((comp)))
+      native-comp-jit-compilation t)
 
 ;; Prefer newer .el files over older .elc
 (setq load-prefer-newer t)

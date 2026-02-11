@@ -500,10 +500,5 @@ Configures terminal with xterm-256color TERM for foot compatibility."
                 vc-ignore-dir-regexp
                 tramp-file-name-regexp)))
 
-;; Docker TRAMP support (built-in since Emacs 29)
-(use-package tramp-container
-  :ensure nil
-  :after tramp)
-
 (provide 'sw-terminal)
 ;;; sw-terminal.el ends here
