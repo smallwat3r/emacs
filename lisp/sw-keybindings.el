@@ -43,10 +43,19 @@
   "Alist of (MODE . KEYMAP) for SPC m bindings.")
 
 (defun sw-local-leader-keymap ()
-  "Return the local leader keymap for the current major mode."
-  (or (alist-get major-mode sw-local-leader-alist)
-      (cl-loop for (m . km) in sw-local-leader-alist
-               when (derived-mode-p m) return km)))
+  "Return the local leader keymap for the current major mode.
+Composes custom SPC m bindings with the mode's C-c keymap
+so both are accessible, with custom bindings taking precedence."
+  (let ((custom (or (alist-get major-mode sw-local-leader-alist)
+                    (cl-loop for (m . km) in sw-local-leader-alist
+                             when (derived-mode-p m) return km)))
+        (mode-cc (when-let ((local (current-local-map)))
+                   (lookup-key local (kbd "C-c")))))
+    (cond
+     ((and custom (keymapp mode-cc))
+      (make-composed-keymap custom mode-cc))
+     (custom custom)
+     ((keymapp mode-cc) mode-cc))))
 
 (defun sw-define-keys (keymap bindings)
   "Define BINDINGS in KEYMAP with which-key labels.
