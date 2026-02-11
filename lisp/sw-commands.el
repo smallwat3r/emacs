@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'sw-lib)
+
 ;;; Buffer/File commands
 
 (defun sw-show-buffer-path ()
@@ -114,14 +116,8 @@ When deleting single space, also deletes trailing symbol and word."
   "Copy region between BEG and END with common indentation removed."
   (interactive "r")
   (let* ((text (buffer-substring-no-properties beg end))
-         (lines (split-string text "\n"))
-         (min-indent most-positive-fixnum))
-    (dolist (l lines)
-      (when (string-match "\\`\\( *\\)\\S-" l)
-        (setq min-indent
-              (min min-indent (match-end 1)))))
-    (when (= min-indent most-positive-fixnum)
-      (setq min-indent 0))
+         (min-indent (sw--string-min-indent text))
+         (lines (split-string text "\n")))
     (kill-new
      (mapconcat
       (lambda (l)

@@ -99,24 +99,7 @@ Runs after `treesit-major-mode-setup'."
   "Alist mapping major modes to region formatter commands.
 Each value is a list where car is the command and cdr is the arguments.")
 
-(defun sw--string-min-indent (str)
-  "Return minimum indentation (spaces) of non-blank lines in STR."
-  (let ((min most-positive-fixnum))
-    (dolist (line (split-string str "\n"))
-      (when (string-match "^\\( *\\)[^ \t\n]" line)
-        (setq min (min min (length (match-string 1 line))))))
-    (if (= min most-positive-fixnum) 0 min)))
-
-(defun sw--string-reindent (str old-indent new-indent)
-  "Change indentation of STR from OLD-INDENT to NEW-INDENT spaces."
-  (let ((prefix (make-string new-indent ?\s))
-        (re (concat "^" (make-string old-indent ?\s))))
-    (mapconcat (lambda (line)
-                 (if (string-match-p "^[ \t]*$" line)
-                     line
-                   (concat prefix (replace-regexp-in-string re "" line t t))))
-               (split-string str "\n" nil)
-               "\n")))
+(require 'sw-lib)
 
 (defun sw-format-region ()
   "Format the current region using language-specific tools or eglot.

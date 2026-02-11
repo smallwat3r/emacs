@@ -124,6 +124,7 @@
 ;; Wait for all queued packages to be installed before loading modules
 (elpaca-wait)
 
+(require 'sw-lib)
 (require 'sw-theme)
 (require 'sw-evil)
 (require 'sw-modeline)
