@@ -22,6 +22,9 @@
 ;; Marginalia - rich annotations in minibuffer
 (use-package marginalia
   :hook (sw-first-input . marginalia-mode)
+  :custom
+  (marginalia-align 'right)
+  (marginalia-align-offset -1) ; prevent right-aligned annotations truncation
   :config
   ;; Remove underline from annotation faces
   (dolist (face '(marginalia-documentation marginalia-value marginalia-key))
