@@ -49,8 +49,6 @@
 ;; Consult - enhanced search and navigation
 (use-package consult
   :custom
-  (consult-narrow-key "<")
-  (consult-line-numbers-widen t)
   (consult-async-min-input 2)
   (consult-async-refresh-delay 0.15)
   (consult-async-input-throttle 0.2)
@@ -65,7 +63,15 @@
   (setq consult-fd-args
         `(,(if (executable-find "fdfind") "fdfind" "fd")
           "--color=never" "--hidden" "--exclude" ".git"))
-  (setq consult-async-split-style 'semicolon))
+  (setq consult-async-split-style 'semicolon)
+  ;; Hide line number prefix in consult-line, keep syntax highlighting
+  (advice-add 'consult--line-fontify :around
+    (lambda (orig-fn &rest args)
+      (let ((fn (apply orig-fn args)))
+        (lambda (cand)
+          (let ((result (funcall fn cand)))
+            (setf (cadr result) "")
+            result))))))
 
 ;; Embark - contextual actions
 (use-package embark
