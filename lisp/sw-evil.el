@@ -76,10 +76,12 @@
   (evil-snipe-aliases
    '((?\( "[[{(]")
      (?\) "[]})]")))
+  :custom-face
+  (evil-snipe-first-match-face
+   ((t (:background "yellow" :weight bold))))
+  (evil-snipe-matches-face
+   ((t (:background "yellow" :weight bold))))
   :config
-  (custom-set-faces
-   '(evil-snipe-first-match-face ((t (:background "yellow" :weight bold))))
-   '(evil-snipe-matches-face ((t (:background "yellow" :weight bold)))))
 
   (defvar sw--last-search-was-snipe nil
     "Non-nil if the last search action was an evil-snipe.")
