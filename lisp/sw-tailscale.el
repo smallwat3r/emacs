@@ -37,15 +37,17 @@
   "Return alist of Tailscale devices as (name . ip)."
   (sw-tailscale--with-cli
     (condition-case err
-        (let* ((json (shell-command-to-string
-                      "tailscale status --json 2>/dev/null"))
-               (data (json-parse-string json :object-type 'alist))
+        (let* ((result (sw-tailscale--call "status" "--json"))
+               (data (json-parse-string (cdr result)
+                                        :object-type 'alist))
                (peers (alist-get 'Peer data)))
           (mapcar (lambda (peer)
                     (let* ((info (cdr peer))
                            (dns (alist-get 'DNSName info))
                            (name (car (split-string dns "\\.")))
-                           (ip (aref (alist-get 'TailscaleIPs info) 0)))
+                           (ip (aref
+                                (alist-get 'TailscaleIPs info)
+                                0)))
                       (cons name ip)))
                   peers))
       (error

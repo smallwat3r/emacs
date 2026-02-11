@@ -480,7 +480,7 @@ Configures terminal with xterm-256color TERM for foot compatibility."
   (tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory))
   (tramp-persistency-file-name (expand-file-name "tramp" user-emacs-directory))
   (tramp-use-connection-share nil)
-  (remote-file-name-inhibit-cache nil)
+  (remote-file-name-inhibit-cache 10)
 
   :config
   ;; SSH completion from config files
