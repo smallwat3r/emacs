@@ -148,8 +148,7 @@ OLD-FACE and NEW-FACE the face plists."
   (add-hook 'git-timemachine-mode-hook #'evil-normalize-keymaps))
 
 ;; Git modes for config files
-(use-package git-modes
-  :defer t)
+(use-package git-modes)
 
 ;; Open remote repo in browser
 (use-package browse-at-remote
