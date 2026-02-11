@@ -13,12 +13,13 @@
           go-ts-mode
           rust-ts-mode
           typescript-ts-mode
+          tsx-ts-mode
           js-ts-mode
           sh-mode
           terraform-mode)
          . eglot-ensure)
   :init
-  ;; Prevent eglot from managing flymake
+  ;; Disable inline diagnostics to keep the UI minimal
   (setq eglot-stay-out-of '(flymake))
   :custom
   ;; Performance

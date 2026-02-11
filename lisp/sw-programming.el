@@ -341,7 +341,7 @@ Works for both JS and TypeScript tree-sitter modes."
 
 (use-package typescript-ts-mode
   :ensure nil
-  :mode ("\\.ts\\'" "\\.tsx\\'")
+  :mode ("\\.ts\\'" ("\\.tsx\\'" . tsx-ts-mode))
   :custom
   (typescript-ts-mode-indent-offset 2)
   :config
