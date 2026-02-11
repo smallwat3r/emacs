@@ -6,7 +6,7 @@
 
 ;;; Code:
 
-(defvar sw-center-width nil
+(defvar sw-center-width 100
   "Text width for centering. When nil, uses `fill-column'.")
 
 (defun sw-center--has-hsplit-p (node)
