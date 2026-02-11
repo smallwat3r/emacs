@@ -83,12 +83,7 @@ If a workspace for the project already exists, switch to it."
         (tab-bar-new-tab)
         (tab-bar-rename-tab name)
         (delete-other-windows)
-        ;; Find file using project's file list if available
-        (if pr
-            (let* ((files (project-files pr))
-                   (file (completing-read "Find file: " files nil t)))
-              (find-file file))
-          (call-interactively #'find-file))))))
+        (project-find-file)))))
 
 (defun sw-workspace-find-in-directory (dir name)
   "Find file in DIR, switching to or creating workspace NAME."

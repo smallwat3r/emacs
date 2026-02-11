@@ -54,6 +54,7 @@ message have changed since the last call."
 
 (add-hook 'window-configuration-change-hook #'sw--update-mode-line-visibility)
 
+;; Hardcoded across all themes
 (set-face-attribute 'mode-line nil
                     :background "#e63946"
                     :box nil
