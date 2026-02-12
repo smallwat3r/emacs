@@ -78,11 +78,11 @@ If a workspace for the project already exists, switch to it."
         (tab-bar-switch-to-tab name)
       (let* ((tab-bar-new-tab-choice #'sw-fallback-buffer)
              (pr (project-current nil dir))
-             (root (if pr (project-root pr) dir))
-             (default-directory root))
+             (root (if pr (project-root pr) dir)))
         (tab-bar-new-tab)
         (tab-bar-rename-tab name)
         (delete-other-windows)
+        (setq default-directory root)
         (project-find-file)))))
 
 (defun sw-workspace-find-in-directory (dir name)
