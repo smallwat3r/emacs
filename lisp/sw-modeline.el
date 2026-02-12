@@ -41,7 +41,6 @@ message have changed since the last call."
 
 (add-hook 'post-command-hook #'sw--update-echo-area)
 
-
 ;; Modeline is only used to distinguish active window via color.
 ;; Hide it when there's only one window since there's nothing to distinguish.
 (defun sw--update-mode-line-visibility ()
