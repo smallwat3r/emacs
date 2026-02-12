@@ -22,10 +22,11 @@
                  (car (window-tree)))))
     (walk-windows
      (lambda (w)
+       (set-window-margins w 0 0)
        (let* ((target (or sw-center-width fill-column 100))
+              (available (window-body-width w))
               (margin (if squash 0
-                        (max 0 (/ (- (window-total-width w)
-                                     target)
+                        (max 0 (/ (- available target)
                                   2)))))
          (set-window-margins w margin margin)))
      'no-mini)))
