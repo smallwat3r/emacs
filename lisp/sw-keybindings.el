@@ -574,6 +574,26 @@ DEF is a command or nil (prefix-only label)."
     (kbd "<backtab>") #'dired-subtree-remove
     (kbd "/")        #'dired-narrow-fuzzy))
 
+;;; Magit bindings
+
+(with-eval-after-load 'magit
+  ;; Unbind h/l keys for Evil compatibility (allow cursor movement)
+  (define-key magit-mode-map (kbd "l") nil)
+  (define-key magit-mode-map (kbd "h") nil))
+
+;;; Git rebase bindings
+;; n, a bindings match custom keyboard layout (up/down)
+
+(with-eval-after-load 'git-rebase
+  (define-key git-rebase-mode-map
+    (kbd "K") #'git-rebase-move-line-up)
+  (define-key git-rebase-mode-map
+    (kbd "J") #'git-rebase-move-line-down)
+  (define-key git-rebase-mode-map
+    (kbd "N") #'git-rebase-move-line-up)
+  (define-key git-rebase-mode-map
+    (kbd "A") #'git-rebase-move-line-down))
+
 ;;; Git timemachine bindings
 
 (with-eval-after-load 'git-timemachine

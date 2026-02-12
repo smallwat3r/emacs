@@ -100,10 +100,6 @@ OLD-FACE and NEW-FACE the face plists."
   (magit-process-finish-apply-ansi-colors t)
 
   :config
-  ;; Unbind h/l keys for Evil compatibility (allow cursor movement)
-  (define-key magit-mode-map (kbd "l") nil)
-  (define-key magit-mode-map (kbd "h") nil)
-
   ;; Commit buffer settings
   (add-hook 'git-commit-mode-hook
             (lambda ()
@@ -117,15 +113,6 @@ OLD-FACE and NEW-FACE the face plists."
   :ensure nil
   :custom
   (git-commit-summary-max-length 75))
-
-;; n, a bindings match custom keyboard layout (up/down)
-(use-package git-rebase
-  :ensure nil
-  :config
-  (define-key git-rebase-mode-map (kbd "K") #'git-rebase-move-line-up)
-  (define-key git-rebase-mode-map (kbd "J") #'git-rebase-move-line-down)
-  (define-key git-rebase-mode-map (kbd "N") #'git-rebase-move-line-up)
-  (define-key git-rebase-mode-map (kbd "A") #'git-rebase-move-line-down))
 
 ;; Git gutter
 (use-package diff-hl
