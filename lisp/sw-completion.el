@@ -79,12 +79,7 @@
   :bind
   ("C-." . embark-export)
   :custom
-  (prefix-help-command #'embark-prefix-help-command)
-  :config
-  (add-to-list 'display-buffer-alist
-               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-                 nil
-                 (window-parameters (mode-line-format . none)))))
+  (prefix-help-command #'embark-prefix-help-command))
 
 ;; Embark + Consult integration
 (use-package embark-consult
