@@ -40,15 +40,27 @@ and IS-CURRENT indicates if this is the active workspace."
     (propertize text 'face face)))
 
 (defun sw-workspace--tabline ()
-  "Return formatted workspace tabline for echo area display."
+  "Return formatted workspace tabline for echo area display.
+Wraps to multiple lines when tabs exceed the frame width."
   (let* ((tabs (funcall tab-bar-tabs-function))
-         (current-index (tab-bar--current-tab-index tabs)))
+         (current-index (tab-bar--current-tab-index tabs))
+         (max-width (frame-width))
+         (line-len 0)
+         parts)
     (cl-loop for tab in tabs
              for idx from 0
-             concat (sw-workspace--format-tab
-                     idx
-                     (alist-get 'name tab)
-                     (eq idx current-index)))))
+             do (let* ((segment (sw-workspace--format-tab
+                                 idx
+                                 (alist-get 'name tab)
+                                 (eq idx current-index)))
+                       (seg-len (length segment)))
+                  (when (and (> line-len 0)
+                             (> (+ line-len seg-len) max-width))
+                    (push "\n" parts)
+                    (setq line-len 0))
+                  (push segment parts)
+                  (cl-incf line-len seg-len)))
+    (apply #'concat (nreverse parts))))
 
 ;; Interactive commands
 (defun sw-workspace-display ()
