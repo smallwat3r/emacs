@@ -44,9 +44,7 @@
 Preserves *scratch* and *Messages* buffers."
   (interactive)
   (when (y-or-n-p "Kill all projects and buffers? ")
-    ;; Close all tabs except the current one
-    (while (> (length (tab-bar-tabs)) 1)
-      (tab-bar-close-other-tabs))
+    (tab-bar-close-other-tabs)
     (tab-bar-rename-tab "main")
     ;; Kill all buffers except essential ones
     (dolist (buf (buffer-list))

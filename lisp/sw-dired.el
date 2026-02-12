@@ -12,7 +12,7 @@
                            "-alh --group-directories-first"))
   (dired-dwim-target t)
   (dired-recursive-copies 'always)
-  (dired-recursive-deletes 'always)
+  (dired-recursive-deletes 'top)
   (dired-kill-when-opening-new-dired-buffer t)
   (dired-auto-revert-buffer t)
   :config

@@ -247,29 +247,21 @@ For remote directories, uses TRAMP to connect.
 For local directories, uses the user's default shell."
   (require 'eat)
   (let* ((default-directory dir)
-         (buf-name (or name (generate-new-buffer-name (sw-eat--buffer-for-dir dir)))))
-    (if (file-remote-p dir)
-        ;; For remote directories, use eat's built-in TRAMP support
-        (let* ((method (file-remote-p dir 'method))
-               (shell (or (cdr (assoc method eat-tramp-shells)) "/bin/bash"))
-               (buffer (get-buffer-create buf-name)))
-          (with-current-buffer buffer
-            (unless (eq major-mode 'eat-mode)
-              (eat-mode))
-            (unless (and (bound-and-true-p eat-terminal)
-                         (eat-term-parameter eat-terminal 'eat--process))
-              (eat-exec buffer buf-name shell nil nil)))
-          buffer)
-      ;; For local directories
-      (let ((shell (or (getenv "SHELL") "/bin/bash"))
-            (buffer (get-buffer-create buf-name)))
-        (with-current-buffer buffer
-          (unless (eq major-mode 'eat-mode)
-            (eat-mode))
-          (unless (and (bound-and-true-p eat-terminal)
-                       (eat-term-parameter eat-terminal 'eat--process))
-            (eat-exec buffer buf-name shell nil nil)))
-        buffer))))
+         (buf-name (or name (generate-new-buffer-name
+                             (sw-eat--buffer-for-dir dir))))
+         (shell (if (file-remote-p dir)
+                    (or (cdr (assoc (file-remote-p dir 'method)
+                                    eat-tramp-shells))
+                        "/bin/bash")
+                  (or (getenv "SHELL") "/bin/bash")))
+         (buffer (get-buffer-create buf-name)))
+    (with-current-buffer buffer
+      (unless (eq major-mode 'eat-mode)
+        (eat-mode))
+      (unless (and (bound-and-true-p eat-terminal)
+                   (eat-term-parameter eat-terminal 'eat--process))
+        (eat-exec buffer buf-name shell nil nil)))
+    buffer))
 
 (defun sw-eat--determine-directory (here)
   "Return directory for eat buffer.
