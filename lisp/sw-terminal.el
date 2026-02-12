@@ -426,8 +426,8 @@ Sets INSIDE_EMACS environment variable to indicate Emacs context."
          (dir (sw-terminal-here--default-directory)))
     (unless (executable-find term)
       (error "Executable '%s' not found in PATH" term))
-    (format "sh -lc 'cd %s && INSIDE_EMACS=%s %s' >/dev/null 2>&1"
-            (shell-quote-argument dir) term term)))
+    (format "sh -lc 'cd %s && INSIDE_EMACS=1 %s' >/dev/null 2>&1"
+            (shell-quote-argument dir) term)))
 
 (defun sw-terminal-here ()
   "Open a terminal window in the current directory."
