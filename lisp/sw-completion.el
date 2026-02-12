@@ -43,7 +43,8 @@
   (setq orderless-matching-styles '(orderless-literal
                                     orderless-regexp
                                     orderless-flex))  ; flex = fuzzy
-  ;; Use fuzzy for consult-ripgrep and similar async commands
+  ;; Per-component style dispatch: =literal ~flex !exclude `regexp %charfold
+  (setq orderless-style-dispatchers '(orderless-affix-dispatch))
   (setq orderless-component-separator #'orderless-escapable-split-on-space))
 
 ;; Consult - enhanced search and navigation
