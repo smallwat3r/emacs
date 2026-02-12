@@ -30,6 +30,10 @@ ielm-history.eld
 # Tree-sitter grammars
 tree-sitter/
 
+# EWW
+eww-bookmarks
+eww/
+
 # Misc
 .DS_Store
 url/
