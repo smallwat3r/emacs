@@ -402,6 +402,7 @@ DEF is a command or nil (prefix-only label)."
   ;; Quick commands with ;
   (kbd ";w") #'save-buffer
   (kbd ";q") #'evil-quit
+  (kbd ";d") #'kill-current-buffer
 
   ;; Symbol highlight (stay at point, use n/N to navigate)
   (kbd "*")  #'sw-highlight-symbol-at-point
