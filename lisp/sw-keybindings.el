@@ -143,7 +143,7 @@ DEF is a command or nil (prefix-only label)."
     ("b"   nil "Buffer")
     ("b b" sw-workspace-switch-buffer "Switch buffer")
     ("b B" sw-switch-buffer-global "Switch buffer (all)")
-    ("b d" kill-current-buffer "Kill buffer")
+    ("b d" sw-kill-buffer "Kill buffer")
     ("b D" sw-workspace-kill-all-buffers
      "Kill workspace buffers")
     ("b i" ibuffer "Ibuffer")
@@ -402,7 +402,7 @@ DEF is a command or nil (prefix-only label)."
   ;; Quick commands with ;
   (kbd ";w") #'save-buffer
   (kbd ";q") #'evil-quit
-  (kbd ";d") #'kill-current-buffer
+  (kbd ";d") #'sw-kill-buffer
 
   ;; Symbol highlight (stay at point, use n/N to navigate)
   (kbd "*")  #'sw-highlight-symbol-at-point

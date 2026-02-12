@@ -21,6 +21,13 @@
     (kill-new path)
     (message "Copied: %s" path)))
 
+(defun sw-kill-buffer ()
+  "Kill the current buffer with confirmation message."
+  (interactive)
+  (let ((name (buffer-name)))
+    (kill-current-buffer)
+    (message "Killed buffer: %s" name)))
+
 (defun sw-delete-this-file ()
   "Delete the current file and kill the buffer."
   (interactive)
