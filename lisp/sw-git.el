@@ -110,20 +110,22 @@ OLD-FACE and NEW-FACE the face plists."
               (display-line-numbers-mode -1)
               (evil-insert-state)))
 
-  ;; Git commit settings
-  (with-eval-after-load 'git-commit
-    (setq git-commit-summary-max-length 75))
-
   ;; Ensure commit buffer is focused in daemon mode
-  (add-hook 'server-switch-hook #'raise-frame)
+  (add-hook 'server-switch-hook #'raise-frame))
 
-  ;; Git rebase keybindings for moving commits
-  ;; n, a bindings match custom keyboard layout (up/down)
-  (with-eval-after-load 'git-rebase
-    (define-key git-rebase-mode-map (kbd "K") #'git-rebase-move-line-up)
-    (define-key git-rebase-mode-map (kbd "J") #'git-rebase-move-line-down)
-    (define-key git-rebase-mode-map (kbd "N") #'git-rebase-move-line-up)
-    (define-key git-rebase-mode-map (kbd "A") #'git-rebase-move-line-down)))
+(use-package git-commit
+  :ensure nil
+  :custom
+  (git-commit-summary-max-length 75))
+
+;; n, a bindings match custom keyboard layout (up/down)
+(use-package git-rebase
+  :ensure nil
+  :config
+  (define-key git-rebase-mode-map (kbd "K") #'git-rebase-move-line-up)
+  (define-key git-rebase-mode-map (kbd "J") #'git-rebase-move-line-down)
+  (define-key git-rebase-mode-map (kbd "N") #'git-rebase-move-line-up)
+  (define-key git-rebase-mode-map (kbd "A") #'git-rebase-move-line-down))
 
 ;; Git gutter
 (use-package diff-hl
