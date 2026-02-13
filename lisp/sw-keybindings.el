@@ -580,9 +580,9 @@ DEF is a command or nil (prefix-only label)."
 
 (with-eval-after-load 'dired
   (evil-define-key* 'normal dired-mode-map
-    (kbd "TAB")      #'dired-subtree-toggle
+    (kbd "TAB")       #'dired-subtree-toggle
     (kbd "<backtab>") #'dired-subtree-remove
-    (kbd "/")        #'dired-narrow-fuzzy))
+    (kbd "/")         #'dired-narrow-fuzzy))
 
 ;;; Magit bindings
 

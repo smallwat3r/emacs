@@ -262,8 +262,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
                             `(:basedpyright (:pythonPath ,python)))))))
 
 ;; Poetry lock files are TOML
-(add-to-list 'auto-mode-alist
-             '("poetry\\.lock\\'" . conf-toml-mode))
+(add-to-list 'auto-mode-alist '("poetry\\.lock\\'" . conf-toml-mode))
 
 ;;; Go
 
@@ -369,14 +368,13 @@ Works for both JS and TypeScript tree-sitter modes."
   :custom
   (sh-basic-offset 2)
   (sh-indentation 2)
-  :hook (sh-mode . (lambda ()
-                     (setq-local indent-tabs-mode nil))))
+  :hook (sh-mode . (lambda () (setq-local indent-tabs-mode nil))))
 
 ;;; SQL
 
 (use-package sql
   :ensure nil
-  :mode (("\\.sql\\'" . sql-mode)
+  :mode (("\\.sql\\'"   . sql-mode)
          ("\\.mysql\\'" . sql-mode)
          ("\\.pgsql\\'" . sql-mode))
   :config
@@ -424,16 +422,13 @@ Works for both JS and TypeScript tree-sitter modes."
   :mode ("Makefile.*" . makefile-mode))
 
 ;; ROS launch files are XML
-(add-to-list 'auto-mode-alist
-             '("\\.launch\\'" . xml-mode))
+(add-to-list 'auto-mode-alist '("\\.launch\\'" . xml-mode))
 
 ;; Conky config files are Lua
-(add-to-list 'auto-mode-alist
-             '("conky\\.conf\\'" . lua-mode))
+(add-to-list 'auto-mode-alist '("conky\\.conf\\'" . lua-mode))
 
 ;; Djot (use markdown-mode as syntax is similar)
-(add-to-list 'auto-mode-alist
-             '("\\.dj\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.dj\\'" . markdown-mode))
 
 ;;; Editorconfig
 

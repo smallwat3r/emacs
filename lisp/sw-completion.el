@@ -10,9 +10,9 @@
 (use-package vertico
   :hook (sw-first-input . vertico-mode)
   :custom
-  (vertico-count 10)
+  (vertico-count  10)
   (vertico-resize nil)
-  (vertico-cycle t))
+  (vertico-cycle  t))
 
 ;; Save minibuffer history
 (use-package savehist
@@ -106,9 +106,9 @@
   (corfu-quit-at-boundary 'separator)
   :bind
   (:map corfu-map
-        ("TAB" . corfu-next)
-        ([tab] . corfu-next)
-        ("S-TAB" . corfu-previous)
+        ("TAB"     . corfu-next)
+        ([tab]     . corfu-next)
+        ("S-TAB"   . corfu-previous)
         ([backtab] . corfu-previous)))
 
 ;; Cape - completion at point extensions

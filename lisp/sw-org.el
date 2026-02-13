@@ -41,8 +41,8 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
-     (python . t)
-     (shell . t))))
+     (python     . t)
+     (shell      . t))))
 
 ;; Modern Org appearance
 (use-package org-modern

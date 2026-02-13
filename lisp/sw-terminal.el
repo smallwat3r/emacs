@@ -64,22 +64,22 @@ LIMIT defaults to 10000."
   (eat-enable-mouse t)
   (eat-enable-shell-integration nil)
   (eat-enable-shell-prompt-annotation nil)
-  (eat-tramp-shells '(("ssh" . "/bin/bash")
-                      ("scp" . "/bin/bash")
-                      ("sshx" . "/bin/bash")
+  (eat-tramp-shells '(("ssh"    . "/bin/bash")
+                      ("scp"    . "/bin/bash")
+                      ("sshx"   . "/bin/bash")
                       ("docker" . "/bin/sh")))
   :config
   ;; Terminal colors optimized for light backgrounds
-  (dolist (spec '((eat-term-color-0 . "#000000")
-                  (eat-term-color-1 . "#aa0000")
-                  (eat-term-color-2 . "#00aa00")
-                  (eat-term-color-3 . "#aa5500")
-                  (eat-term-color-4 . "#0000aa")
-                  (eat-term-color-5 . "#aa00aa")
-                  (eat-term-color-6 . "#00aaaa")
-                  (eat-term-color-7 . "#555555")
-                  (eat-term-color-8 . "#444444")
-                  (eat-term-color-9 . "#cc0000")
+  (dolist (spec '((eat-term-color-0  . "#000000")
+                  (eat-term-color-1  . "#aa0000")
+                  (eat-term-color-2  . "#00aa00")
+                  (eat-term-color-3  . "#aa5500")
+                  (eat-term-color-4  . "#0000aa")
+                  (eat-term-color-5  . "#aa00aa")
+                  (eat-term-color-6  . "#00aaaa")
+                  (eat-term-color-7  . "#555555")
+                  (eat-term-color-8  . "#444444")
+                  (eat-term-color-9  . "#cc0000")
                   (eat-term-color-10 . "#00cc00")
                   (eat-term-color-11 . "#cc7700")
                   (eat-term-color-12 . "#0000cc")
@@ -469,8 +469,10 @@ Configures terminal with xterm-256color TERM for foot compatibility."
   :custom
   (tramp-default-method "ssh")
   (tramp-verbose 1)
-  (tramp-auto-save-directory (expand-file-name "tramp-autosave" user-emacs-directory))
-  (tramp-persistency-file-name (expand-file-name "tramp" user-emacs-directory))
+  (tramp-auto-save-directory
+   (expand-file-name "tramp-autosave" user-emacs-directory))
+  (tramp-persistency-file-name
+   (expand-file-name "tramp" user-emacs-directory))
   (tramp-use-connection-share nil)
   (remote-file-name-inhibit-cache 10)
 
@@ -483,8 +485,8 @@ Configures terminal with xterm-256color TERM for foot compatibility."
               (list 'tramp-parse-sconfig (expand-file-name f)))
             sw-ssh-config-files)
     '((tramp-parse-sconfig "/etc/ssh_config")
-      (tramp-parse-shosts "/etc/hosts")
-      (tramp-parse-shosts "~/.ssh/known_hosts"))))
+      (tramp-parse-shosts  "/etc/hosts")
+      (tramp-parse-shosts  "~/.ssh/known_hosts"))))
 
   ;; Disable version control checks on remote files
   (setq vc-ignore-dir-regexp
