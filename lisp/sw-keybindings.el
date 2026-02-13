@@ -110,10 +110,20 @@ DEF is a command or nil (prefix-only label)."
   (define-key map (kbd "C-v") #'yank)
   (define-key map (kbd "C-r") #'evil-paste-from-register))
 
+;;; macOS modifier keys
+
+(when sw-is-mac
+  (setq mac-command-modifier      'super
+        ns-command-modifier       'super
+        mac-option-modifier       'meta
+        ns-option-modifier        'meta
+        mac-right-option-modifier 'none
+        ns-right-option-modifier  'none))
+
 ;;; Global editing bindings
 
 (global-set-key (kbd "C-<backspace>") #'sw-backward-kill-word)
-(when (eq system-type 'darwin)
+(when sw-is-mac
   (global-set-key (kbd "A-<backspace>") #'sw-backward-kill-word))
 
 ;;; Text scaling (global)
