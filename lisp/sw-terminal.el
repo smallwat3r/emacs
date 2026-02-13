@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 ;;; SSH config files
 
 (defconst sw-ssh-config-files

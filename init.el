@@ -110,9 +110,7 @@
 ;;; Sync shell PATH into Emacs
 
 (use-package exec-path-from-shell
-  :demand t
-  :config
-  (exec-path-from-shell-initialize))
+  :hook (sw-first-file . exec-path-from-shell-initialize))
 
 ;;; Early dependencies
 

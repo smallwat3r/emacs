@@ -8,7 +8,10 @@
 ;;; Browser configuration
 
 (when sw-is-linux
-  (setq browse-url-browser-function 'browse-url-xdg-open))
+  (setq browse-url-browser-function
+        (if (executable-find "firefox")
+            'browse-url-firefox
+          'browse-url-xdg-open)))
 
 ;;; Goto address - highlight URLs and email addresses
 
