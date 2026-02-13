@@ -18,7 +18,7 @@
   ;; Add additional root markers
   (setq project-vc-extra-root-markers
         '(".project" ".projectile" "Cargo.toml" "go.mod" "package.json"
-          "pyproject.toml" "setup.py" "Makefile" ".git")))
+          "pyproject.toml" ".git")))
 
 ;; Auto-discover projects in these directories
 (defvar sw-project-directories '("~/code" "~/work" "~/dotfiles")
@@ -77,7 +77,9 @@ When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
 Removes projects that no longer exist and re-scans `sw-project-directories'
 for new projects."
   (interactive)
-  (project-forget-zombie-projects)
+  (setq project--list nil)
+  (when (file-exists-p project-list-file)
+    (delete-file project-list-file))
   (sw-project-discover))
 
 (provide 'sw-project)
