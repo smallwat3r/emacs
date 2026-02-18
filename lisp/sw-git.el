@@ -100,6 +100,16 @@ OLD-FACE and NEW-FACE the face plists."
   (magit-process-finish-apply-ansi-colors t)
 
   :config
+  (add-to-list 'magit-git-environment
+               (concat "GIT_SSH_COMMAND="
+                       "ssh -4"
+                       " -o ConnectTimeout=10"
+                       " -o ServerAliveInterval=20"
+                       " -o ServerAliveCountMax=3"
+                       " -o TCPKeepAlive=yes"
+                       " -o GSSAPIAuthentication=no"
+                       " -o ControlMaster=no"))
+
   ;; Commit buffer settings
   (add-hook 'git-commit-mode-hook
             (lambda ()

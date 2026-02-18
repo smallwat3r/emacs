@@ -586,6 +586,9 @@ DEF is a command or nil (prefix-only label)."
 
 ;;; Magit bindings
 
+(with-eval-after-load 'transient
+  (keymap-set transient-map "<escape>" #'transient-quit-all))
+
 (with-eval-after-load 'magit
   ;; Unbind h/l keys for Evil compatibility (allow cursor movement)
   (define-key magit-mode-map (kbd "l") nil)
