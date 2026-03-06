@@ -167,8 +167,13 @@ TRAMP-PREFIX is the remote prefix for the `e` function."
                      (= (eat-term-end eat-terminal)
                         (point-max)))
             (setq sw-eat-tramp-initialized t)
-            (process-send-string
-             proc (sw-eat--tramp-init-string tramp-prefix)))))))
+            (let* ((win (get-buffer-window (current-buffer)))
+                   (rows (if win (window-body-height win) 24))
+                   (cols (if win (window-body-width win) 80)))
+              (set-process-window-size proc rows cols)
+              (process-send-string
+               proc (sw-eat--tramp-init-string
+                     tramp-prefix))))))))
 
   (defvar-local sw-eat--tramp-timer nil
     "Timer for TRAMP initialization polling.")
