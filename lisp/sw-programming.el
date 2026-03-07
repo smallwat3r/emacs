@@ -268,6 +268,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 (use-package go-ts-mode
   :ensure nil
+  :mode "\\.go\\'"
   :custom
   (go-ts-mode-indent-offset 4)
   :hook (go-ts-mode . (lambda () (setq-local indent-tabs-mode t))))
