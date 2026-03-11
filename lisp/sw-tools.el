@@ -22,11 +22,6 @@
   (goto-address-url-face 'link)
   (goto-address-mail-face 'link))
 
-;;; Restart Emacs
-
-(use-package restart-emacs
-  :commands restart-emacs)
-
 ;;; Sudo edit
 
 (use-package sudo-edit

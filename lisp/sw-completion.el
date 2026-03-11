@@ -8,7 +8,8 @@
 ;;; Minibuffer completion with Vertico
 
 (use-package vertico
-  :hook (sw-first-input . vertico-mode)
+  :hook ((sw-first-input . vertico-mode)
+         (minibuffer-setup . vertico-repeat-save))
   :custom
   (vertico-count  10)
   (vertico-resize nil)
