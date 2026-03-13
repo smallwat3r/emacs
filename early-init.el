@@ -90,7 +90,7 @@
   (seq-find #'sw-font-available-p fonts))
 
 ;; Primary font families (set early, before display is available)
-(defvar sw-font-family (if sw-is-mac "Monaco" "ocrab")
+(defvar sw-font-family (if sw-is-mac "Monaco" "Ocrab Nerd Font Mono")
   "Primary monospace font for code and default text.")
 
 (defvar sw-font-variable-pitch sw-font-family
