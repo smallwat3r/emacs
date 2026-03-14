@@ -39,7 +39,7 @@
     (add-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)
   (add-hook 'after-init-hook #'sw-setup-fontsets))
 
-(setq-default line-spacing 2)
+(setq-default line-spacing 0)
 
 ;;; Frame appearance
 (setq-default left-fringe-width 0
