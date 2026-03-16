@@ -282,6 +282,7 @@ DEF is a command or nil (prefix-only label)."
     ;; Toggle
     ("t"   nil "Toggle")
     ("t t" toggle-truncate-lines "Truncate lines")
+    ("t v" visual-line-mode "Visual line mode")
     ("t n" display-line-numbers-mode "Line numbers")
     ("t i" imenu-list-smart-toggle "Imenu list")
     ("t w" whitespace-mode "Whitespace")

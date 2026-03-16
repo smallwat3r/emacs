@@ -90,7 +90,17 @@
   (add-hook 'sw-first-file-hook #'global-so-long-mode)
 
   ;; Disable blinking cursor
-  (blink-cursor-mode -1))
+  (blink-cursor-mode -1)
+
+  ;; Wrap lines in non-code modes
+  (dolist (hook '(text-mode-hook
+                  org-mode-hook
+                  markdown-mode-hook
+                  message-mode-hook
+                  help-mode-hook
+                  Info-mode-hook
+                  eww-mode-hook))
+    (add-hook hook #'visual-line-mode)))
 
 ;;; Garbage collection during idle time
 
