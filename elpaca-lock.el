@@ -546,6 +546,10 @@
                                      "LICENSE" "README*" "*-pkg.el"))
                           :source "MELPA" :protocol https :inherit t :depth treeless :ref
                           "1607da2bc657fe05ae01f7fdf26f716eafead02c"))
+ (ros-mode :source "elpaca-menu-lock-file" :recipe
+           (:source nil :protocol https :inherit t :depth treeless :host github :repo
+                    "smallwat3r/emacs-ros-mode" :package "ros-mode" :ref
+                    "02968f75ccc7451de1a5bfd4e335cf156dda4823"))
  (restclient :source "elpaca-menu-lock-file" :recipe
              (:package "restclient" :fetcher github :repo "emacsorphanage/restclient" :files
                        ("restclient.el") :source "MELPA" :protocol https :inherit t :depth treeless
