@@ -2,8 +2,15 @@
 
 ;;; Commentary:
 ;; Integration with claude-code CLI for AI-assisted coding.
+;; Claude runs inside a Docker sandbox (see docker/claude-sandbox/)
+;; via a wrapper script (bin/claude-docker) that mounts the project
+;; directory and forwards auth, git config, and SSH agent.
 
 ;;; Code:
+
+(defconst sw-claude-docker-script
+  (expand-file-name "bin/claude-docker" user-emacs-directory)
+  "Path to the Docker wrapper script for sandboxed Claude.")
 
 (defun sw-claude-notify (title message)
   "Display a Linux notification with TITLE and MESSAGE using notify-send."
@@ -19,21 +26,32 @@ If in a split view, display in the current window."
                       '((display-buffer-full-frame))
                     '((display-buffer-same-window)))))
 
+(defun sw-claude-rebuild-sandbox ()
+  "Force rebuild the Claude Docker sandbox image."
+  (interactive)
+  (let ((default-directory user-emacs-directory))
+    (compile "docker build --no-cache -t claude-code-sandbox docker/claude-sandbox/")))
+
 ;; Required dependency for claude-code
 (use-package inheritenv
   :ensure (:host github :repo "purcell/inheritenv" :wait t)
   :demand t)
 
-;; Claude Code
+;; Claude Code (sandboxed via Docker)
 (use-package claude-code
   :ensure (:host github :repo "stevemolitor/claude-code.el" :wait t)
-  :when (executable-find "claude")
+  :when (and (executable-find "docker")
+             (file-executable-p sw-claude-docker-script))
   :after inheritenv
   :init
-  (setq claude-code-terminal-backend 'eat
+  (setq claude-code-program sw-claude-docker-script
+        claude-code-program-switches
+        '("--dangerously-skip-permissions")
+        claude-code-terminal-backend 'eat
         claude-code-notification-function #'sw-claude-notify
         claude-code-toggle-auto-select t
-        claude-code-display-window-fn #'sw-claude-display-buffer-full-frame)
+        claude-code-display-window-fn
+        #'sw-claude-display-buffer-full-frame)
 
   ;; Custom toggle that uses full frame display
   ;; Defined in :init so the command exists before the package is loaded

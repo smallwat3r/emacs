@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# claude-docker - Run Claude Code inside a sandboxed Docker container.
+#
+# This script builds the sandbox image on first use, then runs
+# claude inside a container with the project directory mounted
+# read-write and the ~/.claude config directory persisted.
+
+set -euo pipefail
+
+IMAGE_NAME="claude-code-sandbox"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOCKERFILE_DIR="${SCRIPT_DIR}/../docker/claude-sandbox"
+
+build_image() {
+  docker build -t "${IMAGE_NAME}" "${DOCKERFILE_DIR}" >&2
+}
+
+if ! docker image inspect "${IMAGE_NAME}" >/dev/null 2>&1; then
+  echo "Building Claude sandbox image..." >&2
+  build_image
+fi
+
+PROJECT_DIR="$(pwd)"
+CONTAINER_HOME="/home/node"
+
+CLAUDE_DIR="${HOME}/.claude"
+CLAUDE_DATA_DIR="${HOME}/.local/share/claude"
+CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
+mkdir -p "${CLAUDE_DIR}" "${CLAUDE_DATA_DIR}" "${CLAUDE_STATE_DIR}"
+
+DOCKER_ARGS=(
+  --rm
+  -it
+  -e TERM=xterm-256color
+  -e INSIDE_EMACS=
+  -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
+  -v "${CLAUDE_DIR}:${CONTAINER_HOME}/.claude:z"
+  -v "${HOME}/.claude.json:${CONTAINER_HOME}/.claude.json:z"
+  -v "${CLAUDE_DATA_DIR}:${CONTAINER_HOME}/.local/share/claude:z"
+  -v "${CLAUDE_STATE_DIR}:${CONTAINER_HOME}/.local/state/claude:z"
+  -w "${PROJECT_DIR}"
+  --user "$(id -u):$(id -g)"
+  --cap-drop=ALL
+  --security-opt=no-new-privileges
+  --read-only
+  --tmpfs /tmp
+  --pids-limit=128
+)
+
+# Pass through optional env vars if set
+for var in ANTHROPIC_API_KEY CLAUDE_BUFFER_NAME; do
+  if [ -n "${!var+x}" ]; then
+    DOCKER_ARGS+=(-e "${var}")
+  fi
+done
+
+# Forward SSH agent if available
+MACOS_SSH_SOCK="/run/host-services/ssh-auth.sock"
+if [ "$(uname)" = "Darwin" ] && [ -e "${MACOS_SSH_SOCK}" ]; then
+  DOCKER_ARGS+=(
+    -v "${MACOS_SSH_SOCK}:/tmp/ssh-agent.sock"
+    -e SSH_AUTH_SOCK=/tmp/ssh-agent.sock
+  )
+elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
+  DOCKER_ARGS+=(
+    -v "${SSH_AUTH_SOCK}:/tmp/ssh-agent.sock:z"
+    -e SSH_AUTH_SOCK=/tmp/ssh-agent.sock
+  )
+fi
+
+# Forward git config (read-only)
+if [ -f "${HOME}/.gitconfig" ]; then
+  DOCKER_ARGS+=(-v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z")
+fi
+
+# Filter out --continue/--resume as they fail in ephemeral
+# containers with no prior sessions.
+CLAUDE_ARGS=()
+for arg in "$@"; do
+  case "${arg}" in
+    --continue|--resume) ;;
+    *) CLAUDE_ARGS+=("${arg}") ;;
+  esac
+done
+
+exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" "${CLAUDE_ARGS[@]}"
