@@ -73,14 +73,4 @@ if [ -f "${HOME}/.gitconfig" ]; then
   DOCKER_ARGS+=(-v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z")
 fi
 
-# Filter out --continue/--resume as they fail in ephemeral
-# containers with no prior sessions.
-CLAUDE_ARGS=()
-for arg in "$@"; do
-  case "${arg}" in
-    --continue|--resume) ;;
-    *) CLAUDE_ARGS+=("${arg}") ;;
-  esac
-done
-
-exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" "${CLAUDE_ARGS[@]}"
+exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" "$@"
