@@ -427,7 +427,10 @@ Works for both JS and TypeScript tree-sitter modes."
   :ensure (:host github :repo "smallwat3r/emacs-ros-mode")
   :mode (("\\.msg\\'" . ros-msg-mode)
          ("\\.srv\\'" . ros-msg-mode)
-         ("\\.action\\'" . ros-msg-mode)))
+         ("\\.action\\'" . ros-msg-mode))
+  :custom
+  (ros-build-tool 'colcon)
+  (ros-build-args "--symlink-install"))
 
 ;; Conky config files are Lua
 (add-to-list 'auto-mode-alist '("conky\\.conf\\'" . lua-mode))

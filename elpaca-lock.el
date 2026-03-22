@@ -549,7 +549,7 @@
  (ros-mode :source "elpaca-menu-lock-file" :recipe
            (:source nil :protocol https :inherit t :depth treeless :host github :repo
                     "smallwat3r/emacs-ros-mode" :package "ros-mode" :ref
-                    "02968f75ccc7451de1a5bfd4e335cf156dda4823"))
+                    "ca48b52f9647d8eea7f58c39f363d4e1fde01494"))
  (restclient :source "elpaca-menu-lock-file" :recipe
              (:package "restclient" :fetcher github :repo "emacsorphanage/restclient" :files
                        ("restclient.el") :source "MELPA" :protocol https :inherit t :depth treeless
