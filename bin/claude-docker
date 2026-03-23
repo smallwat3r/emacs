@@ -56,7 +56,7 @@ DOCKER_ARGS=(
   --security-opt=no-new-privileges
   --read-only
   --tmpfs /tmp
-  --pids-limit=128
+  --pids-limit=512
   --name "${CONTAINER_NAME}"
 )
 
