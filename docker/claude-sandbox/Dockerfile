@@ -18,6 +18,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     ca-certificates \
     openssh-client \
     jq \
+    tree \
     make \
     python3 \
     gh \
