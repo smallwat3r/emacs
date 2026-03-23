@@ -43,6 +43,7 @@ mkdir -p "${CLAUDE_DIR}" "${CLAUDE_DATA_DIR}" "${CLAUDE_STATE_DIR}"
 DOCKER_ARGS=(
   --rm
   -it
+  -e HOME="${CONTAINER_HOME}"
   -e TERM=xterm-256color
   -e INSIDE_EMACS=
   -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
