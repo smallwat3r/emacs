@@ -8,10 +8,6 @@
 
 ;;; Code:
 
-;; Forward-declare so the dynamic `let' binding in
-;; `sw-claude-start-advice' is valid under lexical-binding.
-(defvar eat-kill-buffer-on-exit)
-
 (defconst sw-claude-docker-script
   (expand-file-name "bin/claude-docker" user-emacs-directory)
   "Path to the Docker wrapper script for sandboxed Claude.")
@@ -86,8 +82,13 @@ during the startup delay."
       (when (and (string-prefix-p "*claude:" (buffer-name buf))
                  (not (get-buffer-process buf)))
         (kill-buffer buf)))
-    (let ((eat-kill-buffer-on-exit nil))
-      (apply orig-fn args)))
+    (if (not (boundp 'eat-kill-buffer-on-exit))
+        (apply orig-fn args)
+      (let ((saved (symbol-value 'eat-kill-buffer-on-exit)))
+        (set 'eat-kill-buffer-on-exit nil)
+        (unwind-protect
+            (apply orig-fn args)
+          (set 'eat-kill-buffer-on-exit saved)))))
 
   (advice-add 'claude-code--start :around #'sw-claude-start-advice))
 
