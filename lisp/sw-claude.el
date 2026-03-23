@@ -8,6 +8,10 @@
 
 ;;; Code:
 
+;; Forward-declare so the dynamic `let' binding in
+;; `sw-claude-start-advice' is valid under lexical-binding.
+(defvar eat-kill-buffer-on-exit)
+
 (defconst sw-claude-docker-script
   (expand-file-name "bin/claude-docker" user-emacs-directory)
   "Path to the Docker wrapper script for sandboxed Claude.")
@@ -71,7 +75,21 @@ If in a split view, display in the current window."
         (claude-code--show-not-running-message))))
 
   :config
-  (advice-add 'claude-code-toggle :override #'sw-claude-code-toggle))
+  (advice-add 'claude-code-toggle :override #'sw-claude-code-toggle)
+
+  (defun sw-claude-start-advice (orig-fn &rest args)
+    "Advice around `claude-code--start'.
+Kill stale Claude buffers, then run with `eat-kill-buffer-on-exit'
+disabled so eat does not kill the buffer if the process exits
+during the startup delay."
+    (dolist (buf (buffer-list))
+      (when (and (string-prefix-p "*claude:" (buffer-name buf))
+                 (not (get-buffer-process buf)))
+        (kill-buffer buf)))
+    (let ((eat-kill-buffer-on-exit nil))
+      (apply orig-fn args)))
+
+  (advice-add 'claude-code--start :around #'sw-claude-start-advice))
 
 (provide 'sw-claude)
 ;;; sw-claude.el ends here

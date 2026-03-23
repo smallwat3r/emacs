@@ -23,6 +23,18 @@ fi
 PROJECT_DIR="$(pwd)"
 CONTAINER_HOME="/home/node"
 
+# Container name: claude-{project}-{instance}
+PROJECT_SLUG="$(basename "${PROJECT_DIR}")"
+if [ -n "${CLAUDE_BUFFER_NAME:-}" ]; then
+  INSTANCE="${CLAUDE_BUFFER_NAME##*:}"
+  INSTANCE="${INSTANCE%\*}"
+  CONTAINER_NAME="claude-${PROJECT_SLUG}-${INSTANCE}"
+else
+  CONTAINER_NAME="claude-${PROJECT_SLUG}"
+fi
+CONTAINER_NAME="$(echo "${CONTAINER_NAME}" | \
+  tr -cs 'a-zA-Z0-9_.-' '-' | sed 's/^[^a-zA-Z0-9]*//;s/-$//')"
+
 CLAUDE_DIR="${HOME}/.claude"
 CLAUDE_DATA_DIR="${HOME}/.local/share/claude"
 CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
@@ -45,6 +57,7 @@ DOCKER_ARGS=(
   --read-only
   --tmpfs /tmp
   --pids-limit=128
+  --name "${CONTAINER_NAME}"
 )
 
 # Pass through optional env vars if set
