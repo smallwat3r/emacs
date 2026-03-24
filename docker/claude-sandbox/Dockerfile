@@ -11,6 +11,13 @@ RUN apt-get update \
     signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] \
     https://cli.github.com/packages stable main" \
     > /etc/apt/sources.list.d/github-cli.list \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg \
+    -o /usr/share/keyrings/docker-archive-keyring.asc \
+    && echo "deb [arch=$(dpkg --print-architecture) \
+    signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
+    https://download.docker.com/linux/debian \
+    $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+    > /etc/apt/sources.list.d/docker.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
     git \
@@ -21,7 +28,9 @@ RUN apt-get update \
     tree \
     make \
     python3 \
+    python3-pip \
     gh \
+    docker-ce-cli \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @anthropic-ai/claude-code@latest

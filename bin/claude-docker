@@ -57,9 +57,52 @@ DOCKER_ARGS=(
   --security-opt=no-new-privileges
   --read-only
   --tmpfs /tmp
+  --tmpfs "${CONTAINER_HOME}/.config"
+  --tmpfs "${CONTAINER_HOME}/.npm"
   --pids-limit=512
   --name "${CONTAINER_NAME}"
 )
+
+# Docker socket proxy - gives read-only + exec access to
+# containers without exposing full Docker control.
+DOCKER_SOCK="/var/run/docker.sock"
+PROXY_NAME="claude-docker-proxy"
+PROXY_NET="claude-docker-proxy-net"
+
+if [ -S "${DOCKER_SOCK}" ]; then
+  if ! docker network inspect "${PROXY_NET}" >/dev/null 2>&1; then
+    docker network create "${PROXY_NET}" >/dev/null
+  fi
+
+  if ! docker container inspect -f '{{.State.Running}}' \
+       "${PROXY_NAME}" 2>/dev/null | grep -q true; then
+    docker rm -f "${PROXY_NAME}" >/dev/null 2>&1 || true
+    docker run -d \
+      --name "${PROXY_NAME}" \
+      --network "${PROXY_NET}" \
+      --restart unless-stopped \
+      -v "${DOCKER_SOCK}:/var/run/docker.sock:ro" \
+      -e CONTAINERS=1 \
+      -e EXEC=1 \
+      -e POST=1 \
+      -e LOG=1 \
+      -e INFO=1 \
+      -e IMAGES=0 \
+      -e NETWORKS=0 \
+      -e VOLUMES=0 \
+      -e SERVICES=0 \
+      -e TASKS=0 \
+      -e BUILD=0 \
+      -e COMMIT=0 \
+      -e SWARM=0 \
+      tecnativa/docker-socket-proxy >/dev/null
+  fi
+
+  DOCKER_ARGS+=(
+    --network "${PROXY_NET}"
+    -e DOCKER_HOST="tcp://${PROXY_NAME}:2375"
+  )
+fi
 
 # Pass through optional env vars if set
 for var in ANTHROPIC_API_KEY CLAUDE_BUFFER_NAME; do
