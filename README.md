@@ -24,6 +24,15 @@ Common commands (run in Emacs after startup):
 - `M-x elpaca-update-all` - update all packages
 - `M-x elpaca-write-lock-file` - save current versions to lockfile
 
+Run `make` to see available commands:
+
+```
+$ make
+  help       Show this help
+  link       Symlink this directory to ~/.emacs.d
+  clean      Remove all installed packages
+```
+
 ## Claude Code sandbox
 
 Claude Code runs inside a Docker container for sandboxing. The setup lives in
@@ -43,13 +52,4 @@ To force rebuild the sandbox image (e.g. after a new Claude Code release):
 
 ```
 M-x sw-claude-rebuild-sandbox
-```
-
-Run `make` to see available commands:
-
-```
-$ make
-  help       Show this help
-  link       Symlink this directory to ~/.emacs.d
-  clean      Remove all installed packages
 ```
