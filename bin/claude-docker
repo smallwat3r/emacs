@@ -125,6 +125,13 @@ elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
   )
 fi
 
+# Shadow .env files so secrets are never visible inside the container
+while IFS= read -r -d '' envfile; do
+  DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
+done < <(find "${PROJECT_DIR}" -maxdepth 5 \
+  \( -name '.env' -o -name '.env.*' -o -name '.env.local' \) \
+  -print0 2>/dev/null)
+
 # Forward git config (read-only)
 if [ -f "${HOME}/.gitconfig" ]; then
   DOCKER_ARGS+=(-v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z")

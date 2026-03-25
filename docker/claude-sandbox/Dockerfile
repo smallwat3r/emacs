@@ -20,17 +20,25 @@ RUN apt-get update \
     > /etc/apt/sources.list.d/docker.list \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
+    # Version control and remote
     git \
+    openssh-client \
+    gh \
+    # Search and filesystem
     ripgrep \
     fd-find \
-    openssh-client \
-    jq \
     tree \
+    jq \
+    # Build tools
     make \
     python3 \
     python3-pip \
-    gh \
+    # Docker CLI (talks to host via socket proxy)
     docker-ce-cli \
+    # Media processing
+    ffmpeg \
+    imagemagick \
+    webp \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g @anthropic-ai/claude-code@latest
