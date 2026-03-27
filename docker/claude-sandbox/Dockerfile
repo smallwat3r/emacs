@@ -41,6 +41,11 @@ RUN apt-get update \
     webp \
     && rm -rf /var/lib/apt/lists/*
 
+# Python package manager
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
+    && mv /root/.local/bin/uv /usr/local/bin/ \
+    && mv /root/.local/bin/uvx /usr/local/bin/
+
 RUN npm install -g @anthropic-ai/claude-code@latest
 
 USER node
