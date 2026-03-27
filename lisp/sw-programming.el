@@ -423,14 +423,8 @@ Works for both JS and TypeScript tree-sitter modes."
   :mode ("Makefile.*" . makefile-mode))
 
 ;; ROS file support (messages, services, actions, launch)
-(use-package ros-mode
-  :ensure (:host github :repo "smallwat3r/emacs-ros-mode")
-  :mode (("\\.msg\\'" . ros-msg-mode)
-         ("\\.srv\\'" . ros-msg-mode)
-         ("\\.action\\'" . ros-msg-mode))
-  :custom
-  (ros-build-tool 'colcon)
-  (ros-build-args "--symlink-install"))
+(use-package ros-face
+  :ensure (:host github :repo "smallwat3r/emacs-ros-face"))
 
 ;; Conky config files are Lua
 (add-to-list 'auto-mode-alist '("conky\\.conf\\'" . lua-mode))
