@@ -134,7 +134,15 @@ done < <(find "${PROJECT_DIR}" -maxdepth 5 \
 
 # Forward git config (read-only)
 if [ -f "${HOME}/.gitconfig" ]; then
-  DOCKER_ARGS+=(-v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z")
+  DOCKER_ARGS+=(
+    -v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z"
+  )
+fi
+XDG_GIT="${XDG_CONFIG_HOME:-${HOME}/.config}/git"
+if [ -d "${XDG_GIT}" ]; then
+  DOCKER_ARGS+=(
+    -v "${XDG_GIT}:${CONTAINER_HOME}/.config/git:ro,z"
+  )
 fi
 
 exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" "$@"
