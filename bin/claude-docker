@@ -40,6 +40,14 @@ CLAUDE_DATA_DIR="${HOME}/.local/share/claude"
 CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
 mkdir -p "${CLAUDE_DIR}" "${CLAUDE_DATA_DIR}" "${CLAUDE_STATE_DIR}"
 
+# Ensure ~/.claude.json exists as a file before mounting.
+# Docker bind mounts create missing host paths as directories,
+# which breaks Claude Code's config read/write.
+CLAUDE_JSON="${HOME}/.claude.json"
+if [ ! -f "${CLAUDE_JSON}" ]; then
+  echo '{}' > "${CLAUDE_JSON}"
+fi
+
 DOCKER_ARGS=(
   --rm
   -it
@@ -57,6 +65,7 @@ DOCKER_ARGS=(
   --security-opt=no-new-privileges
   --read-only
   --tmpfs /tmp
+  --tmpfs "${CONTAINER_HOME}/.cache"
   --tmpfs "${CONTAINER_HOME}/.config"
   --tmpfs "${CONTAINER_HOME}/.npm"
   --pids-limit=512
