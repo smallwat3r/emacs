@@ -418,6 +418,9 @@ Works for both JS and TypeScript tree-sitter modes."
 (use-package nginx-mode
   :mode ("nginx\\.conf\\'" "/nginx/.+\\.conf\\'"))
 
+(use-package scad-mode
+  :mode "\\.scad\\'")
+
 (use-package make-mode
   :ensure nil
   :mode ("Makefile.*" . makefile-mode))
