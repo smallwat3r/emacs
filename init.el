@@ -124,6 +124,10 @@
 
 ;;; Early dependencies
 
+;; compat must be loaded from GNU ELPA, not the Emacs built-in shim,
+;; since some packages (e.g. hl-todo) now require compat >= 31.0
+(use-package compat :ensure (:wait t))
+
 ;; Transient needs to be updated before magit/claude-code load
 (use-package transient :ensure (:wait t))
 

@@ -32,6 +32,23 @@ If in a split view, display in the current window."
   (let ((default-directory user-emacs-directory))
     (compile "docker build --no-cache -t claude-code-sandbox docker/claude-sandbox/")))
 
+(defun sw-claude--filter-substring (beg end &optional delete)
+  "Like `buffer-substring--filter' but strip trailing whitespace per line.
+Claude's TUI pads each line to terminal width, so plain copies pick
+up the padding instead of clean newlines."
+  (let ((text (buffer-substring--filter beg end delete)))
+    (if (stringp text)
+        (replace-regexp-in-string "[ \t]+$" "" text)
+      text)))
+
+(defun sw-claude--enable-copy-filter ()
+  "Strip trailing whitespace from copies in claude-code buffers."
+  (when (string-prefix-p "*claude:" (buffer-name))
+    (setq-local filter-buffer-substring-function
+                #'sw-claude--filter-substring)))
+
+(add-hook 'eat-mode-hook #'sw-claude--enable-copy-filter)
+
 ;; Required dependency for claude-code
 (use-package inheritenv
   :ensure (:host github :repo "purcell/inheritenv" :wait t)
