@@ -45,7 +45,14 @@
                     (terraform-mode
                      "terraform-ls" "serve")))
     (add-to-list 'eglot-server-programs
-                 (cons (car server) (cdr server)))))
+                 (cons (car server) (cdr server))))
+
+  ;; Never start an LSP server over Tramp. Treat remote boxes as if no
+  ;; servers are installed, avoiding slow connections and "Server died"
+  ;; errors when the binary is missing on the remote PATH.
+  (advice-add 'eglot-ensure :before-while
+              (lambda (&rest _)
+                (not (file-remote-p default-directory)))))
 
 ;; Warn about missing LSP servers when their mode loads
 (dolist (entry '((python . "basedpyright-langserver")

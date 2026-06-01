@@ -120,7 +120,16 @@
 ;;; Sync shell PATH into Emacs
 
 (use-package exec-path-from-shell
-  :hook (sw-first-file . exec-path-from-shell-initialize))
+  :hook (sw-first-file . exec-path-from-shell-initialize)
+  :init
+  ;; exec-path-from-shell refuses to run from a remote (Tramp) buffer.
+  ;; If the first file visited is remote, the unguarded call signals an
+  ;; error that aborts find-file-hook. Always import from a local dir.
+  (defun sw--exec-path-from-shell-local (fn &rest args)
+    (let ((default-directory temporary-file-directory))
+      (apply fn args)))
+  (advice-add 'exec-path-from-shell-initialize :around
+              #'sw--exec-path-from-shell-local))
 
 ;;; Early dependencies
 

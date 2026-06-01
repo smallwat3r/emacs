@@ -30,21 +30,24 @@
 (defun sw--run-first-input ()
   "Run `sw-first-input-hook' once then remove trigger."
   (when sw-first-input-hook
-    (run-hooks 'sw-first-input-hook)
+    (with-demoted-errors "sw-first-input-hook: %S"
+      (run-hooks 'sw-first-input-hook))
     (setq sw-first-input-hook nil)
     (remove-hook 'pre-command-hook #'sw--run-first-input)))
 
 (defun sw--run-first-file ()
   "Run `sw-first-file-hook' once then remove trigger."
   (when sw-first-file-hook
-    (run-hooks 'sw-first-file-hook)
+    (with-demoted-errors "sw-first-file-hook: %S"
+      (run-hooks 'sw-first-file-hook))
     (setq sw-first-file-hook nil)
     (remove-hook 'find-file-hook #'sw--run-first-file)))
 
 (defun sw--run-first-buffer (&rest _)
   "Run `sw-first-buffer-hook' once then remove trigger."
   (when sw-first-buffer-hook
-    (run-hooks 'sw-first-buffer-hook)
+    (with-demoted-errors "sw-first-buffer-hook: %S"
+      (run-hooks 'sw-first-buffer-hook))
     (setq sw-first-buffer-hook nil)
     (remove-hook 'window-buffer-change-functions #'sw--run-first-buffer)))
 
