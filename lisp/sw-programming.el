@@ -252,14 +252,19 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 ;; Virtual environment detection
 (use-package pet
-  :hook (python-base-mode . pet-mode)
   :config
+  ;; pet probes the filesystem and spawns executables to locate the venv and
+  ;; tools. Over Tramp each probe is a remote round-trip, which makes opening
+  ;; even tiny remote Python files slow, so skip it on remote buffers (same
+  ;; treatment as eglot).
   (add-hook 'python-base-mode-hook
             (lambda ()
-              (when-let ((python (pet-executable-find "python")))
-                ;; Eglot/basedpyright
-                (setq-local eglot-workspace-configuration
-                            `(:basedpyright (:pythonPath ,python)))))))
+              (unless (file-remote-p default-directory)
+                (pet-mode)
+                (when-let ((python (pet-executable-find "python")))
+                  ;; Eglot/basedpyright
+                  (setq-local eglot-workspace-configuration
+                              `(:basedpyright (:pythonPath ,python))))))))
 
 ;; Poetry lock files are TOML
 (add-to-list 'auto-mode-alist '("poetry\\.lock\\'" . conf-toml-mode))

@@ -54,7 +54,7 @@ LIMIT defaults to 10000."
 (defun sw-tramp-connect ()
   "Open remote SSH connection with TRAMP."
   (interactive)
-  (find-file (read-file-name "SSH target: " "/ssh:")))
+  (find-file (read-file-name "SSH target: " "/scp:")))
 
 ;;; Eat - Emulate A Terminal
 
@@ -475,7 +475,10 @@ Configures terminal with xterm-256color TERM for foot compatibility."
   :ensure nil
   :defer t
   :custom
-  (tramp-default-method "ssh")
+  ;; scp transfers files >10KB (`tramp-copy-size-limit') out-of-band as raw
+  ;; bytes over the reused ControlMaster socket, instead of base64 through the
+  ;; shell. Small files still go inline. Big win for large files.
+  (tramp-default-method "scp")
   (tramp-verbose 1)
   (tramp-auto-save-directory
    (expand-file-name "tramp-autosave" user-emacs-directory))
@@ -483,18 +486,21 @@ Configures terminal with xterm-256color TERM for foot compatibility."
    (expand-file-name "tramp" user-emacs-directory))
   (tramp-use-connection-share nil)
   (remote-file-name-inhibit-cache 10)
+  (remote-file-name-inhibit-locks t)
 
   :config
-  ;; SSH completion from config files
-  (tramp-set-completion-function
-   "ssh"
-   (append
-    (mapcar (lambda (f)
-              (list 'tramp-parse-sconfig (expand-file-name f)))
-            sw-ssh-config-files)
-    '((tramp-parse-sconfig "/etc/ssh_config")
-      (tramp-parse-shosts  "/etc/hosts")
-      (tramp-parse-shosts  "~/.ssh/known_hosts"))))
+  ;; SSH completion from config files, shared across the ssh-based methods so
+  ;; host completion works the same whether the path uses scp, ssh or rsync.
+  (let ((sw-ssh-completion
+         (append
+          (mapcar (lambda (f)
+                    (list 'tramp-parse-sconfig (expand-file-name f)))
+                  sw-ssh-config-files)
+          '((tramp-parse-sconfig "/etc/ssh_config")
+            (tramp-parse-shosts  "/etc/hosts")
+            (tramp-parse-shosts  "~/.ssh/known_hosts")))))
+    (dolist (method '("scp" "ssh" "rsync"))
+      (tramp-set-completion-function method sw-ssh-completion)))
 
   ;; Disable version control checks on remote files
   (setq vc-ignore-dir-regexp

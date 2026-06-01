@@ -94,7 +94,7 @@
     (if-let ((devices (sw-tailscale--devices)))
         (let* ((names (mapcar #'car devices))
                (choice (completing-read "Tailscale device: " names nil t))
-               (path (format "/ssh:%s:" choice)))
+               (path (format "/scp:%s:" choice)))
           (find-file path))
       (user-error "No Tailscale devices found"))))
 
