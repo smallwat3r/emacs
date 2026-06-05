@@ -17,7 +17,7 @@
 (defun sw-copy-file-path ()
   "Copy current buffer file path to clipboard."
   (interactive)
-  (when-let ((path (buffer-file-name)))
+  (when-let* ((path (buffer-file-name)))
     (kill-new path)
     (message "Copied: %s" path)))
 
@@ -46,10 +46,12 @@ Preserves *scratch* and *Messages* buffers."
   (when (y-or-n-p "Kill all projects and buffers? ")
     (tab-bar-close-other-tabs)
     (tab-bar-rename-tab "main")
-    ;; Kill all buffers except essential ones
-    (dolist (buf (buffer-list))
-      (unless (member (buffer-name buf) '("*scratch*" "*Messages*"))
-        (kill-buffer buf)))
+    ;; Kill all buffers except essential ones. Suppress query functions
+    ;; so live-process buffers (REPLs, eglot) don't prompt mid-loop.
+    (let ((kill-buffer-query-functions nil))
+      (dolist (buf (buffer-list))
+        (unless (member (buffer-name buf) '("*scratch*" "*Messages*"))
+          (kill-buffer buf))))
     (switch-to-buffer "*scratch*")
     (delete-other-windows)
     (message "All projects and buffers killed")))

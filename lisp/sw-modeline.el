@@ -15,7 +15,10 @@
 (defun sw--update-echo-area ()
   "Update echo area with buffer info.
 Skips redisplay when neither the info string nor the current
-message have changed since the last call."
+message have changed since the last call.  A single-line foreign
+message is shown alongside the info; a multi-line foreign message
+(eldoc, errors, async process output) is left untouched so the
+single-line layout below does not mangle or clobber it."
   (unless (active-minibuffer-window)
     (let* ((info (format "%s%s  %s %s,%d"
                          (if (buffer-modified-p) "** " "")
@@ -24,20 +27,24 @@ message have changed since the last call."
                          (format-mode-line "%l")
                          (current-column)))
            (raw (current-message))
-           (cur (if (equal raw sw--echo-area-last-message)
-                    "" (or raw ""))))
-      (unless (and sw--echo-area-last-info
-                   (equal info (car sw--echo-area-last-info))
-                   (equal cur (cdr sw--echo-area-last-info)))
-        (setq sw--echo-area-last-info (cons info cur))
-        (let* ((padding (- (frame-width)
-                           (length cur) (length info) 1))
-               (msg (concat cur
-                            (make-string (max 1 padding) ?\s)
-                            info))
-               (message-log-max nil))
-          (setq sw--echo-area-last-message msg)
-          (message "%s" msg))))))
+           ;; A foreign message is one we did not write ourselves.
+           (foreign (and raw
+                         (not (equal raw sw--echo-area-last-message))
+                         raw)))
+      (unless (and foreign (string-search "\n" foreign))
+        (let ((cur (or foreign "")))
+          (unless (and sw--echo-area-last-info
+                       (equal info (car sw--echo-area-last-info))
+                       (equal cur (cdr sw--echo-area-last-info)))
+            (setq sw--echo-area-last-info (cons info cur))
+            (let* ((padding (- (frame-width)
+                               (length cur) (length info) 1))
+                   (msg (concat cur
+                                (make-string (max 1 padding) ?\s)
+                                info))
+                   (message-log-max nil))
+              (setq sw--echo-area-last-message msg)
+              (message "%s" msg))))))))
 
 (defvar sw--echo-area-timer nil
   "Idle timer used to debounce echo area updates.")

@@ -41,15 +41,20 @@
                (data (json-parse-string (cdr result)
                                         :object-type 'alist))
                (peers (alist-get 'Peer data)))
-          (mapcar (lambda (peer)
-                    (let* ((info (cdr peer))
-                           (dns (alist-get 'DNSName info))
-                           (name (car (split-string dns "\\.")))
-                           (ip (aref
-                                (alist-get 'TailscaleIPs info)
-                                0)))
-                      (cons name ip)))
-                  peers))
+          (delq nil
+                (mapcar (lambda (peer)
+                          (let* ((info (cdr peer))
+                                 (dns (alist-get 'DNSName info))
+                                 (ips (alist-get 'TailscaleIPs info)))
+                            ;; Some peers legitimately have no DNS name or
+                            ;; no IPs, skip them rather than erroring out.
+                            (when (and (stringp dns)
+                                       (> (length dns) 0)
+                                       (vectorp ips)
+                                       (> (length ips) 0))
+                              (cons (car (split-string dns "\\."))
+                                    (aref ips 0)))))
+                        peers)))
       (error
        (message "Tailscale: %s" (error-message-string err))
        nil))))
@@ -91,7 +96,7 @@
   "Select a Tailscale device and connect via TRAMP."
   (interactive)
   (sw-tailscale--with-cli
-    (if-let ((devices (sw-tailscale--devices)))
+    (if-let* ((devices (sw-tailscale--devices)))
         (let* ((names (mapcar #'car devices))
                (choice (completing-read "Tailscale device: " names nil t))
                (path (format "/scp:%s:" choice)))

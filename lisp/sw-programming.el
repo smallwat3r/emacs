@@ -114,6 +114,8 @@ For Python, handles indented code by dedenting before formatting."
      ((derived-mode-p 'emacs-lisp-mode 'lisp-mode)
       (indent-region beg end)
       (message "Formatted region (indent-region)"))
+     ((and formatter (not (executable-find (car formatter))))
+      (message "%s not found in PATH" (car formatter)))
      (formatter
       (let* ((cmd (car formatter))
              (args (cdr formatter))
@@ -227,7 +229,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
             (python-shell-get-process-name 'project))
            (buf (get-buffer
                  (format "*%s*" proc-name))))
-      (if-let ((win (and buf (get-buffer-window buf))))
+      (if-let* ((win (and buf (get-buffer-window buf))))
           (delete-window win)
         (run-python nil 'project t))))
 
@@ -261,7 +263,7 @@ Handles combined prefixes like `rf' or `fr' correctly."
             (lambda ()
               (unless (file-remote-p default-directory)
                 (pet-mode)
-                (when-let ((python (pet-executable-find "python")))
+                (when-let* ((python (pet-executable-find "python")))
                   ;; Eglot/basedpyright
                   (setq-local eglot-workspace-configuration
                               `(:basedpyright (:pythonPath ,python))))))))
@@ -309,10 +311,12 @@ Works for both JS and TypeScript tree-sitter modes."
                (lambda (level)
                  (memq 'string-interpolation level))
                treesit-font-lock-feature-list)
-        (setf (nth 1 treesit-font-lock-feature-list)
-              (append
-               (nth 1 treesit-font-lock-feature-list)
-               '(string-interpolation))))
+        ;; Mutate a buffer-local copy, not the shared global list, so
+        ;; the first JS/TS buffer does not alter defaults session-wide.
+        (let ((flist (copy-tree treesit-font-lock-feature-list)))
+          (setf (nth 1 flist)
+                (append (nth 1 flist) '(string-interpolation)))
+          (setq-local treesit-font-lock-feature-list flist)))
       (setq-local treesit-font-lock-settings
                   (append
                    treesit-font-lock-settings
@@ -388,7 +392,7 @@ Works for both JS and TypeScript tree-sitter modes."
     "Toggle a SQL REPL window."
     (interactive)
     (let ((buf (sql-find-sqli-buffer)))
-      (if-let ((win (and buf
+      (if-let* ((win (and buf
                          (get-buffer-window buf))))
           (delete-window win)
         (sql-product-interactive)))))
@@ -399,7 +403,7 @@ Works for both JS and TypeScript tree-sitter modes."
   "Toggle an IELM (Emacs Lisp REPL) window."
   (interactive)
   (let ((buf (get-buffer "*ielm*")))
-    (if-let ((win (and buf (get-buffer-window buf))))
+    (if-let* ((win (and buf (get-buffer-window buf))))
         (delete-window win)
       (ielm))))
 

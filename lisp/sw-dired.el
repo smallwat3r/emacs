@@ -21,6 +21,7 @@
 (use-package dired-x
   :ensure nil
   :after dired
+  :hook (dired-mode . dired-omit-mode)
   :config
   (setq dired-omit-files
         (concat dired-omit-files "\\|^\\..+$")))

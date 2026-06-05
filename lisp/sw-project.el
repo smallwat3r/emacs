@@ -44,7 +44,7 @@
 When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
   (if (and prefer-remote (file-remote-p default-directory))
       default-directory
-    (or (when-let ((proj (project-current)))
+    (or (when-let* ((proj (project-current)))
           (project-root proj))
         default-directory)))
 

@@ -52,6 +52,7 @@
 
 ;; Org journal
 (use-package org-journal
+  :commands (org-journal-new-entry org-journal-new-scheduled-entry)
   :custom
   (org-journal-dir (expand-file-name "journal" sw-org-directory))
   (org-journal-date-format "%A, %d %B %Y")

@@ -49,7 +49,7 @@ so both are accessible, with custom bindings taking precedence."
   (let ((custom (or (alist-get major-mode sw-local-leader-alist)
                     (cl-loop for (m . km) in sw-local-leader-alist
                              when (derived-mode-p m) return km)))
-        (mode-cc (when-let ((local (current-local-map)))
+        (mode-cc (when-let* ((local (current-local-map)))
                    (lookup-key local (kbd "C-c")))))
     (cond
      ((and custom (keymapp mode-cc))

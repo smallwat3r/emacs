@@ -213,7 +213,7 @@ TAB-NUMBER is the 1-based tab number, or nil for current tab."
   "Track current buffer in workspace buffer list.
 Intended for use in `window-buffer-change-functions'.
 Ignores minibuffers."
-  (when-let ((buf (current-buffer)))
+  (when-let* ((buf (current-buffer)))
     (unless (minibufferp buf)
       (sw-workspace--add-buffer buf))))
 
@@ -256,7 +256,7 @@ Switches to scratch buffer after killing."
   (interactive)
   (let ((workspace-buffers (sw-workspace-buffer-list)))
     (if workspace-buffers
-        (when-let ((buf (sw-workspace--read-buffer workspace-buffers
+        (when-let* ((buf (sw-workspace--read-buffer workspace-buffers
                                                    "Switch to buffer: ")))
           (switch-to-buffer buf))
       (call-interactively #'consult-buffer))))
@@ -269,7 +269,7 @@ Switches to scratch buffer after killing."
                        (buffer-list)))
          (buf (sw-workspace--read-buffer all-buffers "Switch to buffer (global): ")))
     (when buf
-      (when-let ((workspace-name (sw-workspace--find-buffer-workspace buf)))
+      (when-let* ((workspace-name (sw-workspace--find-buffer-workspace buf)))
         (unless (equal workspace-name (sw-workspace--current-name))
           (tab-bar-switch-to-tab workspace-name)))
       (switch-to-buffer buf))))

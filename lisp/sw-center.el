@@ -6,6 +6,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defvar sw-center-width 100
   "Text width for centering. When nil, uses `fill-column'.")
 

@@ -31,9 +31,12 @@
     (set-fontset-font t 'emoji sw-font-emoji nil 'prepend)))
 
 (defun sw-setup-fontsets-once ()
-  "Run `sw-setup-fontsets' once, then remove from hook."
-  (sw-setup-fontsets)
-  (remove-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once))
+  "Run `sw-setup-fontsets' on the first graphical frame, then remove hook.
+Only acts on a graphical frame so a daemon whose first frame is a
+TTY still configures fonts when a GUI frame is created later."
+  (when (display-graphic-p)
+    (sw-setup-fontsets)
+    (remove-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)))
 
 (if (daemonp)
     (add-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)

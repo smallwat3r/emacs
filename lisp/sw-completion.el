@@ -72,7 +72,8 @@
       (let ((fn (apply orig-fn args)))
         (lambda (cand)
           (let ((result (funcall fn cand)))
-            (setf (cadr result) "")
+            ;; Guard against consult changing the internal return shape.
+            (ignore-errors (setf (cadr result) ""))
             result))))))
 
 ;; Embark - contextual actions

@@ -18,7 +18,7 @@
 (defconst sw-dashboard--os-version
   (pcase system-type
     ('gnu/linux
-     (or (when-let ((release
+     (or (when-let* ((release
                      (ignore-errors
                        (with-temp-buffer
                          (insert-file-contents "/etc/os-release")
@@ -63,7 +63,7 @@
 
 (defun sw-dashboard--on-resize (&optional _frame)
   "Re-render dashboard when window size changes."
-  (when-let ((buf (get-buffer sw-dashboard-buffer-name)))
+  (when-let* ((buf (get-buffer sw-dashboard-buffer-name)))
     (when (get-buffer-window buf)
       (with-current-buffer buf
         (sw-dashboard-render)))))

@@ -46,8 +46,11 @@ OLD-FACE and NEW-FACE the face plists."
 
 (defun sw-magit-diff--add-line-numbers ()
   "Add line number overlays to all hunks."
-  (remove-overlays (point-min) (point-max) 'sw-diff-lnum t)
-  (when (derived-mode-p 'magit-diff-mode 'magit-status-mode)
+  ;; Only run in dedicated diff buffers. Skipping magit-status (which
+  ;; can hold large embedded diffs) avoids rebuilding overlays across
+  ;; all its sections on every refresh.
+  (when (derived-mode-p 'magit-diff-mode)
+    (remove-overlays (point-min) (point-max) 'sw-diff-lnum t)
     (let ((max-line 0) (hunks nil))
       ;; Single pass: collect hunks and find max line number.
       (magit-map-sections

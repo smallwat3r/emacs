@@ -24,7 +24,7 @@
   :custom
   ;; Performance
   (eglot-autoshutdown t)
-  (eglot-events-buffer-size 0)
+  (eglot-events-buffer-config '(:size 0 :format lisp))
   (eglot-sync-connect nil)
   (eglot-connect-timeout 10)
 

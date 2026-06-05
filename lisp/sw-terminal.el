@@ -194,7 +194,7 @@ the TRAMP remote prefix."
                          20))
             (dead (not (process-live-p proc))))
         (if (or done expired dead)
-            (when-let ((tm (buffer-local-value
+            (when-let* ((tm (buffer-local-value
                             'sw-eat--tramp-timer buf)))
               (cancel-timer tm))
           (with-current-buffer buf
@@ -290,7 +290,7 @@ For remote directories, opens a shell on the remote host."
 (defun sw-eat--send-cd (buf dir)
   "Send a cd command to eat BUF to change to DIR.
 Clears any existing input first."
-  (when-let ((proc (get-buffer-process buf)))
+  (when-let* ((proc (get-buffer-process buf)))
     (when (process-live-p proc)
       (with-current-buffer buf
         (eat-term-send-string eat-terminal "\C-u")
