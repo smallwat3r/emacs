@@ -174,7 +174,7 @@ When deleting single space, also deletes trailing symbol and word."
 
 (defun sw--set-all-font-sizes (size)
   "Set SIZE (in points) on all text faces."
-  (let ((height (* size 10)))
+  (let ((height (round (* size 10))))
     (dolist (face '(default fixed-pitch fixed-pitch-serif
                             variable-pitch))
       (set-face-attribute face nil :height height))))
@@ -187,7 +187,7 @@ When deleting single space, also deletes trailing symbol and word."
         (min sw-font-size-max
              (+ sw--current-font-size sw-font-size-step)))
   (sw--set-all-font-sizes sw--current-font-size)
-  (message "Font size: %dpt" sw--current-font-size))
+  (message "Font size: %spt" sw--current-font-size))
 
 (defun sw-text-scale-decrease ()
   "Decrease font size globally by `sw-font-size-step'."
@@ -197,14 +197,14 @@ When deleting single space, also deletes trailing symbol and word."
         (max sw-font-size-min
              (- sw--current-font-size sw-font-size-step)))
   (sw--set-all-font-sizes sw--current-font-size)
-  (message "Font size: %dpt" sw--current-font-size))
+  (message "Font size: %spt" sw--current-font-size))
 
 (defun sw-text-scale-reset ()
   "Reset font size to default."
   (interactive)
   (setq sw--current-font-size sw-font-size)
   (sw--set-all-font-sizes sw-font-size)
-  (message "Font size: %dpt" sw-font-size))
+  (message "Font size: %spt" sw-font-size))
 
 ;;; OS commands
 
