@@ -39,7 +39,19 @@ message have changed since the last call."
           (setq sw--echo-area-last-message msg)
           (message "%s" msg))))))
 
-(add-hook 'post-command-hook #'sw--update-echo-area)
+(defvar sw--echo-area-timer nil
+  "Idle timer used to debounce echo area updates.")
+
+(defun sw--schedule-echo-area-update ()
+  "Debounce `sw--update-echo-area' to idle time.
+Avoids rebuilding and re-rendering the echo area on every
+keystroke, which adds latency during fast typing."
+  (when sw--echo-area-timer
+    (cancel-timer sw--echo-area-timer))
+  (setq sw--echo-area-timer
+        (run-with-idle-timer 0.1 nil #'sw--update-echo-area)))
+
+(add-hook 'post-command-hook #'sw--schedule-echo-area-update)
 
 ;; Modeline is only used to distinguish active window via color.
 ;; Hide it when there's only one window since there's nothing to distinguish.
