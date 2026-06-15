@@ -72,8 +72,11 @@ DOCKER_ARGS=(
   --name "${CONTAINER_NAME}"
 )
 
-# Docker socket proxy - gives read-only + exec access to
-# containers without exposing full Docker control.
+# Docker socket proxy - gives read-only visibility into
+# containers (ps, inspect, logs) without write access.
+# POST/EXEC stay off: a write call to the host daemon (which
+# runs as root) would let this container spawn a sibling that
+# mounts the host filesystem, escaping the sandbox entirely.
 DOCKER_SOCK="/var/run/docker.sock"
 PROXY_NAME="claude-docker-proxy"
 PROXY_NET="claude-docker-proxy-net"
@@ -92,8 +95,8 @@ if [ -S "${DOCKER_SOCK}" ]; then
       --restart unless-stopped \
       -v "${DOCKER_SOCK}:/var/run/docker.sock:ro" \
       -e CONTAINERS=1 \
-      -e EXEC=1 \
-      -e POST=1 \
+      -e EXEC=0 \
+      -e POST=0 \
       -e LOG=1 \
       -e INFO=1 \
       -e IMAGES=0 \
