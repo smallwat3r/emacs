@@ -12,10 +12,18 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOCKERFILE_DIR="${SCRIPT_DIR}/../docker/claude-sandbox"
 
 build_image() {
-  docker build -t "${IMAGE_NAME}" "${DOCKERFILE_DIR}" >&2
+  docker build -t "${IMAGE_NAME}" \
+    --build-arg HOST_HOME="${HOME}" "${DOCKERFILE_DIR}" >&2
 }
 
-if ! docker image inspect "${IMAGE_NAME}" >/dev/null 2>&1; then
+# Rebuild when the image is missing, or was built for a different home. The
+# image symlinks the host home to /home/node so the shared ~/.claude (which
+# stores absolute paths, e.g. plugin install locations) resolves. A cached
+# image built for the wrong home lacks that symlink, so config and credentials
+# never persist and Claude re-onboards every launch.
+IMAGE_HOME="$(docker image inspect \
+  -f '{{index .Config.Labels "host_home"}}' "${IMAGE_NAME}" 2>/dev/null || true)"
+if [ "${IMAGE_HOME}" != "${HOME}" ]; then
   echo "Building Claude sandbox image..." >&2
   build_image
 fi
@@ -40,23 +48,29 @@ CLAUDE_DATA_DIR="${HOME}/.local/share/claude"
 CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
 mkdir -p "${CLAUDE_DIR}" "${CLAUDE_DATA_DIR}" "${CLAUDE_STATE_DIR}"
 
-# Ensure ~/.claude.json exists as a file before mounting.
-# Docker bind mounts create missing host paths as directories,
-# which breaks Claude Code's config read/write.
-CLAUDE_JSON="${HOME}/.claude.json"
-if [ ! -f "${CLAUDE_JSON}" ]; then
-  echo '{}' > "${CLAUDE_JSON}"
+# Claude writes its global config atomically (temp file + rename). The default
+# location, a single-file bind mount of ~/.claude.json, can't be renamed over,
+# and the container home is read-only, so every config write is lost and Claude
+# re-prompts (theme, folder trust) on each launch. Point CLAUDE_CONFIG_DIR at the
+# mounted ~/.claude directory instead: there the config is a regular file in a
+# writable mount, so atomic writes persist. Seed it from the host's global config
+# on first use so onboarding, theme and account carry over.
+CONFIG_JSON="${CLAUDE_DIR}/.claude.json"
+if [ ! -f "${CONFIG_JSON}" ] && [ -f "${HOME}/.claude.json" ]; then
+  cp "${HOME}/.claude.json" "${CONFIG_JSON}"
 fi
 
 DOCKER_ARGS=(
   --rm
   -it
-  -e HOME="${CONTAINER_HOME}"
+  # Run under the host home path (symlinked to /home/node in the image) so
+  # absolute paths in the shared ~/.claude config resolve consistently.
+  -e HOME="${HOME}"
   -e TERM=xterm-256color
   -e INSIDE_EMACS=
+  -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
   -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
   -v "${CLAUDE_DIR}:${CONTAINER_HOME}/.claude:z"
-  -v "${HOME}/.claude.json:${CONTAINER_HOME}/.claude.json:z"
   -v "${CLAUDE_DATA_DIR}:${CONTAINER_HOME}/.local/share/claude:z"
   -v "${CLAUDE_STATE_DIR}:${CONTAINER_HOME}/.local/state/claude:z"
   -w "${PROJECT_DIR}"

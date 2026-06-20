@@ -30,7 +30,9 @@ If in a split view, display in the current window."
   "Force rebuild the Claude Docker sandbox image."
   (interactive)
   (let ((default-directory user-emacs-directory))
-    (compile "docker build --no-cache -t claude-code-sandbox docker/claude-sandbox/")))
+    (compile (format "docker build --no-cache --build-arg HOST_HOME=%s \
+-t claude-code-sandbox docker/claude-sandbox/"
+                     (shell-quote-argument (expand-file-name "~"))))))
 
 (defun sw-claude--filter-substring (beg end &optional delete)
   "Like `buffer-substring--filter' but strip trailing whitespace per line.
