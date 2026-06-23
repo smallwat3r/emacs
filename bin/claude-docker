@@ -44,9 +44,8 @@ CONTAINER_NAME="$(echo "${CONTAINER_NAME}" | \
   tr -cs 'a-zA-Z0-9_.-' '-' | sed 's/^[^a-zA-Z0-9]*//;s/-$//')"
 
 CLAUDE_DIR="${HOME}/.claude"
-CLAUDE_DATA_DIR="${HOME}/.local/share/claude"
 CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
-mkdir -p "${CLAUDE_DIR}" "${CLAUDE_DATA_DIR}" "${CLAUDE_STATE_DIR}"
+mkdir -p "${CLAUDE_DIR}" "${CLAUDE_STATE_DIR}"
 
 # Claude writes its global config atomically (temp file + rename). The default
 # location, a single-file bind mount of ~/.claude.json, can't be renamed over,
@@ -71,7 +70,10 @@ DOCKER_ARGS=(
   -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
   -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
   -v "${CLAUDE_DIR}:${CONTAINER_HOME}/.claude:z"
-  -v "${CLAUDE_DATA_DIR}:${CONTAINER_HOME}/.local/share/claude:z"
+  # Note: ~/.local/share/claude is NOT mounted. It holds the versioned claude
+  # binary the launcher symlinks to; mounting the host's copy shadows the image's
+  # baked-in version, dangling the symlink (exit 127). The image owns the version
+  # (auto-updater is off, update = rebuild), so keep it self-contained.
   -v "${CLAUDE_STATE_DIR}:${CONTAINER_HOME}/.local/state/claude:z"
   -w "${PROJECT_DIR}"
   --user "$(id -u):$(id -g)"
