@@ -31,6 +31,9 @@ RUN apt-get update \
     jq \
     # Build tools
     make \
+    gcc \
+    g++ \
+    pkg-config \
     python3 \
     python3-pip \
     # Docker CLI (talks to host via socket proxy)
