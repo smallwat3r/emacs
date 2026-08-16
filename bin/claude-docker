@@ -130,14 +130,19 @@ fi
 DOCKER_ARGS=(
   --rm
   -it
+  # Claude runs as PID 1 and does not reap orphaned children; without an
+  # init, zombies accumulate and count toward --pids-limit
+  --init
   # Run under the host home path (symlinked to /home/node in the image) so
   # absolute paths in the shared ~/.claude config resolve consistently.
   -e HOME="${HOME}"
   -e TERM=xterm-256color
   -e INSIDE_EMACS=
   -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
-  # Read by bin/claude-statusline to show a sandbox badge in the Claude UI
+  # Read by bin/claude-statusline to show a sandbox badge and the
+  # network mode in the Claude UI
   -e CLAUDE_DOCKER_SANDBOX="${CONTAINER_NAME}"
+  -e CLAUDE_DOCKER_NET_FILTER="${CLAUDE_DOCKER_NET_FILTER:-0}"
   -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
   -v "${CLAUDE_DIR}:${CONTAINER_HOME}/.claude:z"
   # Note: ~/.local/share/claude is NOT mounted. It holds the versioned claude
