@@ -1,0 +1,12 @@
+# Egress allowlist for the Claude sandbox (squid dstdomain format).
+# A leading dot matches the domain and all subdomains.
+# After editing, restart the proxy: docker rm -f claude-egress-proxy
+.anthropic.com
+.claude.ai
+.claude.com
+.github.com
+.githubusercontent.com
+registry.npmjs.org
+.pypi.org
+files.pythonhosted.org
+.golang.org

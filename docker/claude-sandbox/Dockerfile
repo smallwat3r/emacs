@@ -24,6 +24,8 @@ RUN apt-get update \
     git \
     openssh-client \
     gh \
+    # SSH-over-proxy tunnel for the egress allowlist (see bin/claude-docker)
+    netcat-openbsd \
     # Search and filesystem
     ripgrep \
     fd-find \

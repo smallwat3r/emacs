@@ -88,26 +88,68 @@ DOCKER_ARGS=(
   --name "${CONTAINER_NAME}"
 )
 
+# Network: open egress by default. Set CLAUDE_DOCKER_NET_FILTER=1 to
+# instead join an internal network with no route out, where egress goes
+# through a squid sidecar (dual-homed on the internal net and the
+# default bridge) that only allows domains listed in
+# docker/claude-sandbox/allowed-domains.txt. Filtering is by CONNECT
+# host / SNI domain, so it survives CDN IP churn.
+DOCKER_SOCK="/var/run/docker.sock"
+PROXY_NAME="claude-docker-proxy"
+EGRESS_PROXY="claude-egress-proxy"
+
+if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
+  NET="claude-docker-net"
+  NET_OPTS=(--internal)
+else
+  NET="claude-docker-open-net"
+  NET_OPTS=()
+fi
+
+if ! docker network inspect "${NET}" >/dev/null 2>&1; then
+  docker network create ${NET_OPTS[@]+"${NET_OPTS[@]}"} "${NET}" >/dev/null
+fi
+DOCKER_ARGS+=(--network "${NET}")
+
+if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
+  if ! docker container inspect -f '{{.State.Running}}' \
+       "${EGRESS_PROXY}" 2>/dev/null | grep -q true; then
+    docker rm -f "${EGRESS_PROXY}" >/dev/null 2>&1 || true
+    docker run -d \
+      --name "${EGRESS_PROXY}" \
+      --network "${NET}" \
+      --restart unless-stopped \
+      -v "${DOCKERFILE_DIR}/squid.conf:/etc/squid/squid.conf:ro,z" \
+      -v "${DOCKERFILE_DIR}/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro,z" \
+      ubuntu/squid >/dev/null
+    docker network connect bridge "${EGRESS_PROXY}"
+  fi
+
+  DOCKER_ARGS+=(
+    -e HTTP_PROXY="http://${EGRESS_PROXY}:3128"
+    -e HTTPS_PROXY="http://${EGRESS_PROXY}:3128"
+    -e http_proxy="http://${EGRESS_PROXY}:3128"
+    -e https_proxy="http://${EGRESS_PROXY}:3128"
+    -e NO_PROXY="localhost,127.0.0.1,${PROXY_NAME}"
+    -e no_proxy="localhost,127.0.0.1,${PROXY_NAME}"
+    # Direct port 22 is blocked on the internal net, so tunnel
+    # git-over-SSH through the proxy as a CONNECT to :22.
+    -e GIT_SSH_COMMAND="ssh -o ProxyCommand=\"nc -X connect -x ${EGRESS_PROXY}:3128 %h %p\""
+  )
+fi
+
 # Docker socket proxy - gives read-only visibility into
 # containers (ps, inspect, logs) without write access.
 # POST/EXEC stay off: a write call to the host daemon (which
 # runs as root) would let this container spawn a sibling that
 # mounts the host filesystem, escaping the sandbox entirely.
-DOCKER_SOCK="/var/run/docker.sock"
-PROXY_NAME="claude-docker-proxy"
-PROXY_NET="claude-docker-proxy-net"
-
 if [ -S "${DOCKER_SOCK}" ]; then
-  if ! docker network inspect "${PROXY_NET}" >/dev/null 2>&1; then
-    docker network create "${PROXY_NET}" >/dev/null
-  fi
-
   if ! docker container inspect -f '{{.State.Running}}' \
        "${PROXY_NAME}" 2>/dev/null | grep -q true; then
     docker rm -f "${PROXY_NAME}" >/dev/null 2>&1 || true
     docker run -d \
       --name "${PROXY_NAME}" \
-      --network "${PROXY_NET}" \
+      --network "${NET}" \
       --restart unless-stopped \
       -v "${DOCKER_SOCK}:/var/run/docker.sock:ro" \
       -e CONTAINERS=1 \
@@ -125,11 +167,11 @@ if [ -S "${DOCKER_SOCK}" ]; then
       -e SWARM=0 \
       tecnativa/docker-socket-proxy >/dev/null
   fi
+  # A proxy left over from a previous run may sit on another network
+  # (e.g. after toggling CLAUDE_DOCKER_NET_FILTER); attach it to ours.
+  docker network connect "${NET}" "${PROXY_NAME}" 2>/dev/null || true
 
-  DOCKER_ARGS+=(
-    --network "${PROXY_NET}"
-    -e DOCKER_HOST="tcp://${PROXY_NAME}:2375"
-  )
+  DOCKER_ARGS+=(-e DOCKER_HOST="tcp://${PROXY_NAME}:2375")
 fi
 
 # Pass through optional env vars if set
