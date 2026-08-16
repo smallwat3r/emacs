@@ -46,7 +46,18 @@ resolve_dir() {
     "~") dir="${HOME}" ;;
     "~/"*) dir="${HOME}${dir#\~}" ;;
   esac
-  cd "${dir}" && pwd
+  # CDPATH would make cd echo the resolved path, corrupting the output
+  CDPATH= cd -- "${dir}" && pwd
+}
+
+# Skip duplicates and the project dir itself: docker rejects a repeated
+# mount destination, and the project is already mounted.
+add_extra_dir() {
+  local dir
+  dir="$(resolve_dir "$1")"
+  [ "${dir}" = "${PROJECT_DIR}" ] && return 0
+  case " ${EXTRA_DIRS[*]-} " in *" ${dir} "*) return 0 ;; esac
+  EXTRA_DIRS+=("${dir}")
 }
 
 EXTRA_DIRS=()
@@ -54,7 +65,7 @@ if [ -n "${CLAUDE_DOCKER_EXTRA_DIRS:-}" ]; then
   IFS=':' read -ra _dirs <<< "${CLAUDE_DOCKER_EXTRA_DIRS}"
   for _dir in "${_dirs[@]}"; do
     [ -n "${_dir}" ] || continue
-    EXTRA_DIRS+=("$(resolve_dir "${_dir}")")
+    add_extra_dir "${_dir}"
   done
 fi
 
@@ -63,11 +74,11 @@ while [ $# -gt 0 ]; do
   case "$1" in
     --add-dir)
       [ $# -ge 2 ] || { echo "--add-dir requires a path" >&2; exit 1; }
-      EXTRA_DIRS+=("$(resolve_dir "$2")")
+      add_extra_dir "$2"
       shift 2
       ;;
     --add-dir=*)
-      EXTRA_DIRS+=("$(resolve_dir "${1#*=}")")
+      add_extra_dir "${1#*=}"
       shift
       ;;
     *)
