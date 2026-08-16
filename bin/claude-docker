@@ -51,10 +51,17 @@ resolve_dir() {
 }
 
 # Skip duplicates and the project dir itself: docker rejects a repeated
-# mount destination, and the project is already mounted.
+# mount destination, and the project is already mounted. Refuse the home
+# directory and the filesystem root, mounting either defeats the sandbox.
 add_extra_dir() {
   local dir
   dir="$(resolve_dir "$1")"
+  case "${dir}" in
+    /|"${HOME}")
+      echo "refusing to mount ${dir}: it would defeat the sandbox" >&2
+      exit 1
+      ;;
+  esac
   [ "${dir}" = "${PROJECT_DIR}" ] && return 0
   case " ${EXTRA_DIRS[*]-} " in *" ${dir} "*) return 0 ;; esac
   EXTRA_DIRS+=("${dir}")
@@ -143,11 +150,14 @@ DOCKER_ARGS=(
   --cap-drop=ALL
   --security-opt=no-new-privileges
   --read-only
-  --tmpfs /tmp
-  --tmpfs "${CONTAINER_HOME}/.cache"
-  --tmpfs "${CONTAINER_HOME}/.config"
-  --tmpfs "${CONTAINER_HOME}/.npm"
+  # exec where builds and test binaries run; sized so a runaway process
+  # cannot eat host RAM through an unbounded tmpfs (default: half of RAM)
+  --tmpfs /tmp:exec,size=1g
+  --tmpfs "${CONTAINER_HOME}/.cache:exec,size=2g"
+  --tmpfs "${CONTAINER_HOME}/.config:size=64m"
+  --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
   --pids-limit=512
+  --memory=4g
   --name "${CONTAINER_NAME}"
 )
 
@@ -164,8 +174,8 @@ fi
 # instead join an internal network with no route out, where egress goes
 # through a squid sidecar (dual-homed on the internal net and the
 # default bridge) that only allows domains listed in
-# docker/claude-sandbox/allowed-domains.txt. Filtering is by CONNECT
-# host / SNI domain, so it survives CDN IP churn.
+# docker/claude-sandbox/allowed-domains.txt. Filtering is by the host
+# named in the CONNECT request, so it survives CDN IP churn.
 DOCKER_SOCK="/var/run/docker.sock"
 PROXY_NAME="claude-docker-proxy"
 EGRESS_PROXY="claude-egress-proxy"
@@ -198,6 +208,13 @@ if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
   fi
 
   DOCKER_ARGS+=(
+    # Blackhole external DNS: the proxy resolves hostnames (CONNECT
+    # carries the name as a string), and squid only looks up domains
+    # that pass the allowlist, so the container needs no external DNS.
+    # Docker's embedded DNS still answers container names itself and
+    # only forwards unknown names upstream; 127.0.0.1 dies on the host,
+    # so exfiltration via DNS lookups never leaves the machine.
+    --dns 127.0.0.1
     -e HTTP_PROXY="http://${EGRESS_PROXY}:3128"
     -e HTTPS_PROXY="http://${EGRESS_PROXY}:3128"
     -e http_proxy="http://${EGRESS_PROXY}:3128"
@@ -267,12 +284,16 @@ elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
   )
 fi
 
-# Shadow .env files so secrets are never visible inside the container
+# Shadow .env files so secrets are never visible inside the container.
+# Template files (.env.example and friends) stay readable, they exist
+# to be read and hold no secrets.
 while IFS= read -r -d '' envfile; do
   DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
-done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} -maxdepth 5 \
+done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} \
   \( -name node_modules -o -name .git \) -prune -o \
-  \( -name '.env' -o -name '.env.*' \) -print0 2>/dev/null)
+  \( -name '.env' -o -name '.env.*' \) \
+  ! -name '.env.example' ! -name '.env.sample' ! -name '.env.template' \
+  -print0 2>/dev/null)
 
 # Forward git config (read-only)
 if [ -f "${HOME}/.gitconfig" ]; then

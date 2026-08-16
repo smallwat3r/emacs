@@ -1,7 +1,10 @@
 # Sandboxed environment for running Claude Code via Docker.
 # Built automatically on first use by bin/claude-docker,
 # or manually via sw-claude-rebuild-sandbox in Emacs.
-FROM node:22-slim
+# Pinned by digest so a repointed tag cannot change the base under us.
+# Update: docker pull node:22-slim, then copy the new digest from
+# docker inspect -f '{{index .RepoDigests 0}}' node:22-slim
+FROM node:22-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -44,6 +47,8 @@ RUN apt-get update \
     ffmpeg \
     imagemagick \
     webp \
+    # Document conversion
+    pandoc \
     # Plotting
     gnuplot \
     # 3D / CAD
@@ -51,10 +56,8 @@ RUN apt-get update \
     admesh \
     && rm -rf /var/lib/apt/lists/*
 
-# Python package manager
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh \
-    && mv /root/.local/bin/uv /usr/local/bin/ \
-    && mv /root/.local/bin/uvx /usr/local/bin/
+# Python package manager, copied from its official image (pinned)
+COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /usr/local/bin/
 
 # Python tooling (available system-wide)
 RUN uv pip install --system --break-system-packages \
@@ -64,11 +67,21 @@ RUN uv pip install --system --break-system-packages \
     pytest \
     ipython
 
-# Go (latest stable, from the official tarball - apt's is outdated)
-RUN GO_VERSION="$(curl -fsSL https://go.dev/VERSION?m=text | head -n1)" \
-    && ARCH="$(dpkg --print-architecture)" \
+# Go (official tarball - apt's is outdated), pinned and checksum-verified.
+# The shas are recorded here on purpose: fetching them from go.dev alongside
+# the tarball would verify nothing. Update both from https://go.dev/dl
+ARG GO_VERSION=go1.26.6
+ARG GO_SHA256_AMD64=708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89
+ARG GO_SHA256_ARM64=d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e
+RUN ARCH="$(dpkg --print-architecture)" \
+    && case "${ARCH}" in \
+    amd64) GO_SHA256="${GO_SHA256_AMD64}" ;; \
+    arm64) GO_SHA256="${GO_SHA256_ARM64}" ;; \
+    *) echo "unsupported arch: ${ARCH}" >&2; exit 1 ;; \
+    esac \
     && curl -fsSL "https://go.dev/dl/${GO_VERSION}.linux-${ARCH}.tar.gz" \
     -o /tmp/go.tar.gz \
+    && echo "${GO_SHA256}  /tmp/go.tar.gz" | sha256sum -c - \
     && tar -C /usr/local -xzf /tmp/go.tar.gz \
     && rm /tmp/go.tar.gz
 ENV PATH="/usr/local/go/bin:/home/node/go/bin:/home/node/.local/bin:${PATH}"
@@ -94,14 +107,16 @@ RUN if [ "$HOST_HOME" != /home/node ]; then \
 # the literal $HOME/.local/bin (the host home), so add it to silence the warning.
 ENV PATH="${HOST_HOME}/.local/bin:${PATH}"
 
+# Claude Code, pinned to an exact version from npm.
+# Update by bumping the version and rebuilding.
+ARG CLAUDE_CODE_VERSION=2.1.233
+RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
 USER node
 WORKDIR /home/node
 
-# Update by rebuilding the image, so disable the in-container auto-updater
-# (it fails anyway: the launcher lives on the read-only image layer).
+# Rebuilding is the only update path, so disable the in-container auto-updater
+# (it fails anyway: the binary lives on the read-only image layer).
 ENV DISABLE_AUTOUPDATER=1
-
-# Install Claude Code via the native installer
-RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ENTRYPOINT ["claude"]
