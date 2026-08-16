@@ -61,6 +61,10 @@ add_extra_dir() {
 }
 
 EXTRA_DIRS=()
+
+# Always mount the shared scratch directory when it exists
+[ -d "${HOME}/claude-shared" ] && add_extra_dir "${HOME}/claude-shared"
+
 if [ -n "${CLAUDE_DOCKER_EXTRA_DIRS:-}" ]; then
   IFS=':' read -ra _dirs <<< "${CLAUDE_DOCKER_EXTRA_DIRS}"
   for _dir in "${_dirs[@]}"; do

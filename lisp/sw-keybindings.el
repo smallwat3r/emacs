@@ -339,6 +339,7 @@ DEF is a command or nil (prefix-only label)."
     ;; AI/LSP
     ("r"   nil "AI/LSP")
     ("r c" claude-code "Claude chat")
+    ("r a" sw-claude-with-dirs "Claude with extra dirs")
     ("r C" claude-code-continue "Claude continue")
     ("r R" claude-code-resume "Claude resume")
     ("r n" claude-code-new-instance "New instance")
