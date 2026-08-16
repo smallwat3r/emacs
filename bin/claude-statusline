@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Claude Code statusline. Inside a claude-docker container it shows a sandbox
+# badge (the container name, exported by bin/claude-docker) and the extra
+# mounted directories. Outside the sandbox those are simply absent.
+
+set -u
+
+cat > /dev/null
+parts=()
+
+if [ -n "${CLAUDE_DOCKER_SANDBOX:-}" ]; then
+  parts+=("$(printf '\033[1;32m[%s]\033[0m' "${CLAUDE_DOCKER_SANDBOX}")")
+  if [ -n "${CLAUDE_DOCKER_DIRS:-}" ]; then
+    dirs="${CLAUDE_DOCKER_DIRS//:/ }"
+    dirs="${dirs//${HOME}/\~}"
+    parts+=("$(printf '\033[2mdirs: %s\033[0m' "${dirs}")")
+  fi
+fi
+
+printf '%s\n' "${parts[*]-}"
