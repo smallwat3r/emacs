@@ -89,6 +89,28 @@ up the padding instead of clean newlines."
                 (select-window window))))
         (claude-code--show-not-running-message))))
 
+  ;; Defined in :init so the command exists before the package is loaded
+  (defun sw-claude-with-dirs ()
+    "Start Claude with extra project directories mounted in the sandbox.
+Prompts for directories (empty answer to \"Add another\" stops), then
+launches Claude with them passed to the Docker wrapper through
+CLAUDE_DOCKER_EXTRA_DIRS, which mounts each one, shadows its .env
+files and hands it to claude via --add-dir."
+    (interactive)
+    (let ((dirs (list (directory-file-name
+                       (expand-file-name
+                        (read-directory-name "Extra directory: "))))))
+      (while (y-or-n-p "Add another directory? ")
+        (push (directory-file-name
+               (expand-file-name
+                (read-directory-name "Extra directory: ")))
+              dirs))
+      (let ((process-environment
+             (cons (concat "CLAUDE_DOCKER_EXTRA_DIRS="
+                           (mapconcat #'identity (nreverse dirs) ":"))
+                   process-environment)))
+        (claude-code))))
+
   :config
   (advice-add 'claude-code-toggle :override #'sw-claude-code-toggle)
 

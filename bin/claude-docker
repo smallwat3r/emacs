@@ -31,6 +31,52 @@ fi
 PROJECT_DIR="$(pwd)"
 CONTAINER_HOME="/home/node"
 
+# Extra project directories (e.g. the frontend repo next to this backend).
+# Claude's own --add-dir flag is intercepted here so the directory can be
+# mounted, then re-forwarded to claude with the resolved path:
+#   claude-docker --add-dir ../frontend
+# Also accepted, colon-separated: CLAUDE_DOCKER_EXTRA_DIRS=~/code/frontend
+# Each directory is mounted read-write at its host path and gets its .env
+# files shadowed like the main project's.
+# Resolve to an absolute path, expanding a literal leading ~ (the shell does
+# not expand it in the --add-dir=~/x form).
+resolve_dir() {
+  local dir="$1"
+  case "${dir}" in
+    "~") dir="${HOME}" ;;
+    "~/"*) dir="${HOME}${dir#\~}" ;;
+  esac
+  cd "${dir}" && pwd
+}
+
+EXTRA_DIRS=()
+if [ -n "${CLAUDE_DOCKER_EXTRA_DIRS:-}" ]; then
+  IFS=':' read -ra _dirs <<< "${CLAUDE_DOCKER_EXTRA_DIRS}"
+  for _dir in "${_dirs[@]}"; do
+    [ -n "${_dir}" ] || continue
+    EXTRA_DIRS+=("$(resolve_dir "${_dir}")")
+  done
+fi
+
+ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --add-dir)
+      [ $# -ge 2 ] || { echo "--add-dir requires a path" >&2; exit 1; }
+      EXTRA_DIRS+=("$(resolve_dir "$2")")
+      shift 2
+      ;;
+    --add-dir=*)
+      EXTRA_DIRS+=("$(resolve_dir "${1#*=}")")
+      shift
+      ;;
+    *)
+      ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
 # Container name: claude-{project}-{instance}
 PROJECT_SLUG="$(basename "${PROJECT_DIR}")"
 if [ -n "${CLAUDE_BUFFER_NAME:-}" ]; then
@@ -87,6 +133,10 @@ DOCKER_ARGS=(
   --pids-limit=512
   --name "${CONTAINER_NAME}"
 )
+
+for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
+  DOCKER_ARGS+=(-v "${dir}:${dir}:z")
+done
 
 # Network: open egress by default. Set CLAUDE_DOCKER_NET_FILTER=1 to
 # instead join an internal network with no route out, where egress goes
@@ -198,7 +248,7 @@ fi
 # Shadow .env files so secrets are never visible inside the container
 while IFS= read -r -d '' envfile; do
   DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
-done < <(find "${PROJECT_DIR}" -maxdepth 5 \
+done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} -maxdepth 5 \
   \( -name node_modules -o -name .git \) -prune -o \
   \( -name '.env' -o -name '.env.*' \) -print0 2>/dev/null)
 
@@ -215,4 +265,10 @@ if [ -d "${XDG_GIT}" ]; then
   )
 fi
 
-exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" "$@"
+CLAUDE_ARGS=()
+for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
+  CLAUDE_ARGS+=(--add-dir "${dir}")
+done
+
+exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" \
+  ${CLAUDE_ARGS[@]+"${CLAUDE_ARGS[@]}"} ${ARGS[@]+"${ARGS[@]}"}
