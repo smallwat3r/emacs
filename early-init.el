@@ -67,7 +67,6 @@
 
 ;; Disable expensive GUI elements early
 (setq inhibit-startup-screen t
-      inhibit-startup-message t
       inhibit-startup-echo-area-message user-login-name
       initial-scratch-message nil
       initial-major-mode 'fundamental-mode)
@@ -84,23 +83,13 @@
 
 ;;; Font management
 
-(defun sw-font-available-p (font)
-  "Return non-nil if FONT is available on the system."
-  (member font (font-family-list)))
-
 (defun sw-first-available-font (fonts)
   "Return the first available font from FONTS list, or nil if none found."
-  (seq-find #'sw-font-available-p fonts))
+  (seq-find (lambda (font) (member font (font-family-list))) fonts))
 
-;; Primary font families (set early, before display is available)
+;; Primary font family (set early, before display is available)
 (defvar sw-font-family (if sw-is-mac "Monaco" "Ocrab Nerd Font Mono")
   "Primary monospace font for code and default text.")
-
-(defvar sw-font-variable-pitch sw-font-family
-  "Variable-pitch font for prose and UI elements.")
-
-(defvar sw-font-serif sw-font-family
-  "Serif font for documents and reading.")
 
 ;; Fallback font lists (resolved after display is available)
 (defvar sw-font-symbol-fallbacks
@@ -121,9 +110,6 @@
 
 (defvar sw-font-size (if sw-is-mac 13 10.5)
   "Default font size in points (may be fractional, e.g. 10.5).")
-
-(defvar sw-font-variable-pitch-size sw-font-size
-  "Variable-pitch font size in points.")
 
 ;; Set primary font early to prevent random sizing
 (set-face-attribute 'default nil :family sw-font-family

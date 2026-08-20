@@ -18,10 +18,6 @@
   "Face for the selected workspace tab.")
 
 ;; Core functions
-(defun sw-fallback-buffer ()
-  "Return the fallback buffer, creating it if necessary."
-  (get-buffer-create "*scratch*"))
-
 (defun sw-workspace--get-names ()
   "Return list of all workspace names from tab-bar.
 Names may be nil for unnamed workspaces."
@@ -73,10 +69,10 @@ Wraps to multiple lines when tabs exceed the frame width."
   "Create a new blank workspace.
 Starts with only scratch buffer, single window, rooted at home directory."
   (interactive)
-  (let ((tab-bar-new-tab-choice #'sw-fallback-buffer))
+  (let ((tab-bar-new-tab-choice #'get-scratch-buffer-create))
     (tab-bar-new-tab)
     (delete-other-windows)
-    (switch-to-buffer (sw-fallback-buffer))
+    (switch-to-buffer (get-scratch-buffer-create))
     (setq-local default-directory "~/")))
 
 (defun sw-workspace-switch-to-project ()
@@ -88,7 +84,7 @@ If a workspace for the project already exists, switch to it."
          (existing (member name (sw-workspace--get-names))))
     (if existing
         (tab-bar-switch-to-tab name)
-      (let* ((tab-bar-new-tab-choice #'sw-fallback-buffer)
+      (let* ((tab-bar-new-tab-choice #'get-scratch-buffer-create)
              (pr (project-current nil dir))
              (root (if pr (project-root pr) dir)))
         (tab-bar-new-tab)
@@ -102,7 +98,7 @@ If a workspace for the project already exists, switch to it."
   (let ((existing (member name (sw-workspace--get-names))))
     (if existing
         (tab-bar-switch-to-tab name)
-      (let ((tab-bar-new-tab-choice #'sw-fallback-buffer))
+      (let ((tab-bar-new-tab-choice #'get-scratch-buffer-create))
         (tab-bar-new-tab)
         (tab-bar-rename-tab name)
         (delete-other-windows)))
@@ -148,7 +144,7 @@ If a workspace for the project already exists, switch to it."
 ;; Tab-bar configuration
 ;; Hide the built-in tab bar, we display workspaces in the echo area
 (setq tab-bar-show nil
-      tab-bar-new-tab-choice #'sw-fallback-buffer)
+      tab-bar-new-tab-choice #'get-scratch-buffer-create)
 (tab-bar-mode 1)
 
 ;; Name the initial workspace "main" and show workspaces on startup
@@ -191,7 +187,7 @@ Intended for use in `kill-buffer-hook'."
   (let ((count 0))
     (dolist (buf buffers)
       (when (and (buffer-live-p buf)
-                 (not (eq buf (sw-fallback-buffer))))
+                 (not (eq buf (get-scratch-buffer-create))))
         (kill-buffer buf)
         (cl-incf count)))
     count))
@@ -247,7 +243,7 @@ Switches to scratch buffer after killing."
   (let ((buffers (sw-workspace-buffer-list)))
     (when (yes-or-no-p (format "Kill %d buffer(s) in this workspace? " (length buffers)))
       (let ((count (sw-workspace--kill-buffers buffers)))
-        (switch-to-buffer (sw-fallback-buffer))
+        (switch-to-buffer (get-scratch-buffer-create))
         (delete-other-windows)
         (message "Killed %d buffer(s)" count)))))
 
@@ -273,23 +269,6 @@ Switches to scratch buffer after killing."
         (unless (equal workspace-name (sw-workspace--current-name))
           (tab-bar-switch-to-tab workspace-name)))
       (switch-to-buffer buf))))
-
-;; Generates `sw-workspace-switch-to-1' through `sw-workspace-switch-to-9'.
-;; Each function switches to the corresponding workspace index, or displays
-;; an error if the workspace does not exist.
-(defmacro sw-workspace--define-switchers ()
-  "Define workspace switching functions 1-9."
-  `(progn
-     ,@(mapcar (lambda (n)
-                 `(defun ,(intern (format "sw-workspace-switch-to-%d" n)) ()
-                    ,(format "Switch to workspace %d." n)
-                    (interactive)
-                    (if (<= ,n (length (tab-bar-tabs)))
-                        (tab-bar-select-tab ,n)
-                      (message "Workspace %d does not exist" ,n))))
-               (number-sequence 1 9))))
-
-(sw-workspace--define-switchers)
 
 (provide 'sw-workspaces)
 ;;; sw-workspaces.el ends here

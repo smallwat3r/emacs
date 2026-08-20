@@ -7,16 +7,10 @@
 
 ;;; Fonts (font variables defined in early-init.el)
 
-;; Monospace faces
-(set-face-attribute 'fixed-pitch nil
-                    :family sw-font-family :height (round (* sw-font-size 10)))
-(set-face-attribute 'fixed-pitch-serif nil
-                    :family sw-font-serif :height (round (* sw-font-size 10)))
-
-;; Variable-pitch face
-(set-face-attribute 'variable-pitch nil
-                    :family sw-font-variable-pitch
-                    :height (round (* sw-font-variable-pitch-size 10)))
+;; No explicit :height on these faces so they inherit the default
+;; face's height and `global-text-scale-adjust' scales them all.
+(dolist (face '(fixed-pitch fixed-pitch-serif variable-pitch))
+  (set-face-attribute face nil :family sw-font-family))
 
 ;; Symbol and emoji fontsets
 (defun sw-setup-fontsets ()

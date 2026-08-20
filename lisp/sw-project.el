@@ -15,10 +15,10 @@
   ;; Go directly to find-file when switching projects
   (project-switch-commands #'project-find-file)
   :config
-  ;; Add additional root markers
+  ;; Add additional root markers (VC roots like .git are detected natively)
   (setq project-vc-extra-root-markers
         '(".project" ".projectile" "Cargo.toml" "go.mod" "package.json"
-          "pyproject.toml" ".git")))
+          "pyproject.toml")))
 
 ;; Auto-discover projects in these directories
 (defvar sw-project-directories '("~/code" "~/work" "~/dotfiles")

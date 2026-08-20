@@ -69,12 +69,6 @@
   (minibuffer-depth-indicate-mode t)
 
   :config
-  ;; UTF-8 everywhere
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
-
   ;; Enable useful modes
   (delete-selection-mode 1)
   (column-number-mode 1)

@@ -56,6 +56,7 @@ Runs after `treesit-major-mode-setup'."
 (use-package apheleia
   :commands (apheleia-format-buffer apheleia-format-region)
   :config
+  ;; Keep formatter flags in sync with `sw-region-formatters' below
   ;; Python formatters (black/isort read pyproject.toml automatically)
   (setf (alist-get 'black apheleia-formatters) '("black" "--quiet" "-"))
   (setf (alist-get 'isort apheleia-formatters) '("isort" "--profile" "black" "-"))
@@ -72,7 +73,8 @@ Runs after `treesit-major-mode-setup'."
   (setf (alist-get 'bash-ts-mode apheleia-mode-alist) 'shfmt)
   (setf (alist-get 'sh-mode apheleia-mode-alist) 'shfmt))
 
-;; Region formatters by mode (mirrors apheleia config where applicable)
+;; Region formatters by mode (mirrors the apheleia config above,
+;; keep flags in sync when changing either)
 (defvar sw-region-formatters
   (let (alist)
     (dolist (entry
@@ -377,7 +379,6 @@ Works for both JS and TypeScript tree-sitter modes."
   :ensure nil
   :custom
   (sh-basic-offset 2)
-  (sh-indentation 2)
   :hook (sh-mode . (lambda () (setq-local indent-tabs-mode nil))))
 
 ;;; SQL
@@ -447,9 +448,8 @@ Works for both JS and TypeScript tree-sitter modes."
 ;;; Editorconfig
 
 (use-package editorconfig
-  :hook (sw-first-file . editorconfig-mode)
-  :config
-  (setq editorconfig-exclude-modes '(tramp-mode)))
+  :ensure nil
+  :hook (sw-first-file . editorconfig-mode))
 
 (provide 'sw-programming)
 ;;; sw-programming.el ends here

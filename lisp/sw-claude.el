@@ -114,6 +114,8 @@ files and hands it to claude via --add-dir."
   :config
   (advice-add 'claude-code-toggle :override #'sw-claude-code-toggle)
 
+  (defvar eat-kill-buffer-on-exit)
+
   (defun sw-claude-start-advice (orig-fn &rest args)
     "Advice around `claude-code--start'.
 Kill stale Claude buffers, then run with `eat-kill-buffer-on-exit'
@@ -123,13 +125,8 @@ during the startup delay."
       (when (and (string-prefix-p "*claude:" (buffer-name buf))
                  (not (get-buffer-process buf)))
         (kill-buffer buf)))
-    (if (not (boundp 'eat-kill-buffer-on-exit))
-        (apply orig-fn args)
-      (let ((saved (symbol-value 'eat-kill-buffer-on-exit)))
-        (set 'eat-kill-buffer-on-exit nil)
-        (unwind-protect
-            (apply orig-fn args)
-          (set 'eat-kill-buffer-on-exit saved)))))
+    (let ((eat-kill-buffer-on-exit nil))
+      (apply orig-fn args)))
 
   (advice-add 'claude-code--start :around #'sw-claude-start-advice))
 

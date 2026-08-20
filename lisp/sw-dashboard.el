@@ -68,11 +68,18 @@
       (with-current-buffer buf
         (sw-dashboard-render)))))
 
+(defun sw-dashboard--remove-resize-hook ()
+  "Remove the dashboard resize hook."
+  (remove-hook 'window-size-change-functions #'sw-dashboard--on-resize))
+
 (defun sw-dashboard-display ()
   "Create and switch to the dashboard buffer."
   (switch-to-buffer (get-buffer-create sw-dashboard-buffer-name))
   (sw-dashboard-render)
-  (add-hook 'window-size-change-functions #'sw-dashboard--on-resize))
+  (add-hook 'window-size-change-functions #'sw-dashboard--on-resize)
+  ;; Kill protection can be bypassed (e.g. kill-buffer-query-functions
+  ;; bound to nil), so clean up the global hook if the buffer dies.
+  (add-hook 'kill-buffer-hook #'sw-dashboard--remove-resize-hook nil t))
 
 (defun sw-dashboard-refresh ()
   "Refresh the dashboard buffer."

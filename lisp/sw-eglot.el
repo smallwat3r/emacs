@@ -77,8 +77,8 @@
   :after eglot
   :when (executable-find "emacs-lsp-booster")
   :init
-  ;; On Emacs 30+, only use IO buffering (native JSON is faster)
-  (setq eglot-booster-io-only (> emacs-major-version 29))
+  ;; Only use IO buffering, native JSON on Emacs 30+ is faster
+  (setq eglot-booster-io-only t)
   :config
   (eglot-booster-mode 1))
 

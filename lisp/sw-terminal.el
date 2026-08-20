@@ -209,7 +209,7 @@ the TRAMP remote prefix."
                 (_ (file-remote-p default-directory))
                 (prefix (file-remote-p default-directory)))
       (with-current-buffer buf
-        (rename-buffer (format "*eat@%s*" prefix) t)
+        (rename-buffer (sw-eat--buffer-for-dir default-directory) t)
         (setq-local eat-enable-shell-integration nil)
         (setq-local sw-eat-tramp-initialized nil)
         (setq-local sw-eat--tramp-attempts 0)
@@ -382,11 +382,6 @@ Current input becomes a prefix filter (^pattern)."
     (when input
       (eat-term-send-string eat-terminal "\C-u"))
     (eat-term-send-string eat-terminal choice)))
-
-(defun sw-eat-project ()
-  "Open eat terminal in project root."
-  (interactive)
-  (sw-eat-here nil))
 
 (defun sw-eat--kill-buffers (&optional keep-current)
   "Kill eat buffers in the current workspace.

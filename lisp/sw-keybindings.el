@@ -127,11 +127,10 @@ DEF is a command or nil (prefix-only label)."
   (global-set-key (kbd "A-<backspace>") #'sw-backward-kill-word))
 
 ;;; Text scaling (global)
+;; `global-text-scale-adjust' reads the key's final char: =/+ up, - down, 0 reset
 
-(global-set-key (kbd "C-=") #'sw-text-scale-increase)
-(global-set-key (kbd "C-+") #'sw-text-scale-increase)
-(global-set-key (kbd "C--") #'sw-text-scale-decrease)
-(global-set-key (kbd "C-0") #'sw-text-scale-reset)
+(dolist (key '("C-=" "C-+" "C--" "C-0"))
+  (global-set-key (kbd key) #'global-text-scale-adjust))
 
 ;;; Leader key bindings
 
@@ -272,7 +271,7 @@ DEF is a command or nil (prefix-only label)."
     ("h"   nil "Help")
     ("h r" restart-emacs "Restart Emacs")
     ("h f" helpful-callable "Function")
-    ("h F" describe-char "Face at point")
+    ("h F" describe-char "Char at point")
     ("h v" helpful-variable "Variable")
     ("h k" helpful-key "Key")
     ("h p" helpful-at-point "At point")
@@ -302,15 +301,16 @@ DEF is a command or nil (prefix-only label)."
      "Next workspace")
     ("TAB [" tab-bar-switch-to-prev-tab
      "Prev workspace")
-    ("TAB 1" sw-workspace-switch-to-1 "Workspace 1")
-    ("TAB 2" sw-workspace-switch-to-2 "Workspace 2")
-    ("TAB 3" sw-workspace-switch-to-3 "Workspace 3")
-    ("TAB 4" sw-workspace-switch-to-4 "Workspace 4")
-    ("TAB 5" sw-workspace-switch-to-5 "Workspace 5")
-    ("TAB 6" sw-workspace-switch-to-6 "Workspace 6")
-    ("TAB 7" sw-workspace-switch-to-7 "Workspace 7")
-    ("TAB 8" sw-workspace-switch-to-8 "Workspace 8")
-    ("TAB 9" sw-workspace-switch-to-9 "Workspace 9")
+    ;; `tab-bar-select-tab' reads the workspace number from the digit key
+    ("TAB 1" tab-bar-select-tab "Workspace 1")
+    ("TAB 2" tab-bar-select-tab "Workspace 2")
+    ("TAB 3" tab-bar-select-tab "Workspace 3")
+    ("TAB 4" tab-bar-select-tab "Workspace 4")
+    ("TAB 5" tab-bar-select-tab "Workspace 5")
+    ("TAB 6" tab-bar-select-tab "Workspace 6")
+    ("TAB 7" tab-bar-select-tab "Workspace 7")
+    ("TAB 8" tab-bar-select-tab "Workspace 8")
+    ("TAB 9" tab-bar-select-tab "Workspace 9")
 
     ;; Window (unique bindings, navigation via function below)
     ("w"   nil "Window")
@@ -530,35 +530,19 @@ DEF is a command or nil (prefix-only label)."
   (define-key eat-semi-char-mode-map
     (kbd "C-<backspace>") #'sw-eat-backward-kill-word)
   (define-key eat-semi-char-mode-map
-    (kbd "M-<backspace>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "M-d") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "M-f") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "M-b") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-<left>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-<right>") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-k") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-j") #'eat-self-input)
-  (define-key eat-semi-char-mode-map
     (kbd "C-y") #'sw-eat-yank)
   (define-key eat-semi-char-mode-map
     (kbd "C-,") #'sw-eat-zsh-history-pick)
 
+  ;; Keys forwarded straight to the terminal
+  (dolist (key '("M-<backspace>" "M-d" "M-f" "M-b"
+                 "C-<left>" "C-<right>" "C-k" "C-j"))
+    (define-key eat-semi-char-mode-map (kbd key) #'eat-self-input))
+
   ;; Text scaling (override eat-self-input)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-=") #'sw-text-scale-increase)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-+") #'sw-text-scale-increase)
-  (define-key eat-semi-char-mode-map
-    (kbd "C--") #'sw-text-scale-decrease)
-  (define-key eat-semi-char-mode-map
-    (kbd "C-0") #'sw-text-scale-reset))
+  (dolist (key '("C-=" "C-+" "C--" "C-0"))
+    (define-key eat-semi-char-mode-map
+                (kbd key) #'global-text-scale-adjust)))
 
 ;;; Evil-snipe bindings
 
