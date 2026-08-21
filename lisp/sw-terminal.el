@@ -94,15 +94,19 @@ LIMIT defaults to 10000."
   (defun sw-eat-evil-insert-enter ()
     "Switch to semi-char mode when entering insert state in eat."
     (when (and (derived-mode-p 'eat-mode)
-               (boundp 'eat--input-mode)
-               (not (eq eat--input-mode 'semi-char)))
+               ;; eat-mode-hook enters insert state before the
+               ;; process starts, eat errors without a terminal
+               (bound-and-true-p eat-terminal)
+               (not (bound-and-true-p eat--semi-char-mode))
+               ;; leave char mode (passthrough) alone
+               (not (bound-and-true-p eat--char-mode)))
       (eat-semi-char-mode)))
 
   (defun sw-eat-evil-insert-exit ()
     "Switch to emacs mode when exiting insert state in eat."
     (when (and (derived-mode-p 'eat-mode)
-               (boundp 'eat--input-mode)
-               (not (eq eat--input-mode 'emacs)))
+               (bound-and-true-p eat-terminal)
+               (bound-and-true-p eat--semi-char-mode))
       (eat-emacs-mode)))
 
   (add-hook 'evil-insert-state-entry-hook #'sw-eat-evil-insert-enter)
@@ -128,6 +132,18 @@ LIMIT defaults to 10000."
     (interactive)
     (when eat-terminal
       (eat-term-send-string eat-terminal "\e\C-?")))
+
+  (defun sw-eat-passthrough-toggle ()
+    "Toggle full key passthrough, for SSH, screen and remote vim.
+Every key reaches the terminal (eat char mode + evil emacs state,
+so evil's insert-state map cannot steal Escape). Press M-RET to
+toggle back."
+    (interactive)
+    (if (bound-and-true-p eat--char-mode)
+        (progn (eat-semi-char-mode)
+               (evil-insert-state))
+      (evil-emacs-state)
+      (eat-char-mode)))
 
   (defun sw-eat-interrupt ()
     "Send interrupt (C-c) to the eat terminal."

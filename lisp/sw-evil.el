@@ -144,8 +144,11 @@
 
 ;; Tree-sitter text objects (e.g., vaf, dif, vic, dia)
 (use-package evil-textobj-tree-sitter
-  :after evil
-  :demand t
+  :init
+  ;; Defer to first file: the text objects are only useful in file
+  ;; buffers, and :after alone would never load it (always-defer)
+  (add-hook 'sw-first-file-hook
+            (lambda () (require 'evil-textobj-tree-sitter)))
   :config
   (define-key evil-outer-text-objects-map "f"
     (evil-textobj-tree-sitter-get-textobj "function.outer"))

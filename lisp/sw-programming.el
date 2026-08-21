@@ -12,9 +12,26 @@
 
 (use-package treesit
   :ensure nil
-  :demand t
   :custom
   (treesit-font-lock-level 2)
+  :init
+  ;; Set eagerly so the very first file opened remaps; treesit itself
+  ;; loads on demand when a ts mode starts
+  (setq major-mode-remap-alist
+        '((c-mode . c-ts-mode)
+          (c++-mode . c++-ts-mode)
+          (cmake-mode . cmake-ts-mode)
+          (css-mode . css-ts-mode)
+          (go-mode . go-ts-mode)
+          (java-mode . java-ts-mode)
+          (js-mode . js-ts-mode)
+          (json-mode . json-ts-mode)
+          (python-mode . python-ts-mode)
+          (ruby-mode . ruby-ts-mode)
+          (rust-mode . rust-ts-mode)
+          (sh-mode . bash-ts-mode)
+          (toml-mode . toml-ts-mode)
+          (yaml-mode . yaml-ts-mode)))
   :config
   (defun sw-treesit-promote-font-lock-features ()
     "Promote select features to level 2 in all tree-sitter modes.
@@ -33,23 +50,7 @@ Runs after `treesit-major-mode-setup'."
       (treesit-font-lock-recompute-features)))
 
   (advice-add 'treesit-major-mode-setup :after
-              #'sw-treesit-promote-font-lock-features)
-
-  (setq major-mode-remap-alist
-        '((c-mode . c-ts-mode)
-          (c++-mode . c++-ts-mode)
-          (cmake-mode . cmake-ts-mode)
-          (css-mode . css-ts-mode)
-          (go-mode . go-ts-mode)
-          (java-mode . java-ts-mode)
-          (js-mode . js-ts-mode)
-          (json-mode . json-ts-mode)
-          (python-mode . python-ts-mode)
-          (ruby-mode . ruby-ts-mode)
-          (rust-mode . rust-ts-mode)
-          (sh-mode . bash-ts-mode)
-          (toml-mode . toml-ts-mode)
-          (yaml-mode . yaml-ts-mode))))
+              #'sw-treesit-promote-font-lock-features))
 
 ;;; Formatting
 
@@ -256,7 +257,10 @@ Handles combined prefixes like `rf' or `fr' correctly."
 
 ;; Virtual environment detection
 (use-package pet
-  :config
+  ;; :init, not :config: with `use-package-always-defer' nothing loads
+  ;; pet, so a :config add-hook would never be installed. The hook's
+  ;; call to the autoloaded `pet-mode' is what pulls the package in.
+  :init
   ;; pet probes the filesystem and spawns executables to locate the venv and
   ;; tools. Over Tramp each probe is a remote round-trip, which makes opening
   ;; even tiny remote Python files slow, so skip it on remote buffers (same

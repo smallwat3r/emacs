@@ -115,6 +115,10 @@
 
 (use-package exec-path-from-shell
   :hook (sw-first-file . exec-path-from-shell-initialize)
+  :custom
+  ;; Login shell only, skip the interactive rc files: roughly halves
+  ;; the shell spawn that delays the first file open
+  (exec-path-from-shell-arguments '("-l"))
   :init
   ;; exec-path-from-shell refuses to run from a remote (Tramp) buffer.
   ;; If the first file visited is remote, the unguarded call signals an

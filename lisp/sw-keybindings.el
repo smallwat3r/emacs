@@ -534,9 +534,15 @@ DEF is a command or nil (prefix-only label)."
   (define-key eat-semi-char-mode-map
     (kbd "C-,") #'sw-eat-zsh-history-pick)
 
-  ;; Keys forwarded straight to the terminal
+  ;; Full key passthrough for SSH, screen and remote vim.
+  ;; eat binds C-M-m (M-RET) to plain eat-semi-char-mode in char mode,
+  ;; rebind it so the toggle also restores the evil state.
+  (define-key eat-semi-char-mode-map (kbd "M-RET") #'sw-eat-passthrough-toggle)
+  (define-key eat-char-mode-map (kbd "C-M-m") #'sw-eat-passthrough-toggle)
+
+  ;; Keys forwarded straight to the terminal (C-u for shell kill-line)
   (dolist (key '("M-<backspace>" "M-d" "M-f" "M-b"
-                 "C-<left>" "C-<right>" "C-k" "C-j"))
+                 "C-<left>" "C-<right>" "C-k" "C-j" "C-u"))
     (define-key eat-semi-char-mode-map (kbd key) #'eat-self-input))
 
   ;; Text scaling (override eat-self-input)

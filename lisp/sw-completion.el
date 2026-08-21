@@ -115,8 +115,10 @@
 
 ;; Cape - completion at point extensions
 (use-package cape
-  :after corfu
-  :config
+  :init
+  ;; In :init, not :config: with `use-package-always-defer' the :config
+  ;; block never runs (nothing loads cape). The functions are autoloaded
+  ;; so registering them here is enough.
   ;; Add in reverse order since add-to-list pushes to front
   ;; Final order: dabbrev, file, keyword
   (add-to-list 'completion-at-point-functions #'cape-keyword)
