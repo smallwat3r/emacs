@@ -64,6 +64,9 @@ LIMIT defaults to 10000."
   :custom
   (eat-kill-buffer-on-exit t)
   (eat-enable-mouse t)
+  ;; Default 128K chars is ~650 lines once Claude pads lines to window
+  ;; width, long answers get truncated out of the buffer
+  (eat-term-scrollback-size (* 4 1024 1024))
   (eat-enable-shell-integration nil)
   (eat-enable-shell-prompt-annotation nil)
   (eat-tramp-shells '(("ssh"    . "/bin/bash")

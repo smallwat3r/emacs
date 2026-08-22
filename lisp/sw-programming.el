@@ -14,6 +14,10 @@
   :ensure nil
   :custom
   (treesit-font-lock-level 2)
+  ;; Grammars not bundled with Emacs, install with
+  ;; `treesit-install-language-grammar'
+  (treesit-language-source-alist
+   '((typst "https://github.com/uben0/tree-sitter-typst")))
   :init
   ;; Set eagerly so the very first file opened remaps; treesit itself
   ;; loads on demand when a ts mode starts
@@ -434,6 +438,10 @@ Works for both JS and TypeScript tree-sitter modes."
 
 (use-package scad-mode
   :mode "\\.scad\\'")
+
+(use-package typst-ts-mode
+  :ensure (:host codeberg :repo "meow_king/typst-ts-mode")
+  :mode "\\.typ\\'")
 
 (use-package make-mode
   :ensure nil

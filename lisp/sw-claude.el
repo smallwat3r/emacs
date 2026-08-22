@@ -43,13 +43,18 @@ up the padding instead of clean newlines."
         (replace-regexp-in-string "[ \t]+$" "" text)
       text)))
 
-(defun sw-claude--enable-copy-filter ()
-  "Strip trailing whitespace from copies in claude-code buffers."
+(defun sw-claude--setup-eat-buffer ()
+  "Tweak eat settings in claude-code buffers.
+Strip trailing whitespace from copies, and keep the mouse wheel
+scrolling the Emacs window: when Claude enables mouse tracking,
+eat would otherwise forward wheel events to the TUI, making
+scrollback appear stuck."
   (when (string-prefix-p "*claude:" (buffer-name))
     (setq-local filter-buffer-substring-function
-                #'sw-claude--filter-substring)))
+                #'sw-claude--filter-substring)
+    (setq-local eat-enable-mouse nil)))
 
-(add-hook 'eat-mode-hook #'sw-claude--enable-copy-filter)
+(add-hook 'eat-mode-hook #'sw-claude--setup-eat-buffer)
 
 ;; Required dependency for claude-code
 (use-package inheritenv
