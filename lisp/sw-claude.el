@@ -56,6 +56,47 @@ scrollback appear stuck."
 
 (add-hook 'eat-mode-hook #'sw-claude--setup-eat-buffer)
 
+(defvar eat-terminal)
+(declare-function eat-term-end "eat" (terminal))
+
+(defun sw-claude--scrolled-back-p (win)
+  "Non-nil if WIN is scrolled away from the end of its terminal."
+  (and (window-live-p win)
+       (bound-and-true-p eat-terminal)
+       (not (pos-visible-in-window-p
+             (eat-term-end eat-terminal) win t))))
+
+(defun sw-claude--keep-scroll (orig-fn buffer)
+  "Around advice for `eat--process-output-queue' on BUFFER.
+ORIG-FN is the original function.  Claude repaints its TUI
+constantly, and eat writes output at point then recenters the
+window on the terminal cursor, so a scrolled-back window is
+dragged to the bottom within milliseconds.  While the window is
+scrolled back, put point and the window start back where the user
+left them.  Typing resumes following, eat forces a scroll sync
+when it sends input."
+  (if (not (and (buffer-live-p buffer)
+                (string-prefix-p "*claude:" (buffer-name buffer))))
+      (funcall orig-fn buffer)
+    (with-current-buffer buffer
+      (let* ((win (get-buffer-window buffer))
+             (frozen (sw-claude--scrolled-back-p win))
+             (pt (and frozen (point-marker)))
+             (start (and frozen (copy-marker (window-start win)))))
+        (unwind-protect
+            (funcall orig-fn buffer)
+          (when frozen
+            (when (window-live-p win)
+              (set-window-start win start t)
+              (set-window-point win pt))
+            (goto-char pt)
+            (set-marker pt nil)
+            (set-marker start nil)))))))
+
+(with-eval-after-load 'eat
+  (advice-add 'eat--process-output-queue
+              :around #'sw-claude--keep-scroll))
+
 ;; Required dependency for claude-code
 (use-package inheritenv
   :ensure (:host github :repo "purcell/inheritenv" :wait t)

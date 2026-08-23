@@ -138,6 +138,10 @@ DOCKER_ARGS=(
   -e HOME="${HOME}"
   -e TERM=xterm-256color
   -e INSIDE_EMACS=
+  # Claude's TUI defaults to the alternate screen, which has no scrollback
+  # of its own inside eat: everything above the current viewport is gone.
+  # Render inline instead so old output lands in the Emacs buffer.
+  -e CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
   -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
   # Read by bin/claude-statusline to show a sandbox badge and the
   # network mode in the Claude UI
