@@ -24,6 +24,11 @@ ARG TYPST_SHA256_ARM64=5aa8d74a3d906e60ea12a66ac2f37f8eef1b14cbad7182a745e393a10
 # compute sha256sum on the downloaded fonts/ocrab.otf
 ARG OCRAB_VERSION=1.0.4
 ARG OCRAB_SHA256=af49c6c6f72568c62a0243df25b5912e8e3a7a73c3200284d4d8a49e29abab07
+# mcap CLI: update from https://github.com/foxglove/mcap/releases (no upstream
+# checksum files, so compute sha256sum on the downloaded binaries)
+ARG MCAP_VERSION=v0.3.0
+ARG MCAP_SHA256_AMD64=5d4100573fab880f1c6400952466275bb3b32c3d230a54f7c380ee0d08e59eef
+ARG MCAP_SHA256_ARM64=be9734ef63ada9d0cc7a3aa41378ab65fd482601e5f5b3b52098d8e6553deabf
 # Claude Code: exact version from npm
 ARG CLAUDE_CODE_VERSION=2.1.233
 
@@ -91,7 +96,12 @@ RUN uv pip install --system --break-system-packages \
     ruff \
     black \
     pytest \
-    ipython
+    ipython \
+    # Rosbag reading/writing/conversion (ROS1 + ROS2, sqlite3 + mcap storage)
+    rosbags \
+    mcap \
+    mcap-ros1-support \
+    mcap-ros2-support
 
 # Go (official tarball - apt's is outdated), pinned and checksum-verified
 RUN ARCH="$(dpkg --print-architecture)" \
@@ -120,6 +130,18 @@ RUN ARCH="$(dpkg --print-architecture)" \
     && tar -C /usr/local/bin --strip-components=1 -xJf /tmp/typst.tar.xz \
     "typst-${TYPST_ARCH}-unknown-linux-musl/typst" \
     && rm /tmp/typst.tar.xz
+
+# mcap CLI (inspect/filter/recover .mcap rosbags), pinned and checksum-verified
+RUN ARCH="$(dpkg --print-architecture)" \
+    && case "${ARCH}" in \
+    amd64) MCAP_SHA256="${MCAP_SHA256_AMD64}" ;; \
+    arm64) MCAP_SHA256="${MCAP_SHA256_ARM64}" ;; \
+    *) echo "unsupported arch: ${ARCH}" >&2; exit 1 ;; \
+    esac \
+    && curl -fsSL "https://github.com/foxglove/mcap/releases/download/releases/mcap-cli/${MCAP_VERSION}/mcap-linux-${ARCH}" \
+    -o /usr/local/bin/mcap \
+    && echo "${MCAP_SHA256}  /usr/local/bin/mcap" | sha256sum -c - \
+    && chmod +x /usr/local/bin/mcap
 
 # Ocrab font (https://github.com/smallwat3r/ocrab-font), pinned to a release
 # tag and checksum-verified. Typst picks it up from the system font dirs.
