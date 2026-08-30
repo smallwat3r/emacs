@@ -2,9 +2,9 @@
 # Built automatically on first use by bin/claude-docker,
 # or manually via sw-claude-rebuild-sandbox in Emacs.
 # Pinned by digest so a repointed tag cannot change the base under us.
-# Update: docker pull node:22-slim, then copy the new digest from
-# docker inspect -f '{{index .RepoDigests 0}}' node:22-slim
-FROM node:22-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172dc3cc6436
+# Update: docker pull node:24-slim, then copy the new digest from
+# docker inspect -f '{{index .RepoDigests 0}}' node:24-slim
+FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d5281095a71e
 
 # Pinned versions and checksums, grouped here so upgrades happen in one place.
 # The shas are recorded on purpose: fetching them from the same server as the
@@ -12,9 +12,9 @@ FROM node:22-slim@sha256:d649c27dae7ba0137b3cef5dd75baa422c08dc3d9e3fc0c23dfb172
 # (the legacy builder cannot expand an ARG there).
 #
 # Go: update version and shas from https://go.dev/dl
-ARG GO_VERSION=go1.26.6
-ARG GO_SHA256_AMD64=708effb774be8237570d0add163225abbdfaf4fca28b2611df167beba4feef89
-ARG GO_SHA256_ARM64=d0507e9e9d7fe012aae570108cbd76c15de879e17130ab8cb90d4d7445cb1f2e
+ARG GO_VERSION=go1.27.0
+ARG GO_SHA256_AMD64=675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685
+ARG GO_SHA256_ARM64=51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda
 # Typst: update from https://github.com/typst/typst/releases (no upstream
 # checksum files, so compute sha256sum on the downloaded tarballs)
 ARG TYPST_VERSION=v0.15.1
@@ -30,7 +30,7 @@ ARG MCAP_VERSION=v0.3.0
 ARG MCAP_SHA256_AMD64=5d4100573fab880f1c6400952466275bb3b32c3d230a54f7c380ee0d08e59eef
 ARG MCAP_SHA256_ARM64=be9734ef63ada9d0cc7a3aa41378ab65fd482601e5f5b3b52098d8e6553deabf
 # Claude Code: exact version from npm
-ARG CLAUDE_CODE_VERSION=2.1.233
+ARG CLAUDE_CODE_VERSION=2.1.251
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -88,7 +88,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Python package manager, copied from its official image (pinned)
-COPY --from=ghcr.io/astral-sh/uv:0.12.5 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.7 /uv /uvx /usr/local/bin/
 
 # Python tooling (available system-wide)
 RUN uv pip install --system --break-system-packages \
@@ -176,6 +176,11 @@ RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
 
 USER node
 WORKDIR /home/node
+
+# System-level memory: tells Claude which tools this image ships and its
+# runtime constraints. Loaded automatically every session, and rebuilt into
+# the image so it stays in sync with this Dockerfile - update them together.
+COPY CLAUDE-sandbox.md /etc/claude-code/CLAUDE.md
 
 # Rebuilding is the only update path, so disable the in-container auto-updater
 # (it fails anyway: the binary lives on the read-only image layer).
