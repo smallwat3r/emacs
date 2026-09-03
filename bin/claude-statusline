@@ -1,12 +1,38 @@
 #!/usr/bin/env bash
-# Claude Code statusline. Inside a claude-docker container it shows a sandbox
-# badge (the container name, exported by bin/claude-docker) and the extra
+# Claude Code statusline. Shows the model, the used session limits (5h and
+# 7d rate-limit windows), and inside a claude-docker container a sandbox
+# badge (the container name, exported by bin/claude-docker) plus the extra
 # mounted directories. Outside the sandbox those are simply absent.
 
 set -u
 
-cat > /dev/null
+input=$(cat)
 parts=()
+
+mapfile -t fields < <(
+  jq -r '(.model.display_name // "?"),
+         (.rate_limits.five_hour.used_percentage // -1),
+         (.rate_limits.five_hour.resets_at // 0),
+         (.rate_limits.seven_day.used_percentage // -1)' <<<"${input}"
+)
+model=${fields[0]:-?} five_used=${fields[1]:--1}
+five_resets=${fields[2]:-0} seven_used=${fields[3]:--1}
+
+parts+=("$(printf '\033[1m%s\033[0m' "${model}")")
+
+# One limit segment: dim normally, yellow past 70% used, red past 90%
+limit_part() { # label used_pct [resets_epoch]
+  local label=$1 used=${2%%.*} extra=""
+  [ "${used}" -lt 0 ] && return
+  local colour='\033[2m'
+  [ "${used}" -ge 70 ] && colour='\033[33m'
+  [ "${used}" -ge 90 ] && colour='\033[31m'
+  [ "${3:-0}" -gt 0 ] && extra=" $(date -d "@$3" +%H:%M)"
+  parts+=("$(printf "${colour}%s:%s%% used%s\033[0m" "${label}" "${used}" "${extra}")")
+}
+
+limit_part 5h "${five_used}" "${five_resets}"
+limit_part 7d "${seven_used}"
 
 if [ -n "${CLAUDE_DOCKER_SANDBOX:-}" ]; then
   parts+=("$(printf '\033[1;32m[%s]\033[0m' "${CLAUDE_DOCKER_SANDBOX}")")
