@@ -56,6 +56,12 @@ scrollback appear stuck."
 
 (add-hook 'eat-mode-hook #'sw-claude--setup-eat-buffer)
 
+;; Same trick as bin/claude-docker: keep Claude's TUI off the
+;; alternate screen so eat scrollback works when running `claude'
+;; from a plain eat shell.  Inherited by every Emacs subprocess,
+;; harmless outside Claude.
+(setenv "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN" "1")
+
 (defvar eat-terminal)
 (declare-function eat-term-end "eat" (terminal))
 

@@ -166,7 +166,7 @@ DOCKER_ARGS=(
   --tmpfs "${CONTAINER_HOME}/.config:size=64m"
   --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
   --pids-limit=512
-  --memory=4g
+  --memory=8g
   --name "${CONTAINER_NAME}"
 )
 
