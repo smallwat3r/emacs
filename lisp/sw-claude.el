@@ -34,13 +34,49 @@ If in a split view, display in the current window."
 -t claude-code-sandbox docker/claude-sandbox/"
                      (shell-quote-argument (expand-file-name "~"))))))
 
+(defun sw-claude--prose-line-p (line)
+  "Non-nil when LINE looks like flowing prose safe to reflow.
+Indented lines (code blocks, diff gutters, wrapped list items) and
+lines starting with TUI chrome glyphs keep their line breaks."
+  (not (string-match-p "\\`[ \t●⏺⎿│❯✻>+|-]" line)))
+
+(defun sw-claude--reflow (text)
+  "Clean Claude TUI artifacts from copied TEXT.
+Strip the trailing padding and the two-space left margin, then
+join prose lines the TUI hard-wrapped to the terminal width.  The
+TUI writes real newlines when wrapping, so wraps are detected by
+length: a prose line ending near the longest line in the copy
+continues on the next prose line."
+  (let* ((text (replace-regexp-in-string "[ \t]+$" "" text))
+         (text (replace-regexp-in-string "^  " "" text))
+         (lines (split-string text "\n"))
+         (maxlen (apply #'max 0 (mapcar #'length lines))))
+    ;; Width heuristic, a long final paragraph line followed by
+    ;; text joins wrongly; good enough for prose copies.
+    (if (< maxlen 60)
+        text
+      (let (out)
+        (while lines
+          (let* ((line (pop lines))
+                 (seg line))
+            (while (and lines
+                        (>= (length seg) (- maxlen 15))
+                        (sw-claude--prose-line-p seg)
+                        (not (string-empty-p (car lines)))
+                        (sw-claude--prose-line-p (car lines)))
+              (setq seg (pop lines))
+              (setq line (concat line " " seg)))
+            (push line out)))
+        (mapconcat #'identity (nreverse out) "\n")))))
+
 (defun sw-claude--filter-substring (beg end &optional delete)
-  "Like `buffer-substring--filter' but strip trailing whitespace per line.
-Claude's TUI pads each line to terminal width, so plain copies pick
-up the padding instead of clean newlines."
+  "Like `buffer-substring--filter' but clean up Claude TUI output.
+Claude's TUI pads each line to terminal width, indents everything
+by two spaces, and hard-wraps prose, so plain copies pick up
+padding, margins and bogus line breaks."
   (let ((text (buffer-substring--filter beg end delete)))
     (if (stringp text)
-        (replace-regexp-in-string "[ \t]+$" "" text)
+        (sw-claude--reflow text)
       text)))
 
 (defun sw-claude--setup-eat-buffer ()
