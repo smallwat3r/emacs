@@ -155,17 +155,20 @@ Never rewrite pushed commits. Do not push, I'll review and do it manually."
   (expand-file-name "~/.local/state/claude/ephemeral.log")
   "File where every `sw-claude-ephemeral' run is appended.")
 
-(defun sw-claude-ephemeral (name prompt &optional model)
+(defun sw-claude-ephemeral (name prompt &optional model on-success)
   "Run PROMPT in an ephemeral headless sandboxed Claude session.
 Launches a one-shot claude -p in a fresh Docker container that is
 removed when it exits.  Output goes silently into a *claude-NAME*
 buffer (holding the last run) and is appended on exit to
 `sw-claude-ephemeral-log-file'.  Notifies when the run finishes.
 MODEL, when non-nil, is passed to claude --model (an alias like
-\"sonnet\" or a full model ID); otherwise the default model is used."
+\"sonnet\" or a full model ID); otherwise the default model is used.
+ON-SUCCESS, when non-nil, is called with no arguments after a
+successful run, with `default-directory' set to the run directory."
   (let* ((default-directory
           (or (locate-dominating-file default-directory ".git")
               default-directory))
+         (dir default-directory)
          (bufname (format "*claude-%s*" name))
          (buffer (get-buffer-create bufname))
          ;; Unique instance name so the container never collides with an
@@ -202,17 +205,36 @@ MODEL, when non-nil, is passed to claude --model (an alias like
                       (format "Claude %s" name)
                       (if ok "Done" (format "Failed, see %s" bufname)))
                      (message "claude-%s %s, output in %s"
-                              name (if ok "done" "failed") bufname)))))
+                              name (if ok "done" "failed") bufname)
+                     (when (and ok on-success)
+                       (let ((default-directory dir))
+                         (funcall on-success)))))))
     (message "claude-%s running in the background..." name)))
+
+(defun sw-claude--resign-commits ()
+  "Re-sign the unpushed commits on the host, where gpg lives.
+The sandbox has no gpg, so its commits are made unsigned (see
+bin/claude-docker); rewrite everything since upstream with real
+signatures.  Skipped when the branch has no upstream, everything
+would be unpushed and rewriting from the root is not worth it."
+  (if (zerop (call-process "git" nil nil nil
+                           "rev-parse" "--verify" "-q" "@{upstream}"))
+      (if (zerop (call-process "git" nil nil nil "rebase"
+                               "--exec" "git commit --amend --no-edit -n -S"
+                               "@{upstream}"))
+          (message "claude-commit done, commits signed")
+        (message "claude-commit: signing rebase failed, check git status"))
+    (message "claude-commit done, no upstream so commits left unsigned")))
 
 (defun sw-claude-commit ()
   "Stage and commit the repo changes with an ephemeral sandboxed Claude.
 Claude groups the changes into logical commits, never pushes and never
-credits itself."
+credits itself.  Once done, the new commits are re-signed on the host."
   (interactive)
   (unless (locate-dominating-file default-directory ".git")
     (user-error "Not in a git repository"))
-  (sw-claude-ephemeral "commit" sw-claude-commit-prompt "sonnet"))
+  (sw-claude-ephemeral "commit" sw-claude-commit-prompt "sonnet"
+                       #'sw-claude--resign-commits))
 
 ;; Required dependency for claude-code
 (use-package inheritenv
