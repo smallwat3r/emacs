@@ -358,6 +358,7 @@ DEF is a command or nil (prefix-only label)."
     ("r m" claude-code-cycle-mode "Cycle mode")
     ("r M" claude-code-transient "Transient menu")
     ("r k" claude-code-kill "Kill session")
+    ("r g" sw-claude-commit "Build commits")
     ("r w" eglot-reconnect "Reconnect Eglot")
 
     ;; Insert

@@ -139,6 +139,78 @@ when it sends input."
   (advice-add 'eat--process-output-queue
               :around #'sw-claude--keep-scroll))
 
+(defconst sw-claude-commit-prompt
+  "Review what changed in this repo: run git status and look at the \
+staged and unstaged diffs (and untracked files). Stage what is needed and \
+build commits, splitting unrelated changes into separate logical commits, \
+each with a clear one-line message and, when useful, a short description \
+body. If a change logically belongs to an existing commit that has not \
+been pushed yet (check with git log @{upstream}.., or treat everything as \
+unpushed when there is no upstream), fold it into that commit with an \
+amend or a fixup and autosquash rebase, instead of creating a new one. \
+Never rewrite pushed commits. Do not push, I'll review and do it manually."
+  "Prompt sent to the ephemeral Claude session by `sw-claude-commit'.")
+
+(defvar sw-claude-ephemeral-log-file
+  (expand-file-name "~/.local/state/claude/ephemeral.log")
+  "File where every `sw-claude-ephemeral' run is appended.")
+
+(defun sw-claude-ephemeral (name prompt)
+  "Run PROMPT in an ephemeral headless sandboxed Claude session.
+Launches a one-shot claude -p in a fresh Docker container that is
+removed when it exits.  Output goes silently into a *claude-NAME*
+buffer (holding the last run) and is appended on exit to
+`sw-claude-ephemeral-log-file'.  Notifies when the run finishes."
+  (let* ((default-directory
+          (or (locate-dominating-file default-directory ".git")
+              default-directory))
+         (bufname (format "*claude-%s*" name))
+         (buffer (get-buffer-create bufname))
+         ;; Unique instance name so the container never collides with an
+         ;; interactive session's claude-{project} container
+         (process-environment
+          (cons (format "CLAUDE_BUFFER_NAME=*claude:%s-%x*"
+                        name (random #x10000))
+                process-environment)))
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert (format "=== %s | %s | %s\n"
+                      (format-time-string "%F %T") name default-directory)))
+    (make-process
+     :name (format "claude-%s" name)
+     :buffer buffer
+     ;; The wrapper runs docker with -it, which needs pty stdin
+     :connection-type 'pty
+     :command (list sw-claude-docker-script
+                    "--dangerously-skip-permissions"
+                    "-p" prompt)
+     :sentinel (lambda (proc _event)
+                 (when (memq (process-status proc) '(exit signal))
+                   (let ((ok (zerop (process-exit-status proc))))
+                     (when (buffer-live-p buffer)
+                       (with-current-buffer buffer
+                         (goto-char (point-max))
+                         (insert (format "=== exit %d\n\n"
+                                         (process-exit-status proc)))
+                         (write-region (point-min) (point-max)
+                                       sw-claude-ephemeral-log-file
+                                       t 'silent)))
+                     (sw-claude-notify
+                      (format "Claude %s" name)
+                      (if ok "Done" (format "Failed, see %s" bufname)))
+                     (message "claude-%s %s, output in %s"
+                              name (if ok "done" "failed") bufname)))))
+    (message "claude-%s running in the background..." name)))
+
+(defun sw-claude-commit ()
+  "Stage and commit the repo changes with an ephemeral sandboxed Claude.
+Claude groups the changes into logical commits, never pushes and never
+credits itself."
+  (interactive)
+  (unless (locate-dominating-file default-directory ".git")
+    (user-error "Not in a git repository"))
+  (sw-claude-ephemeral "commit" sw-claude-commit-prompt))
+
 ;; Required dependency for claude-code
 (use-package inheritenv
   :ensure (:host github :repo "purcell/inheritenv" :wait t)
