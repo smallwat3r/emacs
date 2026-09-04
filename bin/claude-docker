@@ -322,6 +322,15 @@ if [ -d "${XDG_GIT}" ]; then
     -v "${XDG_GIT}:${CONTAINER_HOME}/.config/git:ro,z"
   )
 fi
+# Work repos: the includeIf "gitdir:~/work/" overrides live outside the
+# project mount, so without this the work identity silently never applies.
+case "${PROJECT_DIR}" in
+  "${HOME}/work/"*)
+    if [ -f "${HOME}/work/.gitconfig" ]; then
+      DOCKER_ARGS+=(-v "${HOME}/work/.gitconfig:${HOME}/work/.gitconfig:ro,z")
+    fi
+    ;;
+esac
 
 CLAUDE_ARGS=()
 for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
