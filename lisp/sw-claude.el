@@ -155,12 +155,14 @@ Never rewrite pushed commits. Do not push, I'll review and do it manually."
   (expand-file-name "~/.local/state/claude/ephemeral.log")
   "File where every `sw-claude-ephemeral' run is appended.")
 
-(defun sw-claude-ephemeral (name prompt)
+(defun sw-claude-ephemeral (name prompt &optional model)
   "Run PROMPT in an ephemeral headless sandboxed Claude session.
 Launches a one-shot claude -p in a fresh Docker container that is
 removed when it exits.  Output goes silently into a *claude-NAME*
 buffer (holding the last run) and is appended on exit to
-`sw-claude-ephemeral-log-file'.  Notifies when the run finishes."
+`sw-claude-ephemeral-log-file'.  Notifies when the run finishes.
+MODEL, when non-nil, is passed to claude --model (an alias like
+\"sonnet\" or a full model ID); otherwise the default model is used."
   (let* ((default-directory
           (or (locate-dominating-file default-directory ".git")
               default-directory))
@@ -181,9 +183,10 @@ buffer (holding the last run) and is appended on exit to
      :buffer buffer
      ;; The wrapper runs docker with -it, which needs pty stdin
      :connection-type 'pty
-     :command (list sw-claude-docker-script
-                    "--dangerously-skip-permissions"
-                    "-p" prompt)
+     :command (append (list sw-claude-docker-script
+                            "--dangerously-skip-permissions")
+                      (when model (list "--model" model))
+                      (list "-p" prompt))
      :sentinel (lambda (proc _event)
                  (when (memq (process-status proc) '(exit signal))
                    (let ((ok (zerop (process-exit-status proc))))
@@ -209,7 +212,7 @@ credits itself."
   (interactive)
   (unless (locate-dominating-file default-directory ".git")
     (user-error "Not in a git repository"))
-  (sw-claude-ephemeral "commit" sw-claude-commit-prompt))
+  (sw-claude-ephemeral "commit" sw-claude-commit-prompt "sonnet"))
 
 ;; Required dependency for claude-code
 (use-package inheritenv
