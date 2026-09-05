@@ -48,8 +48,9 @@ debug a running dev service) without exposing full Docker control. The proxy
 only allows container and exec operations, blocking image builds, network
 changes, volume management, and other privileged actions.
 
-To force rebuild the sandbox image (e.g. after a new Claude Code release):
+To upgrade the pinned versions in the Dockerfile, then rebuild the image:
 
 ```
+M-x sw-claude-upgrade-sandbox
 M-x sw-claude-rebuild-sandbox
 ```

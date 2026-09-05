@@ -26,6 +26,13 @@ If in a split view, display in the current window."
                       '((display-buffer-full-frame))
                     '((display-buffer-same-window)))))
 
+(defun sw-claude-upgrade-sandbox ()
+  "Refresh the pinned versions in the Claude Docker sandbox Dockerfile.
+Run `sw-claude-rebuild-sandbox' afterwards to build the new image."
+  (interactive)
+  (let ((default-directory user-emacs-directory))
+    (compile "docker/claude-sandbox/update-pins.py")))
+
 (defun sw-claude-rebuild-sandbox ()
   "Force rebuild the Claude Docker sandbox image."
   (interactive)
