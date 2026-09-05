@@ -12,9 +12,9 @@ FROM node:24-slim@sha256:ba849c60be29959425b8734d57b8b4b7d56f98edd9504c9af091d52
 # (the legacy builder cannot expand an ARG there).
 #
 # Go: update version and shas from https://go.dev/dl
-ARG GO_VERSION=go1.27.0
-ARG GO_SHA256_AMD64=675c26c449cbb18fc24b74650de1eabbae6e16f64326fd85a283fb3b58280685
-ARG GO_SHA256_ARM64=51798d2c42d0e1c6ed7fd9f48728b4193abac9e8aad6dbac2fe96a81f5909bda
+ARG GO_VERSION=go1.27.1
+ARG GO_SHA256_AMD64=63d339f0da5ab53635a56f2490a7984dfe12dfcff22ad749f63edaf590168445
+ARG GO_SHA256_ARM64=3450b45a3f9ee8568792736a5c5e70a1f2e9b36c35a8f74958c03e51d7d92bec
 # Typst: update from https://github.com/typst/typst/releases (no upstream
 # checksum files, so compute sha256sum on the downloaded tarballs)
 ARG TYPST_VERSION=v0.15.1
@@ -30,7 +30,7 @@ ARG MCAP_VERSION=v0.3.0
 ARG MCAP_SHA256_AMD64=5d4100573fab880f1c6400952466275bb3b32c3d230a54f7c380ee0d08e59eef
 ARG MCAP_SHA256_ARM64=be9734ef63ada9d0cc7a3aa41378ab65fd482601e5f5b3b52098d8e6553deabf
 # Claude Code: exact version from npm
-ARG CLAUDE_CODE_VERSION=2.1.251
+ARG CLAUDE_CODE_VERSION=2.1.261
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -88,7 +88,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Python package manager, copied from its official image (pinned)
-COPY --from=ghcr.io/astral-sh/uv:0.12.7 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.10 /uv /uvx /usr/local/bin/
 
 # Python tooling (available system-wide)
 RUN uv pip install --system --break-system-packages \
