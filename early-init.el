@@ -133,9 +133,6 @@
 ;; Prefer newer .el files over older .elc
 (setq load-prefer-newer t)
 
-;; Remove .so from load-suffixes to reduce file operations during load
-(setq load-suffixes (remove ".so" load-suffixes))
-
 ;; Disable bidirectional text scanning for performance
 (setq-default bidi-display-reordering 'left-to-right
               bidi-paragraph-direction 'left-to-right)

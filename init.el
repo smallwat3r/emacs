@@ -68,6 +68,10 @@
   (enable-recursive-minibuffers t)
   (minibuffer-depth-indicate-mode t)
 
+  ;; Warnings
+  (warning-suppress-types '((emacs) (treesit) (comp)))
+  (warning-suppress-log-types '((treesit) (comp)))
+
   :config
   ;; Enable useful modes
   (delete-selection-mode 1)
@@ -103,7 +107,11 @@
   :custom
   (gcmh-idle-delay 'auto)
   (gcmh-auto-idle-delay-factor 10)
-  (gcmh-high-cons-threshold (* 64 1024 1024)))
+  (gcmh-high-cons-threshold (* 64 1024 1024))
+  :config
+  ;; gcmh only manages the threshold, restore the default percentage
+  ;; raised for startup in early-init.el
+  (setq gc-cons-percentage 0.1))
 
 ;;; Custom file (keep init.el clean)
 
@@ -114,6 +122,11 @@
 ;;; Sync shell PATH into Emacs
 
 (use-package exec-path-from-shell
+  ;; On Linux the PATH is usually right already when Emacs starts from a
+  ;; login session. Probe one tool from the user's PATH and skip the
+  ;; shell spawn when it is found. Extend the probe if another tool
+  ;; goes missing.
+  :when (or sw-is-mac (not (executable-find "rg")))
   :hook (sw-first-file . exec-path-from-shell-initialize)
   :custom
   ;; Login shell only, skip the interactive rc files: roughly halves
