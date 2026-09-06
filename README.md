@@ -30,6 +30,7 @@ Run `make` to see available commands:
 $ make
   help       Show this help
   link       Symlink this directory to ~/.emacs.d
+  check      Smoke test: load config and activate deferred modes in batch
   clean      Remove all installed packages
 ```
 
