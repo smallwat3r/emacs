@@ -27,7 +27,8 @@ limit_part() { # label used_pct [resets_epoch]
   local colour='\033[2m'
   [ "${used}" -ge 70 ] && colour='\033[33m'
   [ "${used}" -ge 90 ] && colour='\033[31m'
-  [ "${3:-0}" -gt 0 ] && extra=" $(date -d "@$3" +%H:%M)"
+  # GNU date inside the sandbox, BSD date when run on the macOS host
+  [ "${3:-0}" -gt 0 ] && extra=" $(date -d "@$3" +%H:%M 2>/dev/null || date -r "$3" +%H:%M)"
   parts+=("$(printf "${colour}%s:%s%% used%s\033[0m" "${label}" "${used}" "${extra}")")
 }
 
