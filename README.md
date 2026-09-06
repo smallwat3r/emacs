@@ -42,11 +42,11 @@ The wrapper script builds the image on first use, then runs Claude with the
 project directory mounted read-write. Security hardening includes read-only
 root filesystem, all capabilities dropped, no-new-privileges, and a PID limit.
 A Docker socket proxy (tecnativa/docker-socket-proxy) gives the sandbox
-limited access to the host's Docker daemon, so Claude can list, inspect,
-and exec into other project containers (e.g. to run tests, check logs, or
-debug a running dev service) without exposing full Docker control. The proxy
-only allows container and exec operations, blocking image builds, network
-changes, volume management, and other privileged actions.
+read-only visibility into the host's Docker daemon, so Claude can list and
+inspect other project containers and read their logs (e.g. to debug a running
+dev service). Every write operation is blocked (run, exec, build, network and
+volume changes): a write to the root daemon would let the sandbox spawn a
+sibling container that mounts the host filesystem and escape entirely.
 
 To upgrade the pinned versions in the Dockerfile, then rebuild the image:
 

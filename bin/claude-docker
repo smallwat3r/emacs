@@ -8,6 +8,11 @@
 set -euo pipefail
 
 IMAGE_NAME="claude-code-sandbox"
+# Sidecar images. Both hold the host Docker socket or the egress path, so
+# pin them by digest once pulled, the same way the Dockerfile pins its base:
+#   docker pull IMAGE && docker inspect -f '{{index .RepoDigests 0}}' IMAGE
+PROXY_IMAGE="tecnativa/docker-socket-proxy"
+SQUID_IMAGE="ubuntu/squid"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOCKERFILE_DIR="${SCRIPT_DIR}/../docker/claude-sandbox"
 
@@ -30,6 +35,16 @@ fi
 
 PROJECT_DIR="$(pwd)"
 CONTAINER_HOME="/home/node"
+
+# Refuse to run from the filesystem root, the home directory or any of its
+# parents: the project mount would expose them read-write and defeat the
+# sandbox. Extra dirs get the same check in add_extra_dir below.
+case "${HOME}/" in
+  "${PROJECT_DIR%/}/"*)
+    echo "refusing to run from ${PROJECT_DIR}: mounting it would defeat the sandbox" >&2
+    exit 1
+    ;;
+esac
 
 # Extra project directories (e.g. the frontend repo next to this backend).
 # Claude's own --add-dir flag is intercepted here so the directory can be
@@ -172,7 +187,9 @@ DOCKER_ARGS=(
   --tmpfs "${CONTAINER_HOME}/.config:size=64m"
   --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
   --pids-limit=512
+  # Same value for swap, otherwise docker allows another 8g of swap on top
   --memory=8g
+  --memory-swap=8g
   --name "${CONTAINER_NAME}"
 )
 
@@ -218,7 +235,7 @@ if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
       --restart unless-stopped \
       -v "${DOCKERFILE_DIR}/squid.conf:/etc/squid/squid.conf:ro,z" \
       -v "${DOCKERFILE_DIR}/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro,z" \
-      ubuntu/squid >/dev/null
+      "${SQUID_IMAGE}" >/dev/null
     docker network connect bridge "${EGRESS_PROXY}"
   fi
 
@@ -269,7 +286,7 @@ if [ -S "${DOCKER_SOCK}" ]; then
       -e BUILD=0 \
       -e COMMIT=0 \
       -e SWARM=0 \
-      tecnativa/docker-socket-proxy >/dev/null
+      "${PROXY_IMAGE}" >/dev/null
   fi
   # A proxy left over from a previous run may sit on another network
   # (e.g. after toggling CLAUDE_DOCKER_NET_FILTER); attach it to ours.
@@ -299,14 +316,15 @@ elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
   )
 fi
 
-# Shadow .env files so secrets are never visible inside the container.
-# Template files (.env.example and friends) stay readable, they exist
-# to be read and hold no secrets.
+# Shadow .env files (and direnv's .envrc, which commonly exports secrets)
+# so they are never visible inside the container. Template files
+# (.env.example and friends) stay readable, they exist to be read and
+# hold no secrets.
 while IFS= read -r -d '' envfile; do
   DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
 done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} \
   \( -name node_modules -o -name .git \) -prune -o \
-  \( -name '.env' -o -name '.env.*' \) \
+  \( -name '.env' -o -name '.env.*' -o -name '.envrc' \) \
   ! -name '.env.example' ! -name '.env.sample' ! -name '.env.template' \
   -print0 2>/dev/null)
 
