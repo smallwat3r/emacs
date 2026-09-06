@@ -24,42 +24,46 @@
   (apply #'sw-run-async "tailscale" args))
 
 (defun sw-tailscale--parse-accounts (output)
-  "Parse account list OUTPUT into alist of (DISPLAY . ID)."
+  "Parse account list OUTPUT into alist of (DISPLAY . ID).
+The active account is marked with a trailing `*' by the CLI and
+gets a (current) suffix in DISPLAY."
   (let ((lines (cdr (split-string output "\n" t)))
         accounts)
     (dolist (line lines)
       (when (string-match
-             "^\\([a-f0-9]+\\)\\s-+\\([^ ]+\\)\\s-+\\([^ *]+\\)"
+             "^\\([a-f0-9]+\\)\\s-+\\([^ ]+\\)\\s-+\\([^ *]+\\)\\(\\*\\)?"
              line)
         (let ((id (match-string 1 line))
               (tailnet (match-string 2 line))
-              (account (match-string 3 line)))
-          (push (cons (format "%s (%s)" account tailnet) id)
+              (account (match-string 3 line))
+              (current (if (match-string 4 line) " (current)" "")))
+          (push (cons (format "%s (%s)%s" account tailnet current) id)
                 accounts))))
     (nreverse accounts)))
 
 (defun sw-tailscale--devices ()
-  "Return alist of Tailscale devices as (name . ip)."
+  "Return alist of Tailscale devices as (DISPLAY . NAME).
+Online devices come first, offline ones are marked as such."
   (sw-tailscale--ensure-cli)
   (condition-case err
       (let* ((result (sw-tailscale--call "status" "--json"))
              (data (json-parse-string (cdr result)
                                       :object-type 'alist))
-             (peers (alist-get 'Peer data)))
-        (delq nil
-              (mapcar (lambda (peer)
-                        (let* ((info (cdr peer))
-                               (dns (alist-get 'DNSName info))
-                               (ips (alist-get 'TailscaleIPs info)))
-                          ;; Some peers legitimately have no DNS name or
-                          ;; no IPs, skip them rather than erroring out.
-                          (when (and (stringp dns)
-                                     (> (length dns) 0)
-                                     (vectorp ips)
-                                     (> (length ips) 0))
-                            (cons (car (split-string dns "\\."))
-                                  (aref ips 0)))))
-                      peers)))
+             (peers (alist-get 'Peer data))
+             devices)
+        (dolist (peer peers)
+          (let* ((info (cdr peer))
+                 (dns (alist-get 'DNSName info))
+                 (online (eq (alist-get 'Online info) t)))
+            ;; Some peers legitimately have no DNS name, skip them
+            ;; rather than erroring out.
+            (when (and (stringp dns) (> (length dns) 0))
+              (let ((name (car (split-string dns "\\."))))
+                (push (list (if online name (format "%s (offline)" name))
+                            name online)
+                      devices)))))
+        (mapcar (lambda (d) (cons (car d) (cadr d)))
+                (sort devices (lambda (a b) (and (caddr a) (not (caddr b)))))))
     (error
      (message "Tailscale: %s" (error-message-string err))
      nil)))
@@ -106,12 +110,11 @@ active."
 (defun sw-tailscale-ssh ()
   "Select a Tailscale device and connect via TRAMP."
   (interactive)
-  (sw-tailscale--ensure-cli)
   (if-let* ((devices (sw-tailscale--devices)))
-      (let* ((names (mapcar #'car devices))
-             (choice (completing-read "Tailscale device: " names nil t))
-             (path (format "/scp:%s:" choice)))
-        (find-file path))
+      (let* ((choice (completing-read "Tailscale device: "
+                                      (mapcar #'car devices) nil t))
+             (name (alist-get choice devices nil nil #'equal)))
+        (find-file (format "/scp:%s:" name)))
     (user-error "No Tailscale devices found")))
 
 (provide 'sw-tailscale)
