@@ -33,7 +33,6 @@
 
 ;; Orderless - flexible completion style with fuzzy matching
 (use-package orderless
-  :ensure (:wait t)
   :demand t
   :custom
   (completion-styles '(orderless basic))

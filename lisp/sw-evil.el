@@ -40,7 +40,6 @@
 
 ;; Evil keybindings for many modes
 (use-package evil-collection
-  :ensure (:wait t)
   :after evil
   :demand t
   :custom

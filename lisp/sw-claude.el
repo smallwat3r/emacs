@@ -262,12 +262,12 @@ credits itself.  Once done, the new commits are re-signed on the host."
 
 ;; Required dependency for claude-code
 (use-package inheritenv
-  :ensure (:host github :repo "purcell/inheritenv" :wait t)
+  :ensure (:host github :repo "purcell/inheritenv")
   :demand t)
 
 ;; Claude Code (sandboxed via Docker)
 (use-package claude-code
-  :ensure (:host github :repo "stevemolitor/claude-code.el" :wait t)
+  :ensure (:host github :repo "stevemolitor/claude-code.el")
   :when (and (executable-find "docker")
              (file-executable-p sw-claude-docker-script))
   :after inheritenv
