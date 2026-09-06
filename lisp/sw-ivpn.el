@@ -5,27 +5,17 @@
 
 ;;; Code:
 
+(require 'sw-lib)
+
 (defun sw-ivpn--ensure-cli ()
   "Signal a user error if the ivpn CLI is not available."
   (unless (executable-find "ivpn")
     (user-error "ivpn not found")))
 
 (defun sw-ivpn--run (&rest args)
-  "Run ivpn with ARGS asynchronously, report the outcome in the echo area."
+  "Run ivpn with ARGS asynchronously."
   (sw-ivpn--ensure-cli)
-  (message "ivpn %s..." (string-join args " "))
-  (make-process
-   :name "ivpn"
-   :buffer (get-buffer-create " *ivpn*")
-   :command (cons "ivpn" args)
-   :sentinel
-   (lambda (proc _event)
-     (unless (process-live-p proc)
-       (if (zerop (process-exit-status proc))
-           (message "ivpn %s: done" (string-join args " "))
-         (message "ivpn %s failed: %s" (string-join args " ")
-                  (with-current-buffer (process-buffer proc)
-                    (string-trim (buffer-string)))))))))
+  (apply #'sw-run-async "ivpn" args))
 
 (defun sw-ivpn--servers ()
   "Return alist of WireGuard servers as (DISPLAY . HOST).

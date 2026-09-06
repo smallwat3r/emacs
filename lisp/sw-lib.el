@@ -26,5 +26,23 @@
                (split-string str "\n" nil)
                "\n")))
 
+(defun sw-run-async (program &rest args)
+  "Run PROGRAM with ARGS asynchronously, report the outcome in the echo area."
+  (let ((cmd (string-join (cons program args) " ")))
+    (message "%s..." cmd)
+    (make-process
+     :name program
+     :buffer (generate-new-buffer (format " *%s*" program))
+     :command (cons program args)
+     :sentinel
+     (lambda (proc _event)
+       (unless (process-live-p proc)
+         (if (zerop (process-exit-status proc))
+             (message "%s: done" cmd)
+           (message "%s failed: %s" cmd
+                    (with-current-buffer (process-buffer proc)
+                      (string-trim (buffer-string)))))
+         (kill-buffer (process-buffer proc)))))))
+
 (provide 'sw-lib)
 ;;; sw-lib.el ends here
