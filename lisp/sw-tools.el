@@ -48,9 +48,7 @@
 ;; Auth source for pass
 (use-package auth-source-pass
   :ensure nil
-  :defer 2
-  :config
-  (auth-source-pass-enable))
+  :hook (sw-first-input . auth-source-pass-enable))
 
 ;;; Rest client
 
@@ -68,9 +66,7 @@
 ;;; Pinentry for GPG
 
 (use-package pinentry
-  :defer 2
-  :config
-  (pinentry-start))
+  :hook (sw-first-input . pinentry-start))
 
 ;;; Helpful - better help buffers
 
