@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'sw-lib)
+
 (defun sw-tailscale--ensure-cli ()
   "Signal a user error if the tailscale CLI is not available."
   (unless (executable-find "tailscale")
@@ -15,6 +17,11 @@
   (with-temp-buffer
     (cons (apply #'call-process "tailscale" nil t nil args)
           (buffer-string))))
+
+(defun sw-tailscale--run (&rest args)
+  "Run tailscale with ARGS asynchronously."
+  (sw-tailscale--ensure-cli)
+  (apply #'sw-run-async "tailscale" args))
 
 (defun sw-tailscale--parse-accounts (output)
   "Parse account list OUTPUT into alist of (DISPLAY . ID)."
@@ -64,19 +71,25 @@
   (let* ((result (sw-tailscale--call "switch" "--list"))
          (_ (unless (zerop (car result))
               (user-error "Failed to list accounts")))
-         (accounts (sw-tailscale--parse-accounts
-                    (cdr result)))
-         (_ (unless accounts
-              (user-error "No Tailscale accounts found")))
+         (accounts (or (sw-tailscale--parse-accounts (cdr result))
+                       (user-error "No Tailscale accounts found")))
          (choice (completing-read
                   "Tailscale account: "
-                  (mapcar #'car accounts) nil t))
-         (id (alist-get choice accounts nil nil #'equal)))
-    (message "Switching to %s..." choice)
-    (let ((switch (sw-tailscale--call "switch" id)))
-      (if (zerop (car switch))
-          (message "Switched to %s" choice)
-        (message "Failed to switch to %s" choice)))))
+                  (mapcar #'car accounts) nil t)))
+    (sw-tailscale--run "switch" (alist-get choice accounts nil nil #'equal))))
+
+(defun sw-tailscale-up ()
+  "Bring Tailscale up."
+  (interactive)
+  (sw-tailscale--run "up"))
+
+(defun sw-tailscale-down ()
+  "Bring Tailscale down.
+Note this flushes the tailnet routes the IVPN drop-in adds, run
+iv-tailscale-routes from a shell after the next up when IVPN is
+active."
+  (interactive)
+  (sw-tailscale--run "down"))
 
 (defun sw-tailscale-status ()
   "Show Tailscale status."
