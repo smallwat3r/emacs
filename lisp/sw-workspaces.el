@@ -72,8 +72,7 @@ Starts with only scratch buffer, single window, rooted at home directory."
   (let ((tab-bar-new-tab-choice #'get-scratch-buffer-create))
     (tab-bar-new-tab)
     (delete-other-windows)
-    (switch-to-buffer (get-scratch-buffer-create))
-    (setq-local default-directory "~/")))
+    (switch-to-buffer (get-scratch-buffer-create))))
 
 (defun sw-workspace-switch-to-project ()
   "Switch project, opening it in a dedicated workspace.
@@ -141,6 +140,20 @@ If a workspace for the project already exists, switch to it."
 
 (advice-add 'tab-bar-close-tab :after #'sw-workspace--display-after-close)
 
+(defun sw-workspace--rename-buffer-list (fn name &optional tab-number)
+  "Around advice for `tab-bar-rename-tab' (FN) to NAME.
+Keep the buffer list attached to the tab, whose entry is keyed by
+name, when TAB-NUMBER or the current tab is renamed."
+  (let ((old (alist-get 'name (if tab-number
+                                  (nth (1- tab-number)
+                                       (funcall tab-bar-tabs-function))
+                                (tab-bar--current-tab)))))
+    (funcall fn name tab-number)
+    (when-let* ((entry (assoc old sw-workspace-buffer-alist)))
+      (setcar entry name))))
+
+(advice-add 'tab-bar-rename-tab :around #'sw-workspace--rename-buffer-list)
+
 ;; Tab-bar configuration
 ;; Hide the built-in tab bar, we display workspaces in the echo area
 (setq tab-bar-show nil
@@ -157,17 +170,17 @@ If a workspace for the project already exists, switch to it."
 (defvar sw-workspace-buffer-alist nil
   "Alist mapping workspace names to their buffer lists.")
 
-(defun sw-workspace--current-name ()
-  "Return current workspace name."
-  (alist-get 'name (tab-bar--current-tab)))
+(defun sw-workspace--current-name (&optional frame)
+  "Return current workspace name, on FRAME or the selected frame."
+  (alist-get 'name (tab-bar--current-tab nil frame)))
 
 (defun sw-workspace--get-buffers ()
   "Return list of buffers for current workspace."
   (alist-get (sw-workspace--current-name) sw-workspace-buffer-alist nil nil #'equal))
 
-(defun sw-workspace--add-buffer (buffer)
-  "Add BUFFER to current workspace's buffer list."
-  (let* ((name (sw-workspace--current-name))
+(defun sw-workspace--add-buffer (buffer &optional frame)
+  "Add BUFFER to the current workspace's buffer list, on FRAME if given."
+  (let* ((name (sw-workspace--current-name frame))
          (buffers (alist-get name sw-workspace-buffer-alist nil nil #'equal)))
     (unless (memq buffer buffers)
       (setf (alist-get name sw-workspace-buffer-alist nil nil #'equal)
@@ -205,13 +218,13 @@ TAB-NUMBER is the 1-based tab number, or nil for current tab."
 
 (advice-add 'tab-bar-close-tab :before #'sw-workspace--kill-buffers-on-close)
 
-(defun sw-workspace--track-buffer (&rest _)
-  "Track current buffer in workspace buffer list.
-Intended for use in `window-buffer-change-functions'.
-Ignores minibuffers."
-  (when-let* ((buf (current-buffer)))
-    (unless (minibufferp buf)
-      (sw-workspace--add-buffer buf))))
+(defun sw-workspace--track-buffer (frame)
+  "Track the buffers shown in FRAME's windows in its workspace.
+Intended for use in `window-buffer-change-functions', which passes
+the frame, so every window is checked rather than only the
+selected one, catching buffers shown via `display-buffer'."
+  (dolist (win (window-list frame 'no-mini))
+    (sw-workspace--add-buffer (window-buffer win) frame)))
 
 (add-hook 'window-buffer-change-functions #'sw-workspace--track-buffer)
 
