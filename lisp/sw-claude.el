@@ -223,14 +223,31 @@ successful run, with `default-directory' set to the run directory."
 The sandbox has no gpg, so its commits are made unsigned (see
 bin/claude-docker); rewrite everything since upstream with real
 signatures.  Skipped when the branch has no upstream, everything
-would be unpushed and rewriting from the root is not worth it."
+would be unpushed and rewriting from the root is not worth it.
+
+The rebase runs asynchronously on purpose: gpg prompts through the
+Emacs pinentry server, which can only answer while the Emacs event
+loop is free, a synchronous call would deadlock until gpg gives up."
   (if (zerop (call-process "git" nil nil nil
                            "rev-parse" "--verify" "-q" "@{upstream}"))
-      (if (zerop (call-process "git" nil nil nil "rebase"
-                               "--exec" "git commit --amend --no-edit -n -S"
-                               "@{upstream}"))
-          (message "claude-commit done, commits signed")
-        (message "claude-commit: signing rebase failed, check git status"))
+      (progn
+        (require 'pinentry)
+        (pinentry-start 'quiet)
+        (make-process
+         :name "claude-resign"
+         :buffer (generate-new-buffer " *claude-resign*")
+         :command '("git" "rebase"
+                    "--exec" "git commit --amend --no-edit -n -S"
+                    "@{upstream}")
+         :sentinel
+         (lambda (proc _event)
+           (unless (process-live-p proc)
+             (if (zerop (process-exit-status proc))
+                 (message "claude-commit done, commits signed")
+               (message "claude-commit: signing rebase failed: %s"
+                        (with-current-buffer (process-buffer proc)
+                          (string-trim (buffer-string)))))
+             (kill-buffer (process-buffer proc))))))
     (message "claude-commit done, no upstream so commits left unsigned")))
 
 (defun sw-claude-commit ()
