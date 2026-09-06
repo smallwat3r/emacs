@@ -102,6 +102,9 @@ OLD-FACE and NEW-FACE the face plists."
   ;; Process
   (magit-process-finish-apply-ansi-colors t)
 
+  ;; Commit message
+  (git-commit-summary-max-length 75)
+
   :config
   (add-to-list 'magit-git-environment
                (concat "GIT_SSH_COMMAND="
@@ -121,11 +124,6 @@ OLD-FACE and NEW-FACE the face plists."
 
   ;; Ensure commit buffer is focused in daemon mode
   (add-hook 'server-switch-hook #'raise-frame))
-
-(use-package git-commit
-  :ensure nil
-  :custom
-  (git-commit-summary-max-length 75))
 
 ;; Git gutter
 (use-package diff-hl
