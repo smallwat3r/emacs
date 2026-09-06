@@ -371,9 +371,9 @@ Works for both JS and TypeScript tree-sitter modes."
   :mode "\\.ya?ml\\'")
 
 ;;; Markdown
+;; Extensions are registered by the package autoloads, no :mode needed
 
 (use-package markdown-mode
-  :mode ("\\.md\\'" "\\.markdown\\'")
   :custom
   (markdown-fontify-code-blocks-natively t)
   (markdown-command "pandoc"))
@@ -410,28 +410,24 @@ Works for both JS and TypeScript tree-sitter modes."
   :commands package-lint-current-buffer)
 
 ;;; Other file types
+;; These packages register their extensions through autoloads, only
+;; web-mode below needs an explicit :mode
 
-(use-package dockerfile-mode
-  :mode "Dockerfile\\'")
+(use-package dockerfile-mode)
 
 (use-package docker
   :commands docker)
 
-(use-package terraform-mode
-  :mode "\\.tf\\'")
+(use-package terraform-mode)
 
-(use-package lua-mode
-  :mode "\\.lua\\'")
+(use-package lua-mode)
 
-(use-package nginx-mode
-  :mode ("nginx\\.conf\\'" "/nginx/.+\\.conf\\'"))
+(use-package nginx-mode)
 
-(use-package scad-mode
-  :mode "\\.scad\\'")
+(use-package scad-mode)
 
 (use-package typst-ts-mode
-  :ensure (:host codeberg :repo "meow_king/typst-ts-mode")
-  :mode "\\.typ\\'")
+  :ensure (:host codeberg :repo "meow_king/typst-ts-mode"))
 
 (use-package make-mode
   :ensure nil
