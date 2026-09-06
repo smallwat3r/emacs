@@ -207,6 +207,8 @@ successful run, with `default-directory' set to the run directory."
                          (goto-char (point-max))
                          (insert (format "=== exit %d\n\n"
                                          (process-exit-status proc)))
+                         (make-directory
+                          (file-name-directory sw-claude-ephemeral-log-file) t)
                          (write-region (point-min) (point-max)
                                        sw-claude-ephemeral-log-file
                                        t 'silent)))
