@@ -335,6 +335,7 @@ DEF is a command or nil (prefix-only label)."
     ("T s" sw-tailscale-switch "Switch account")
     ("T S" sw-tailscale-status "Status")
     ("T c" sw-tailscale-ssh "SSH to device")
+    ("T e" sw-tailscale-exit-node "Exit node")
     ("T u" sw-tailscale-up "Up")
     ("T d" sw-tailscale-down "Down")
 

@@ -36,32 +36,61 @@ gets a (current) suffix in DISPLAY."
                 accounts))))
     (nreverse accounts)))
 
-(defun sw-tailscale--devices ()
-  "Return alist of Tailscale devices as (DISPLAY . NAME).
-Online devices come first, offline ones are marked as such."
+(defun sw-tailscale--peers ()
+  "Return the peer alists from `tailscale status --json', or nil on error."
   (sw-ensure-cli "tailscale")
   (condition-case err
-      (let* ((result (sw-tailscale--call "status" "--json"))
-             (data (json-parse-string (cdr result)
-                                      :object-type 'alist))
-             (peers (alist-get 'Peer data))
-             devices)
-        (dolist (peer peers)
-          (let* ((info (cdr peer))
-                 (dns (alist-get 'DNSName info))
-                 (online (eq (alist-get 'Online info) t)))
-            ;; Some peers legitimately have no DNS name, skip them
-            ;; rather than erroring out.
-            (when (and (stringp dns) (> (length dns) 0))
-              (let ((name (car (split-string dns "\\."))))
-                (push (list (if online name (format "%s (offline)" name))
-                            name online)
-                      devices)))))
-        (mapcar (lambda (d) (cons (car d) (cadr d)))
-                (sort devices (lambda (a b) (and (caddr a) (not (caddr b)))))))
+      (let ((data (json-parse-string (cdr (sw-tailscale--call "status" "--json"))
+                                     :object-type 'alist)))
+        (mapcar #'cdr (alist-get 'Peer data)))
     (error
      (message "Tailscale: %s" (error-message-string err))
      nil)))
+
+(defun sw-tailscale--peer-name (info)
+  "Return the short DNS name of peer INFO, or nil if it has none."
+  (let ((dns (alist-get 'DNSName info)))
+    ;; Some peers legitimately have no DNS name, skip them rather
+    ;; than erroring out.
+    (when (and (stringp dns) (> (length dns) 0))
+      (car (split-string dns "\\.")))))
+
+(defun sw-tailscale--devices ()
+  "Return alist of Tailscale devices as (DISPLAY . NAME).
+Online devices come first, offline ones are marked as such."
+  (let (devices)
+    (dolist (info (sw-tailscale--peers))
+      (when-let* ((name (sw-tailscale--peer-name info)))
+        (let ((online (eq (alist-get 'Online info) t)))
+          (push (list (if online name (format "%s (offline)" name))
+                      name online)
+                devices))))
+    (mapcar (lambda (d) (cons (car d) (cadr d)))
+            (sort devices (lambda (a b) (and (caddr a) (not (caddr b))))))))
+
+(defun sw-tailscale--exit-nodes ()
+  "Return alist of exit nodes as (DISPLAY . NAME).
+The active exit node gets a (current) suffix in DISPLAY."
+  (let (nodes)
+    (dolist (info (sw-tailscale--peers))
+      (when-let* (((eq (alist-get 'ExitNodeOption info) t))
+                  (name (sw-tailscale--peer-name info)))
+        (push (cons (if (eq (alist-get 'ExitNode info) t)
+                        (format "%s (current)" name)
+                      name)
+                    name)
+              nodes)))
+    (nreverse nodes)))
+
+(defun sw-tailscale-exit-node ()
+  "Select a Tailscale exit node, or None to route directly."
+  (interactive)
+  (let* ((nodes (or (sw-tailscale--exit-nodes)
+                    (user-error "No Tailscale exit nodes found")))
+         (choice (completing-read "Tailscale exit node: "
+                                  (cons "None" (mapcar #'car nodes)) nil t))
+         (name (alist-get choice nodes "" nil #'equal)))
+    (sw-tailscale--run "set" (concat "--exit-node=" name))))
 
 (defun sw-tailscale-switch ()
   "Switch Tailscale account, parsed from CLI."
