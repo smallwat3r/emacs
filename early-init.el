@@ -83,10 +83,6 @@
 
 ;;; Font management
 
-(defun sw-first-available-font (fonts)
-  "Return the first available font from FONTS list, or nil if none found."
-  (seq-find (lambda (font) (member font (font-family-list))) fonts))
-
 ;; Primary font family (set early, before display is available)
 (defvar sw-font-family (if sw-is-mac "Monaco" "Ocrab Nerd Font Mono")
   "Primary monospace font for code and default text.")

@@ -12,12 +12,18 @@
 (dolist (face '(fixed-pitch fixed-pitch-serif variable-pitch))
   (set-face-attribute face nil :family sw-font-family))
 
+(defun sw-first-available-font (fonts families)
+  "Return the first font from FONTS present in FAMILIES, or nil."
+  (seq-find (lambda (font) (member font families)) fonts))
+
 ;; Symbol and emoji fontsets
 (defun sw-setup-fontsets ()
   "Configure fontsets for symbols and emoji."
-  ;; Resolve fonts from fallback lists now that display is available
-  (setq sw-font-symbol (sw-first-available-font sw-font-symbol-fallbacks))
-  (setq sw-font-emoji (sw-first-available-font sw-font-emoji-fallbacks))
+  ;; Resolve fonts from fallback lists now that display is available.
+  ;; `font-family-list' is slow with many fonts installed, call it once.
+  (let ((families (font-family-list)))
+    (setq sw-font-symbol (sw-first-available-font sw-font-symbol-fallbacks families))
+    (setq sw-font-emoji (sw-first-available-font sw-font-emoji-fallbacks families)))
   (when sw-font-symbol
     (set-fontset-font t 'symbol sw-font-symbol nil 'prepend)
     (set-fontset-font t 'mathematical sw-font-symbol nil 'prepend))
@@ -32,9 +38,11 @@ TTY still configures fonts when a GUI frame is created later."
     (sw-setup-fontsets)
     (remove-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)))
 
+;; Symbol and emoji fallbacks are not needed for the first paint, keep
+;; the font enumeration off the startup path
 (if (daemonp)
     (add-hook 'server-after-make-frame-hook #'sw-setup-fontsets-once)
-  (add-hook 'after-init-hook #'sw-setup-fontsets))
+  (run-with-idle-timer 1 nil #'sw-setup-fontsets))
 
 (setq-default line-spacing 0)
 
