@@ -74,7 +74,10 @@
 ;; Eglot booster - IO buffering for better performance
 (use-package eglot-booster
   :ensure (:host github :repo "jdtsmith/eglot-booster")
+  ;; :demand is required: with `use-package-always-defer', :after alone
+  ;; never loads the package and the mode would never be enabled
   :after eglot
+  :demand t
   :when (executable-find "emacs-lsp-booster")
   :init
   ;; Only use IO buffering, native JSON on Emacs 30+ is faster
