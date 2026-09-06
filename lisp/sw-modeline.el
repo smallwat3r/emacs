@@ -46,19 +46,9 @@ single-line layout below does not mangle or clobber it."
               (setq sw--echo-area-last-message msg)
               (message "%s" msg))))))))
 
-(defvar sw--echo-area-timer nil
-  "Idle timer used to debounce echo area updates.")
-
-(defun sw--schedule-echo-area-update ()
-  "Debounce `sw--update-echo-area' to idle time.
-Avoids rebuilding and re-rendering the echo area on every
-keystroke, which adds latency during fast typing."
-  (when sw--echo-area-timer
-    (cancel-timer sw--echo-area-timer))
-  (setq sw--echo-area-timer
-        (run-with-idle-timer 0.1 nil #'sw--update-echo-area)))
-
-(add-hook 'post-command-hook #'sw--schedule-echo-area-update)
+;; A repeating idle timer fires once each time Emacs goes idle, which
+;; debounces the update for free, no per-command hook or timer churn
+(run-with-idle-timer 0.1 t #'sw--update-echo-area)
 
 ;; Modeline is only used to distinguish active window via color.
 ;; Hide it when there's only one window since there's nothing to distinguish.
@@ -66,22 +56,23 @@ keystroke, which adds latency during fast typing."
   "Show mode-line only when frame has multiple windows."
   (let ((fmt (if (> (count-windows) 1) " " nil)))
     (dolist (win (window-list))
-      (with-selected-window win
+      (with-current-buffer (window-buffer win)
         (unless (eq mode-line-format fmt)
           (setq mode-line-format fmt))))))
 
 (add-hook 'window-configuration-change-hook #'sw--update-mode-line-visibility)
 
-;; Hardcoded across all themes
-(set-face-attribute 'mode-line nil
-                    :background "#e63946"
-                    :box nil
-                    :height 0.1)
+(defun sw--set-mode-line-faces (&rest _)
+  "Hardcode the mode-line faces, the same across all themes."
+  (set-face-attribute 'mode-line nil
+                      :background "#e63946" :box nil :height 0.1)
+  (set-face-attribute 'mode-line-inactive nil
+                      :background "#333333" :box nil :height 0.1))
 
-(set-face-attribute 'mode-line-inactive nil
-                    :background "#333333"
-                    :box nil
-                    :height 0.1)
+(sw--set-mode-line-faces)
+;; Enabling a theme resets face attributes, reapply after each one
+(add-hook 'enable-theme-functions #'sw--set-mode-line-faces)
+
 
 (provide 'sw-modeline)
 ;;; sw-modeline.el ends here
