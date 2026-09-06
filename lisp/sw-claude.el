@@ -8,6 +8,8 @@
 
 ;;; Code:
 
+(require 'sw-lib)
+
 (defconst sw-claude-docker-script
   (expand-file-name "bin/claude-docker" user-emacs-directory)
   "Path to the Docker wrapper script for sandboxed Claude.")
@@ -233,21 +235,11 @@ loop is free, a synchronous call would deadlock until gpg gives up."
       (progn
         (require 'pinentry)
         (pinentry-start 'quiet)
-        (make-process
-         :name "claude-resign"
-         :buffer (generate-new-buffer " *claude-resign*")
-         :command '("git" "rebase"
-                    "--exec" "git commit --amend --no-edit -n -S"
-                    "@{upstream}")
-         :sentinel
-         (lambda (proc _event)
-           (unless (process-live-p proc)
-             (if (zerop (process-exit-status proc))
-                 (message "claude-commit done, commits signed")
-               (message "claude-commit: signing rebase failed: %s"
-                        (with-current-buffer (process-buffer proc)
-                          (string-trim (buffer-string)))))
-             (kill-buffer (process-buffer proc))))))
+        (sw-run-async '("git" "rebase"
+                        "--exec" "git commit --amend --no-edit -n -S"
+                        "@{upstream}")
+                      (lambda ()
+                        (message "claude-commit done, commits signed"))))
     (message "claude-commit done, no upstream so commits left unsigned")))
 
 (defun sw-claude-commit ()

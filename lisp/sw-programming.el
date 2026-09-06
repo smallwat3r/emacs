@@ -5,6 +5,8 @@
 
 ;;; Code:
 
+(require 'sw-lib)
+
 ;; Enable ANSI colors in compilation buffers
 (add-hook 'compilation-filter-hook #'ansi-color-compilation-filter)
 
@@ -106,8 +108,6 @@ Runs after `treesit-major-mode-setup'."
   "Alist mapping major modes to region formatter commands.
 Each value is a list where car is the command and cdr is the arguments.")
 
-(require 'sw-lib)
-
 (defun sw-format-region ()
   "Format the current region using language-specific tools or eglot.
 For Python, handles indented code by dedenting before formatting."
@@ -127,8 +127,8 @@ For Python, handles indented code by dedenting before formatting."
       (let* ((cmd (car formatter))
              (args (cdr formatter))
              (input (buffer-substring-no-properties beg end))
-             (indent (sw--string-min-indent input))
-             (dedented (sw--string-reindent input indent 0))
+             (indent (sw-string-min-indent input))
+             (dedented (sw-string-reindent input indent 0))
              (err-file (make-temp-file "fmt-err"))
              (exit-code nil)
              output err-msg)
@@ -154,7 +154,7 @@ For Python, handles indented code by dedenting before formatting."
             (save-excursion
               (delete-region beg end)
               (goto-char beg)
-              (insert (sw--string-reindent output 0 indent))
+              (insert (sw-string-reindent output 0 indent))
               (message "Formatted region (%s)" cmd))
           (message "%s failed: %s" cmd (or err-msg "unknown error")))))
      ((and (fboundp 'eglot-managed-p) (eglot-managed-p))
@@ -233,12 +233,9 @@ Handles combined prefixes like `rf' or `fr' correctly."
                 python-shell-interpreter))
            (python-shell-interpreter python)
            (proc-name
-            (python-shell-get-process-name 'project))
-           (buf (get-buffer
-                 (format "*%s*" proc-name))))
-      (if-let* ((win (and buf (get-buffer-window buf))))
-          (delete-window win)
-        (run-python nil 'project t))))
+            (python-shell-get-process-name 'project)))
+      (sw-toggle-window (get-buffer (format "*%s*" proc-name))
+                        (lambda () (run-python nil 'project t)))))
 
   (defun sw-python-isort ()
     "Run isort on the current buffer."
@@ -400,21 +397,14 @@ Works for both JS and TypeScript tree-sitter modes."
   (defun sw-sql-repl-toggle ()
     "Toggle a SQL REPL window."
     (interactive)
-    (let ((buf (sql-find-sqli-buffer)))
-      (if-let* ((win (and buf
-                         (get-buffer-window buf))))
-          (delete-window win)
-        (sql-product-interactive)))))
+    (sw-toggle-window (sql-find-sqli-buffer) #'sql-product-interactive)))
 
 ;;; Emacs Lisp
 
 (defun sw-ielm-toggle ()
   "Toggle an IELM (Emacs Lisp REPL) window."
   (interactive)
-  (let ((buf (get-buffer "*ielm*")))
-    (if-let* ((win (and buf (get-buffer-window buf))))
-        (delete-window win)
-      (ielm))))
+  (sw-toggle-window (get-buffer "*ielm*") #'ielm))
 
 (use-package package-lint
   :commands package-lint-current-buffer)

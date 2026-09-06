@@ -7,11 +7,6 @@
 
 (require 'sw-lib)
 
-(defun sw-tailscale--ensure-cli ()
-  "Signal a user error if the tailscale CLI is not available."
-  (unless (executable-find "tailscale")
-    (user-error "tailscale not found")))
-
 (defun sw-tailscale--call (&rest args)
   "Run tailscale with ARGS. Return (EXIT-CODE . OUTPUT)."
   (with-temp-buffer
@@ -20,8 +15,8 @@
 
 (defun sw-tailscale--run (&rest args)
   "Run tailscale with ARGS asynchronously."
-  (sw-tailscale--ensure-cli)
-  (apply #'sw-run-async "tailscale" args))
+  (sw-ensure-cli "tailscale")
+  (sw-run-async (cons "tailscale" args)))
 
 (defun sw-tailscale--parse-accounts (output)
   "Parse account list OUTPUT into alist of (DISPLAY . ID).
@@ -44,7 +39,7 @@ gets a (current) suffix in DISPLAY."
 (defun sw-tailscale--devices ()
   "Return alist of Tailscale devices as (DISPLAY . NAME).
 Online devices come first, offline ones are marked as such."
-  (sw-tailscale--ensure-cli)
+  (sw-ensure-cli "tailscale")
   (condition-case err
       (let* ((result (sw-tailscale--call "status" "--json"))
              (data (json-parse-string (cdr result)
@@ -71,7 +66,7 @@ Online devices come first, offline ones are marked as such."
 (defun sw-tailscale-switch ()
   "Switch Tailscale account, parsed from CLI."
   (interactive)
-  (sw-tailscale--ensure-cli)
+  (sw-ensure-cli "tailscale")
   (let* ((result (sw-tailscale--call "switch" "--list"))
          (_ (unless (zerop (car result))
               (user-error "Failed to list accounts")))
@@ -98,14 +93,8 @@ active."
 (defun sw-tailscale-status ()
   "Show Tailscale status."
   (interactive)
-  (sw-tailscale--ensure-cli)
-  (with-current-buffer (get-buffer-create "*tailscale-status*")
-    (let ((inhibit-read-only t))
-      (erase-buffer)
-      (insert (shell-command-to-string "tailscale status")))
-    (goto-char (point-min))
-    (special-mode)
-    (pop-to-buffer (current-buffer))))
+  (sw-ensure-cli "tailscale")
+  (sw-command-buffer "*tailscale-status*" '("tailscale" "status")))
 
 (defun sw-tailscale-ssh ()
   "Select a Tailscale device and connect via TRAMP."

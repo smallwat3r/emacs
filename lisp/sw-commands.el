@@ -122,16 +122,8 @@ When deleting single space, also deletes trailing symbol and word."
 (defun sw-copy-dedented (beg end)
   "Copy region between BEG and END with common indentation removed."
   (interactive "r")
-  (let* ((text (buffer-substring-no-properties beg end))
-         (min-indent (sw--string-min-indent text))
-         (lines (split-string text "\n")))
-    (kill-new
-     (mapconcat
-      (lambda (l)
-        (if (>= (length l) min-indent)
-            (substring l min-indent)
-          l))
-      lines "\n"))
+  (let ((text (buffer-substring-no-properties beg end)))
+    (kill-new (sw-string-reindent text (sw-string-min-indent text) 0))
     (deactivate-mark)
     (message "Copied dedented text")))
 

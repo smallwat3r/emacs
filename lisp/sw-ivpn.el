@@ -7,22 +7,17 @@
 
 (require 'sw-lib)
 
-(defun sw-ivpn--ensure-cli ()
-  "Signal a user error if the ivpn CLI is not available."
-  (unless (executable-find "ivpn")
-    (user-error "ivpn not found")))
-
 (defun sw-ivpn--run (&rest args)
   "Run ivpn with ARGS asynchronously."
-  (sw-ivpn--ensure-cli)
-  (apply #'sw-run-async "ivpn" args))
+  (sw-ensure-cli "ivpn")
+  (sw-run-async (cons "ivpn" args)))
 
 (defun sw-ivpn--servers ()
   "Return alist of WireGuard servers as (DISPLAY . HOST).
 Parses the pipe separated table from `ivpn servers -p wg', the
 first column after the protocol is the host, the following ones
 city, country and ISP."
-  (sw-ivpn--ensure-cli)
+  (sw-ensure-cli "ivpn")
   (let (servers)
     (dolist (line (cdr (split-string
                         (shell-command-to-string "ivpn servers -p wg")
@@ -57,14 +52,8 @@ city, country and ISP."
 (defun sw-ivpn-status ()
   "Show IVPN status."
   (interactive)
-  (sw-ivpn--ensure-cli)
-  (with-current-buffer (get-buffer-create "*ivpn-status*")
-    (let ((inhibit-read-only t))
-      (erase-buffer)
-      (insert (shell-command-to-string "ivpn status")))
-    (goto-char (point-min))
-    (special-mode)
-    (pop-to-buffer (current-buffer))))
+  (sw-ensure-cli "ivpn")
+  (sw-command-buffer "*ivpn-status*" '("ivpn" "status")))
 
 (provide 'sw-ivpn)
 ;;; sw-ivpn.el ends here
