@@ -336,6 +336,13 @@ DEF is a command or nil (prefix-only label)."
     ("T S" sw-tailscale-status "Status")
     ("T c" sw-tailscale-ssh "SSH to device")
 
+    ;; IVPN
+    ("V"   nil "IVPN")
+    ("V c" sw-ivpn-connect "Connect to server")
+    ("V l" sw-ivpn-connect-last "Connect last")
+    ("V d" sw-ivpn-disconnect "Disconnect")
+    ("V S" sw-ivpn-status "Status")
+
     ;; AI/LSP
     ("r"   nil "AI/LSP")
     ("r c" claude-code "Claude chat")

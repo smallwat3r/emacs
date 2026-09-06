@@ -152,6 +152,7 @@
 (require 'sw-git)
 (require 'sw-terminal)
 (require 'sw-tailscale)
+(require 'sw-ivpn)
 (require 'sw-dired)
 (require 'sw-org)
 (require 'sw-programming)
