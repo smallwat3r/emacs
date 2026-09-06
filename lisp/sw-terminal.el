@@ -6,6 +6,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'sw-lib)
 
 ;;; SSH config files
 
@@ -57,7 +58,6 @@ LIMIT defaults to 10000."
   (find-file (read-file-name "SSH target: " "/scp:")))
 
 ;;; Eat - Emulate A Terminal
-
 
 (use-package eat
   :commands (eat eat-project eat-other-window)
@@ -441,47 +441,32 @@ Uses alacritty on macOS, foot on Linux."
    (sw-is-mac "alacritty")
    (t "foot")))
 
-(defun sw-terminal-here--command ()
-  "Build shell command to launch external terminal in current directory.
-Sets INSIDE_EMACS environment variable to indicate Emacs context."
-  (let* ((term (sw-terminal-here--pick-terminal))
-         (dir (sw-terminal-here--default-directory)))
-    (unless (executable-find term)
-      (error "Executable '%s' not found in PATH" term))
-    (format "sh -lc 'cd %s && INSIDE_EMACS=1 %s' >/dev/null 2>&1"
-            (shell-quote-argument dir) term)))
-
+;; No shell in between: the directory comes from `default-directory'
+;; and the argv is passed as a list, so paths and hosts need no quoting.
 (defun sw-terminal-here ()
   "Open a terminal window in the current directory."
   (interactive "@")
-  (start-process-shell-command
-   "terminal-here" nil
-   (sw-terminal-here--command))
-  (message "Terminal is ready!"))
-
-(defun sw-terminal-ssh--command (host)
-  "Build shell command to open external terminal with SSH connection to HOST.
-Configures terminal with xterm-256color TERM for foot compatibility."
   (let* ((term (sw-terminal-here--pick-terminal))
-         (extra-flags (if (string= term "foot") "-t xterm-256color" ""))
-         (ssh-cmd (format "ssh %s" (shell-quote-argument host))))
-    (unless (executable-find term)
-      (error "Executable '%s' not found in PATH" term))
-    (format "INSIDE_EMACS=1 %s %s -e sh -lc %s"
-            term
-            extra-flags
-            (shell-quote-argument ssh-cmd))))
+         (default-directory (sw-terminal-here--default-directory))
+         (process-environment (cons "INSIDE_EMACS=1" process-environment)))
+    (sw-ensure-cli term)
+    (start-process "terminal-here" nil term)
+    (message "Terminal is ready!")))
 
 (defun sw-ssh-external (host)
-  "Open an external terminal and SSH to HOST."
+  "Open an external terminal and SSH to HOST.
+Sets TERM to xterm-256color on foot for remote compatibility."
   (interactive
    (list (completing-read "SSH target: "
                           (sw-ssh-config-hosts)
                           nil nil)))
-  (let ((cmd (sw-terminal-ssh--command host)))
-    (message "SSH external running: %s" cmd)
-    (start-process-shell-command
-     "ssh-external" nil cmd)))
+  (let ((term (sw-terminal-here--pick-terminal))
+        (process-environment (cons "INSIDE_EMACS=1" process-environment)))
+    (sw-ensure-cli term)
+    (apply #'start-process "ssh-external" nil term
+           (append (when (string= term "foot") '("-t" "xterm-256color"))
+                   (list "-e" "ssh" host)))
+    (message "SSH to %s in %s" host term)))
 
 ;;; TRAMP configuration
 
