@@ -68,7 +68,6 @@ RUN apt-get update \
     g++ \
     pkg-config \
     python3 \
-    python3-pip \
     # Docker CLI (talks to host via socket proxy)
     docker-ce-cli \
     # Media processing
