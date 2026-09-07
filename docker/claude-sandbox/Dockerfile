@@ -1,6 +1,6 @@
 # Sandboxed environment for running Claude Code via Docker.
-# Built automatically on first use by bin/claude-docker,
-# or manually via sw-claude-rebuild-sandbox in Emacs.
+# Built automatically on first use by bin/claude-docker (or with
+# claude-docker --rebuild, which sw-claude-rebuild-sandbox runs in Emacs).
 # Pinned by digest so a repointed tag cannot change the base under us.
 # Update: docker pull node:24-slim, then copy the new digest from
 # docker inspect -f '{{index .RepoDigests 0}}' node:24-slim

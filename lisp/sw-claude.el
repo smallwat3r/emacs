@@ -38,10 +38,8 @@ Run `sw-claude-rebuild-sandbox' afterwards to build the new image."
 (defun sw-claude-rebuild-sandbox ()
   "Force rebuild the Claude Docker sandbox image."
   (interactive)
-  (let ((default-directory user-emacs-directory))
-    (compile (format "docker build --no-cache --build-arg HOST_HOME=%s \
--t claude-code-sandbox docker/claude-sandbox/"
-                     (shell-quote-argument (expand-file-name "~"))))))
+  (compile (concat (shell-quote-argument sw-claude-docker-script)
+                   " --rebuild")))
 
 (defun sw-claude--prose-line-p (line)
   "Non-nil when LINE looks like flowing prose safe to reflow.

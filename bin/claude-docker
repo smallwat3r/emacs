@@ -1,9 +1,19 @@
 #!/usr/bin/env bash
 # claude-docker - Run Claude Code inside a sandboxed Docker container.
 #
-# This script builds the sandbox image on first use, then runs
-# claude inside a container with the project directory mounted
-# read-write and the ~/.claude config directory persisted.
+# Builds the sandbox image on first use, then runs claude inside a container
+# with the project directory mounted read-write and ~/.claude persisted.
+#
+#   claude-docker [--add-dir DIR]... [claude args]...
+#   claude-docker --rebuild        force a clean image rebuild, then exit
+#
+# Extra project directories (e.g. the frontend repo next to this backend)
+# are mounted read-write at their host path, get their .env files shadowed
+# like the main project's, and are forwarded to claude via --add-dir. Also
+# accepted, colon-separated: CLAUDE_DOCKER_EXTRA_DIRS=~/code/frontend
+#
+# Set CLAUDE_DOCKER_NET_FILTER=1 to restrict egress to the domains listed in
+# docker/claude-sandbox/allowed-domains.txt (see network_args below).
 
 set -euo pipefail
 
@@ -13,11 +23,32 @@ IMAGE_NAME="claude-code-sandbox"
 #   docker pull IMAGE && docker inspect -f '{{index .RepoDigests 0}}' IMAGE
 PROXY_IMAGE="tecnativa/docker-socket-proxy"
 SQUID_IMAGE="ubuntu/squid"
+PROXY_NAME="claude-docker-proxy"
+EGRESS_PROXY="claude-egress-proxy"
+DOCKER_SOCK="/var/run/docker.sock"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOCKERFILE_DIR="${SCRIPT_DIR}/../docker/claude-sandbox"
+CONTAINER_HOME="/home/node"
+PROJECT_DIR="$(pwd)"
+NET_FILTER="${CLAUDE_DOCKER_NET_FILTER:-0}"
 
-build_image() {
-  docker build -t "${IMAGE_NAME}" \
+# Filtered mode joins an internal network with no route out, open mode a
+# plain bridge network. Both are user-defined so container names resolve.
+if [ "${NET_FILTER}" = "1" ]; then
+  NET="claude-docker-net"
+  NET_OPTS=(--internal)
+else
+  NET="claude-docker-open-net"
+  NET_OPTS=()
+fi
+
+EXTRA_DIRS=()  # host directories mounted alongside the project
+CLAUDE_ARGS=() # arguments forwarded to claude
+DOCKER_ARGS=() # arguments passed to docker run
+
+build_image() { # [docker build options]
+  echo "Building Claude sandbox image..." >&2
+  docker build "$@" -t "${IMAGE_NAME}" \
     --build-arg HOST_HOME="${HOME}" "${DOCKERFILE_DIR}" >&2
 }
 
@@ -26,33 +57,24 @@ build_image() {
 # stores absolute paths, e.g. plugin install locations) resolves. A cached
 # image built for the wrong home lacks that symlink, so config and credentials
 # never persist and Claude re-onboards every launch.
-IMAGE_HOME="$(docker image inspect \
-  -f '{{index .Config.Labels "host_home"}}' "${IMAGE_NAME}" 2>/dev/null || true)"
-if [ "${IMAGE_HOME}" != "${HOME}" ]; then
-  echo "Building Claude sandbox image..." >&2
-  build_image
-fi
+ensure_image() {
+  local image_home
+  image_home="$(docker image inspect \
+    -f '{{index .Config.Labels "host_home"}}' "${IMAGE_NAME}" 2>/dev/null || true)"
+  [ "${image_home}" = "${HOME}" ] || build_image
+}
 
-PROJECT_DIR="$(pwd)"
-CONTAINER_HOME="/home/node"
+# Refuse the filesystem root, the home directory or any of its parents:
+# mounting one read-write would expose the whole home and defeat the sandbox.
+refuse_unsafe_dir() {
+  case "${HOME}/" in
+    "${1%/}/"*)
+      echo "refusing to mount $1: it would defeat the sandbox" >&2
+      exit 1
+      ;;
+  esac
+}
 
-# Refuse to run from the filesystem root, the home directory or any of its
-# parents: the project mount would expose them read-write and defeat the
-# sandbox. Extra dirs get the same check in add_extra_dir below.
-case "${HOME}/" in
-  "${PROJECT_DIR%/}/"*)
-    echo "refusing to run from ${PROJECT_DIR}: mounting it would defeat the sandbox" >&2
-    exit 1
-    ;;
-esac
-
-# Extra project directories (e.g. the frontend repo next to this backend).
-# Claude's own --add-dir flag is intercepted here so the directory can be
-# mounted, then re-forwarded to claude with the resolved path:
-#   claude-docker --add-dir ../frontend
-# Also accepted, colon-separated: CLAUDE_DOCKER_EXTRA_DIRS=~/code/frontend
-# Each directory is mounted read-write at its host path and gets its .env
-# files shadowed like the main project's.
 # Resolve to an absolute path, expanding a literal leading ~ (the shell does
 # not expand it in the --add-dir=~/x form).
 resolve_dir() {
@@ -66,179 +88,184 @@ resolve_dir() {
 }
 
 # Skip duplicates and the project dir itself: docker rejects a repeated
-# mount destination, and the project is already mounted. Refuse the home
-# directory and the filesystem root, mounting either defeats the sandbox.
+# mount destination, and the project is already mounted.
 add_extra_dir() {
   local dir
   dir="$(resolve_dir "$1")"
-  case "${dir}" in
-    /|"${HOME}")
-      echo "refusing to mount ${dir}: it would defeat the sandbox" >&2
-      exit 1
-      ;;
-  esac
+  refuse_unsafe_dir "${dir}"
   [ "${dir}" = "${PROJECT_DIR}" ] && return 0
   case " ${EXTRA_DIRS[*]-} " in *" ${dir} "*) return 0 ;; esac
   EXTRA_DIRS+=("${dir}")
 }
 
-EXTRA_DIRS=()
-
-# Always mount the shared scratch directory when it exists
-[ -d "${HOME}/claude-shared" ] && add_extra_dir "${HOME}/claude-shared"
-
-if [ -n "${CLAUDE_DOCKER_EXTRA_DIRS:-}" ]; then
-  IFS=':' read -ra _dirs <<< "${CLAUDE_DOCKER_EXTRA_DIRS}"
-  for _dir in "${_dirs[@]}"; do
-    [ -n "${_dir}" ] || continue
-    add_extra_dir "${_dir}"
+parse_args() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --rebuild)
+        build_image --no-cache
+        exit 0
+        ;;
+      --add-dir)
+        [ $# -ge 2 ] || { echo "--add-dir requires a path" >&2; exit 1; }
+        add_extra_dir "$2"
+        shift 2
+        ;;
+      --add-dir=*)
+        add_extra_dir "${1#*=}"
+        shift
+        ;;
+      *)
+        CLAUDE_ARGS+=("$1")
+        shift
+        ;;
+    esac
   done
-fi
+}
 
-ARGS=()
-while [ $# -gt 0 ]; do
-  case "$1" in
-    --add-dir)
-      [ $# -ge 2 ] || { echo "--add-dir requires a path" >&2; exit 1; }
-      add_extra_dir "$2"
-      shift 2
-      ;;
-    --add-dir=*)
-      add_extra_dir "${1#*=}"
-      shift
-      ;;
-    *)
-      ARGS+=("$1")
-      shift
-      ;;
-  esac
-done
+# Container name: claude-{project}[-{instance}], instance taken from the
+# Emacs buffer name (*claude:dir:instance*) so parallel sessions never clash.
+container_name() {
+  local name
+  name="claude-$(basename "${PROJECT_DIR}")"
+  if [ -n "${CLAUDE_BUFFER_NAME:-}" ]; then
+    local instance="${CLAUDE_BUFFER_NAME##*:}"
+    name="${name}-${instance%\*}"
+  fi
+  name="${name//[^[:alnum:]_.-]/-}"
+  CONTAINER_NAME="${name%-}"
+}
 
-# Container name: claude-{project}-{instance}
-PROJECT_SLUG="$(basename "${PROJECT_DIR}")"
-if [ -n "${CLAUDE_BUFFER_NAME:-}" ]; then
-  INSTANCE="${CLAUDE_BUFFER_NAME##*:}"
-  INSTANCE="${INSTANCE%\*}"
-  CONTAINER_NAME="claude-${PROJECT_SLUG}-${INSTANCE}"
-else
-  CONTAINER_NAME="claude-${PROJECT_SLUG}"
-fi
-CONTAINER_NAME="$(echo "${CONTAINER_NAME}" | \
-  tr -cs 'a-zA-Z0-9_.-' '-' | sed 's/^[^a-zA-Z0-9]*//;s/-$//')"
+sidecar_running() { # name
+  docker container inspect -f '{{.State.Running}}' "$1" 2>/dev/null | grep -q true
+}
 
-CLAUDE_DIR="${HOME}/.claude"
-CLAUDE_STATE_DIR="${HOME}/.local/state/claude"
-mkdir -p "${CLAUDE_DIR}" "${CLAUDE_STATE_DIR}"
+# (Re)create sidecar NAME on our network, with the given docker run options
+start_sidecar() { # name [docker run options] image
+  local name="$1"
+  shift
+  docker rm -f "${name}" >/dev/null 2>&1 || true
+  docker run -d --name "${name}" --network "${NET}" --restart unless-stopped \
+    "$@" >/dev/null
+}
 
-# Claude writes its global config atomically (temp file + rename). The default
-# location, a single-file bind mount of ~/.claude.json, can't be renamed over,
-# and the container home is read-only, so every config write is lost and Claude
-# re-prompts (theme, folder trust) on each launch. Point CLAUDE_CONFIG_DIR at the
-# mounted ~/.claude directory instead: there the config is a regular file in a
-# writable mount, so atomic writes persist. Seed it from the host's global config
-# on first use so onboarding, theme and account carry over.
-CONFIG_JSON="${CLAUDE_DIR}/.claude.json"
-if [ ! -f "${CONFIG_JSON}" ] && [ -f "${HOME}/.claude.json" ]; then
-  cp "${HOME}/.claude.json" "${CONFIG_JSON}"
-fi
+base_args() {
+  local claude_dir="${HOME}/.claude"
+  local state_dir="${HOME}/.local/state/claude"
+  mkdir -p "${claude_dir}" "${state_dir}"
 
-DOCKER_ARGS=(
-  --rm
-  -it
-  # Claude runs as PID 1 and does not reap orphaned children; without an
-  # init, zombies accumulate and count toward --pids-limit
-  --init
-  # Run under the host home path (symlinked to /home/node in the image) so
-  # absolute paths in the shared ~/.claude config resolve consistently.
-  -e HOME="${HOME}"
-  -e TERM=xterm-256color
-  -e INSIDE_EMACS=
-  # Claude's TUI defaults to the alternate screen, which has no scrollback
-  # of its own inside eat: everything above the current viewport is gone.
-  # Render inline instead so old output lands in the Emacs buffer.
-  -e CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
-  -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
-  # Read by bin/claude-statusline to show a sandbox badge and the
-  # network mode in the Claude UI
-  -e CLAUDE_DOCKER_SANDBOX="${CONTAINER_NAME}"
-  # No gpg binary (or key) in the image, so a host gitconfig with
-  # commit.gpgsign=true would make every commit fail. Sign the
-  # sandbox's commits at review time, before pushing.
-  -e GIT_CONFIG_COUNT=2
-  -e GIT_CONFIG_KEY_0=commit.gpgsign -e GIT_CONFIG_VALUE_0=false
-  -e GIT_CONFIG_KEY_1=tag.gpgsign -e GIT_CONFIG_VALUE_1=false
-  -e CLAUDE_DOCKER_NET_FILTER="${CLAUDE_DOCKER_NET_FILTER:-0}"
-  -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
-  -v "${CLAUDE_DIR}:${CONTAINER_HOME}/.claude:z"
-  # Note: ~/.local/share/claude is NOT mounted. It holds the versioned claude
-  # binary the launcher symlinks to; mounting the host's copy shadows the image's
-  # baked-in version, dangling the symlink (exit 127). The image owns the version
-  # (auto-updater is off, update = rebuild), so keep it self-contained.
-  -v "${CLAUDE_STATE_DIR}:${CONTAINER_HOME}/.local/state/claude:z"
-  -w "${PROJECT_DIR}"
-  --user "$(id -u):$(id -g)"
-  --cap-drop=ALL
-  --security-opt=no-new-privileges
-  --read-only
-  # exec where builds and test binaries run; sized so a runaway process
-  # cannot eat host RAM through an unbounded tmpfs (default: half of RAM)
-  --tmpfs /tmp:exec,size=1g
-  --tmpfs "${CONTAINER_HOME}/.cache:exec,size=2g"
-  --tmpfs "${CONTAINER_HOME}/.config:size=64m"
-  --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
-  --pids-limit=512
-  # Same value for swap, otherwise docker allows another 8g of swap on top
-  --memory=8g
-  --memory-swap=8g
-  --name "${CONTAINER_NAME}"
-)
+  # Claude writes its global config atomically (temp file + rename). The
+  # default location, a single-file bind mount of ~/.claude.json, can't be
+  # renamed over, and the container home is read-only, so every config write
+  # is lost and Claude re-prompts (theme, folder trust) on each launch. Point
+  # CLAUDE_CONFIG_DIR at the mounted ~/.claude directory instead: there the
+  # config is a regular file in a writable mount, so atomic writes persist.
+  # Seed it from the host's global config on first use so onboarding, theme
+  # and account carry over.
+  if [ ! -f "${claude_dir}/.claude.json" ] && [ -f "${HOME}/.claude.json" ]; then
+    cp "${HOME}/.claude.json" "${claude_dir}/.claude.json"
+  fi
 
-for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
-  DOCKER_ARGS+=(-v "${dir}:${dir}:z")
-done
+  DOCKER_ARGS+=(
+    --rm
+    -it
+    # Claude runs as PID 1 and does not reap orphaned children; without an
+    # init, zombies accumulate and count toward --pids-limit
+    --init
+    # Run under the host home path (symlinked to /home/node in the image) so
+    # absolute paths in the shared ~/.claude config resolve consistently.
+    -e HOME="${HOME}"
+    -e TERM=xterm-256color
+    -e INSIDE_EMACS=
+    # Claude's TUI defaults to the alternate screen, which has no scrollback
+    # of its own inside eat: everything above the current viewport is gone.
+    # Render inline instead so old output lands in the Emacs buffer.
+    -e CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1
+    -e CLAUDE_CONFIG_DIR="${CONTAINER_HOME}/.claude"
+    # Read by bin/claude-statusline to show a sandbox badge and the
+    # network mode in the Claude UI
+    -e CLAUDE_DOCKER_SANDBOX="${CONTAINER_NAME}"
+    -e CLAUDE_DOCKER_NET_FILTER="${NET_FILTER}"
+    # No gpg binary (or key) in the image, so a host gitconfig with
+    # commit.gpgsign=true would make every commit fail. Sign the
+    # sandbox's commits at review time, before pushing.
+    -e GIT_CONFIG_COUNT=2
+    -e GIT_CONFIG_KEY_0=commit.gpgsign -e GIT_CONFIG_VALUE_0=false
+    -e GIT_CONFIG_KEY_1=tag.gpgsign -e GIT_CONFIG_VALUE_1=false
+    -v "${PROJECT_DIR}:${PROJECT_DIR}:z"
+    -v "${claude_dir}:${CONTAINER_HOME}/.claude:z"
+    # Note: ~/.local/share/claude is NOT mounted. It holds the versioned claude
+    # binary the launcher symlinks to; mounting the host's copy shadows the
+    # image's baked-in version, dangling the symlink (exit 127). The image owns
+    # the version (auto-updater is off, update = rebuild), so keep it
+    # self-contained.
+    -v "${state_dir}:${CONTAINER_HOME}/.local/state/claude:z"
+    # ~/.claude/settings.json runs the statusline from ~/.emacs.d, which is
+    # neither in the image nor (usually) the mounted project, so mount the
+    # script alone at the path settings.json expects.
+    -v "${SCRIPT_DIR}/claude-statusline:${HOME}/.emacs.d/bin/claude-statusline:ro,z"
+    -w "${PROJECT_DIR}"
+    --user "$(id -u):$(id -g)"
+    --cap-drop=ALL
+    --security-opt=no-new-privileges
+    --read-only
+    # exec where builds and test binaries run; sized so a runaway process
+    # cannot eat host RAM through an unbounded tmpfs (default: half of RAM)
+    --tmpfs /tmp:exec,size=1g
+    --tmpfs "${CONTAINER_HOME}/.cache:exec,size=2g"
+    --tmpfs "${CONTAINER_HOME}/.config:size=64m"
+    --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
+    --pids-limit=512
+    # Same value for swap, otherwise docker allows another 8g of swap on top
+    --memory=8g
+    --memory-swap=8g
+    --name "${CONTAINER_NAME}"
+  )
 
-# Read by bin/claude-statusline to list the mounted extra directories
-if [ -n "${EXTRA_DIRS[*]-}" ]; then
-  DOCKER_ARGS+=(-e CLAUDE_DOCKER_DIRS="$(IFS=:; printf '%s' "${EXTRA_DIRS[*]}")")
-fi
+  # Pass through optional env vars if set
+  local var
+  for var in ANTHROPIC_API_KEY CLAUDE_BUFFER_NAME; do
+    [ -n "${!var+x}" ] && DOCKER_ARGS+=(-e "${var}")
+  done
+  return 0
+}
 
-# Network: open egress by default. Set CLAUDE_DOCKER_NET_FILTER=1 to
-# instead join an internal network with no route out, where egress goes
-# through a squid sidecar (dual-homed on the internal net and the
-# default bridge) that only allows domains listed in
-# docker/claude-sandbox/allowed-domains.txt. Filtering is by the host
-# named in the CONNECT request, so it survives CDN IP churn.
-DOCKER_SOCK="/var/run/docker.sock"
-PROXY_NAME="claude-docker-proxy"
-EGRESS_PROXY="claude-egress-proxy"
+extra_dir_args() {
+  local dir add_dirs=()
+  for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
+    DOCKER_ARGS+=(-v "${dir}:${dir}:z")
+    add_dirs+=(--add-dir "${dir}")
+  done
+  # --add-dir is variadic, keep it ahead of the user's args so a trailing
+  # prompt is never swallowed as another directory
+  CLAUDE_ARGS=(${add_dirs[@]+"${add_dirs[@]}"} ${CLAUDE_ARGS[@]+"${CLAUDE_ARGS[@]}"})
+  # Read by bin/claude-statusline to list the mounted extra directories
+  if [ -n "${EXTRA_DIRS[*]-}" ]; then
+    DOCKER_ARGS+=(-e CLAUDE_DOCKER_DIRS="$(IFS=:; printf '%s' "${EXTRA_DIRS[*]}")")
+  fi
+}
 
-if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
-  NET="claude-docker-net"
-  NET_OPTS=(--internal)
-else
-  NET="claude-docker-open-net"
-  NET_OPTS=()
-fi
+# Network: open egress by default. In filtered mode the container joins an
+# internal network with no route out, where egress goes through a squid
+# sidecar (dual-homed on the internal net and the default bridge) that only
+# allows domains listed in docker/claude-sandbox/allowed-domains.txt.
+# Filtering is by the host named in the CONNECT request, so it survives CDN
+# IP churn.
+network_args() {
+  if ! docker network inspect "${NET}" >/dev/null 2>&1; then
+    docker network create ${NET_OPTS[@]+"${NET_OPTS[@]}"} "${NET}" >/dev/null
+  fi
+  DOCKER_ARGS+=(--network "${NET}")
+  [ "${NET_FILTER}" = "1" ] || return 0
 
-if ! docker network inspect "${NET}" >/dev/null 2>&1; then
-  docker network create ${NET_OPTS[@]+"${NET_OPTS[@]}"} "${NET}" >/dev/null
-fi
-DOCKER_ARGS+=(--network "${NET}")
-
-if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
-  if ! docker container inspect -f '{{.State.Running}}' \
-       "${EGRESS_PROXY}" 2>/dev/null | grep -q true; then
-    docker rm -f "${EGRESS_PROXY}" >/dev/null 2>&1 || true
-    docker run -d \
-      --name "${EGRESS_PROXY}" \
-      --network "${NET}" \
-      --restart unless-stopped \
+  if ! sidecar_running "${EGRESS_PROXY}"; then
+    start_sidecar "${EGRESS_PROXY}" \
       -v "${DOCKERFILE_DIR}/squid.conf:/etc/squid/squid.conf:ro,z" \
       -v "${DOCKERFILE_DIR}/allowed-domains.txt:/etc/squid/allowed-domains.txt:ro,z" \
-      "${SQUID_IMAGE}" >/dev/null
+      "${SQUID_IMAGE}"
     docker network connect bridge "${EGRESS_PROXY}"
   fi
 
+  local proxy_url="http://${EGRESS_PROXY}:3128"
   DOCKER_ARGS+=(
     # Blackhole external DNS: the proxy resolves hostnames (CONNECT
     # carries the name as a string), and squid only looks up domains
@@ -247,113 +274,111 @@ if [ "${CLAUDE_DOCKER_NET_FILTER:-0}" = "1" ]; then
     # only forwards unknown names upstream; 127.0.0.1 dies on the host,
     # so exfiltration via DNS lookups never leaves the machine.
     --dns 127.0.0.1
-    -e HTTP_PROXY="http://${EGRESS_PROXY}:3128"
-    -e HTTPS_PROXY="http://${EGRESS_PROXY}:3128"
-    -e http_proxy="http://${EGRESS_PROXY}:3128"
-    -e https_proxy="http://${EGRESS_PROXY}:3128"
+    -e HTTP_PROXY="${proxy_url}" -e http_proxy="${proxy_url}"
+    -e HTTPS_PROXY="${proxy_url}" -e https_proxy="${proxy_url}"
     -e NO_PROXY="localhost,127.0.0.1,${PROXY_NAME}"
     -e no_proxy="localhost,127.0.0.1,${PROXY_NAME}"
     # Direct port 22 is blocked on the internal net, so tunnel
     # git-over-SSH through the proxy as a CONNECT to :22.
     -e GIT_SSH_COMMAND="ssh -o ProxyCommand=\"nc -X connect -x ${EGRESS_PROXY}:3128 %h %p\""
   )
-fi
+}
 
-# Docker socket proxy - gives read-only visibility into
-# containers (ps, inspect, logs) without write access.
-# POST/EXEC stay off: a write call to the host daemon (which
-# runs as root) would let this container spawn a sibling that
-# mounts the host filesystem, escaping the sandbox entirely.
-if [ -S "${DOCKER_SOCK}" ]; then
-  if ! docker container inspect -f '{{.State.Running}}' \
-       "${PROXY_NAME}" 2>/dev/null | grep -q true; then
-    docker rm -f "${PROXY_NAME}" >/dev/null 2>&1 || true
-    docker run -d \
-      --name "${PROXY_NAME}" \
-      --network "${NET}" \
-      --restart unless-stopped \
+# Docker socket proxy - gives read-only visibility into containers (ps,
+# inspect, logs) without write access. POST/EXEC stay off: a write call to
+# the host daemon (which runs as root) would let this container spawn a
+# sibling that mounts the host filesystem, escaping the sandbox entirely.
+socket_proxy_args() {
+  [ -S "${DOCKER_SOCK}" ] || return 0
+  if ! sidecar_running "${PROXY_NAME}"; then
+    start_sidecar "${PROXY_NAME}" \
       -v "${DOCKER_SOCK}:/var/run/docker.sock:ro" \
-      -e CONTAINERS=1 \
-      -e EXEC=0 \
-      -e POST=0 \
-      -e LOG=1 \
-      -e INFO=1 \
-      -e IMAGES=0 \
-      -e NETWORKS=0 \
-      -e VOLUMES=0 \
-      -e SERVICES=0 \
-      -e TASKS=0 \
-      -e BUILD=0 \
-      -e COMMIT=0 \
-      -e SWARM=0 \
-      "${PROXY_IMAGE}" >/dev/null
+      -e CONTAINERS=1 -e LOG=1 -e INFO=1 \
+      -e EXEC=0 -e POST=0 -e IMAGES=0 -e NETWORKS=0 -e VOLUMES=0 \
+      -e SERVICES=0 -e TASKS=0 -e BUILD=0 -e COMMIT=0 -e SWARM=0 \
+      "${PROXY_IMAGE}"
   fi
   # A proxy left over from a previous run may sit on another network
   # (e.g. after toggling CLAUDE_DOCKER_NET_FILTER); attach it to ours.
   docker network connect "${NET}" "${PROXY_NAME}" 2>/dev/null || true
-
   DOCKER_ARGS+=(-e DOCKER_HOST="tcp://${PROXY_NAME}:2375")
-fi
+}
 
-# Pass through optional env vars if set
-for var in ANTHROPIC_API_KEY CLAUDE_BUFFER_NAME; do
-  if [ -n "${!var+x}" ]; then
-    DOCKER_ARGS+=(-e "${var}")
+# Forward the SSH agent if available. Docker Desktop on macOS exposes the
+# host agent at a fixed path, the host SSH_AUTH_SOCK is not mountable there.
+ssh_agent_args() {
+  local macos_sock="/run/host-services/ssh-auth.sock"
+  if [ "$(uname)" = "Darwin" ] && [ -e "${macos_sock}" ]; then
+    DOCKER_ARGS+=(-v "${macos_sock}:/tmp/ssh-agent.sock")
+  elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
+    DOCKER_ARGS+=(-v "${SSH_AUTH_SOCK}:/tmp/ssh-agent.sock:z")
+  else
+    return 0
   fi
-done
+  DOCKER_ARGS+=(-e SSH_AUTH_SOCK=/tmp/ssh-agent.sock)
+}
 
-# Forward SSH agent if available
-MACOS_SSH_SOCK="/run/host-services/ssh-auth.sock"
-if [ "$(uname)" = "Darwin" ] && [ -e "${MACOS_SSH_SOCK}" ]; then
-  DOCKER_ARGS+=(
-    -v "${MACOS_SSH_SOCK}:/tmp/ssh-agent.sock"
-    -e SSH_AUTH_SOCK=/tmp/ssh-agent.sock
-  )
-elif [ -n "${SSH_AUTH_SOCK:-}" ]; then
-  DOCKER_ARGS+=(
-    -v "${SSH_AUTH_SOCK}:/tmp/ssh-agent.sock:z"
-    -e SSH_AUTH_SOCK=/tmp/ssh-agent.sock
-  )
-fi
+# Forward git config read-only
+git_config_args() {
+  if [ -f "${HOME}/.gitconfig" ]; then
+    DOCKER_ARGS+=(-v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z")
+  fi
+  local xdg_git="${XDG_CONFIG_HOME:-${HOME}/.config}/git"
+  if [ -d "${xdg_git}" ]; then
+    DOCKER_ARGS+=(-v "${xdg_git}:${CONTAINER_HOME}/.config/git:ro,z")
+  fi
+  # Work repos: the includeIf "gitdir:~/work/" overrides live outside the
+  # project mount, so without this the work identity silently never applies.
+  case "${PROJECT_DIR}" in
+    "${HOME}/work/"*)
+      if [ -f "${HOME}/work/.gitconfig" ]; then
+        DOCKER_ARGS+=(-v "${HOME}/work/.gitconfig:${HOME}/work/.gitconfig:ro,z")
+      fi
+      ;;
+  esac
+}
 
 # Shadow .env files (and direnv's .envrc, which commonly exports secrets)
 # so they are never visible inside the container. Template files
 # (.env.example and friends) stay readable, they exist to be read and
-# hold no secrets.
-while IFS= read -r -d '' envfile; do
-  DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
-done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} \
-  \( -name node_modules -o -name .git \) -prune -o \
-  \( -name '.env' -o -name '.env.*' -o -name '.envrc' \) \
-  ! -name '.env.example' ! -name '.env.sample' ! -name '.env.template' \
-  -print0 2>/dev/null)
+# hold no secrets. Files only: a .env directory (some virtualenvs) cannot
+# take a /dev/null bind mount and would abort the run.
+shadow_env_files() {
+  local envfile
+  while IFS= read -r -d '' envfile; do
+    DOCKER_ARGS+=(-v "/dev/null:${envfile}:ro")
+  done < <(find "${PROJECT_DIR}" ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"} \
+    \( -name node_modules -o -name .git \) -prune -o \
+    -type f \( -name '.env' -o -name '.env.*' -o -name '.envrc' \) \
+    ! -name '.env.example' ! -name '.env.sample' ! -name '.env.template' \
+    -print0 2>/dev/null)
+}
 
-# Forward git config (read-only)
-if [ -f "${HOME}/.gitconfig" ]; then
-  DOCKER_ARGS+=(
-    -v "${HOME}/.gitconfig:${CONTAINER_HOME}/.gitconfig:ro,z"
-  )
-fi
-XDG_GIT="${XDG_CONFIG_HOME:-${HOME}/.config}/git"
-if [ -d "${XDG_GIT}" ]; then
-  DOCKER_ARGS+=(
-    -v "${XDG_GIT}:${CONTAINER_HOME}/.config/git:ro,z"
-  )
-fi
-# Work repos: the includeIf "gitdir:~/work/" overrides live outside the
-# project mount, so without this the work identity silently never applies.
-case "${PROJECT_DIR}" in
-  "${HOME}/work/"*)
-    if [ -f "${HOME}/work/.gitconfig" ]; then
-      DOCKER_ARGS+=(-v "${HOME}/work/.gitconfig:${HOME}/work/.gitconfig:ro,z")
-    fi
-    ;;
-esac
+main() {
+  # Always mount the shared scratch directory when it exists
+  [ -d "${HOME}/claude-shared" ] && add_extra_dir "${HOME}/claude-shared"
+  if [ -n "${CLAUDE_DOCKER_EXTRA_DIRS:-}" ]; then
+    local dirs dir
+    IFS=':' read -ra dirs <<< "${CLAUDE_DOCKER_EXTRA_DIRS}"
+    for dir in "${dirs[@]}"; do
+      [ -n "${dir}" ] && add_extra_dir "${dir}"
+    done
+  fi
+  parse_args "$@"
+  refuse_unsafe_dir "${PROJECT_DIR}"
+  ensure_image
+  container_name
 
-CLAUDE_ARGS=()
-for dir in ${EXTRA_DIRS[@]+"${EXTRA_DIRS[@]}"}; do
-  CLAUDE_ARGS+=(--add-dir "${dir}")
-done
+  base_args
+  extra_dir_args
+  network_args
+  socket_proxy_args
+  ssh_agent_args
+  git_config_args
+  shadow_env_files
 
-exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" \
-  ${CLAUDE_ARGS[@]+"${CLAUDE_ARGS[@]}"} ${ARGS[@]+"${ARGS[@]}"}
+  exec docker run "${DOCKER_ARGS[@]}" "${IMAGE_NAME}" \
+    ${CLAUDE_ARGS[@]+"${CLAUDE_ARGS[@]}"}
+}
+
+main "$@"
