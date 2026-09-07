@@ -49,7 +49,15 @@ dev service). Every write operation is blocked (run, exec, build, network and
 volume changes): a write to the root daemon would let the sandbox spawn a
 sibling container that mounts the host filesystem and escape entirely.
 
-To upgrade the pinned versions in the Dockerfile, then rebuild the image:
+Secrets stay on the host: `.env`, `.env.*` and `.envrc` files in the mounted
+directories are shadowed with `/dev/null` (templates such as `.env.example`
+remain readable). Extra project directories can be mounted with
+`--add-dir DIR` or `CLAUDE_DOCKER_EXTRA_DIRS=a:b` (`M-x sw-claude-with-dirs`
+in Emacs), `~/claude-shared` is always mounted when it exists. The home
+directory, its parents and the filesystem root are refused as mounts.
+
+To upgrade the pinned versions in the Dockerfile, then rebuild the image
+(`bin/claude-docker --rebuild` from a shell):
 
 ```
 M-x sw-claude-upgrade-sandbox
