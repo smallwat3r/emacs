@@ -100,7 +100,16 @@ RUN uv pip install --system --break-system-packages \
     rosbags \
     mcap \
     mcap-ros1-support \
-    mcap-ros2-support
+    mcap-ros2-support \
+    # Headless browser automation, used by the diagram-design plugin to
+    # rasterise diagrams to PNG
+    playwright
+
+# Chromium for Playwright, kept in the image rather than the default
+# ~/.cache/ms-playwright, which is a tmpfs in the container
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/ms-playwright
+RUN playwright install --with-deps chromium \
+    && rm -rf /var/lib/apt/lists/*
 
 # Go (official tarball - apt's is outdated), pinned and checksum-verified
 RUN ARCH="$(dpkg --print-architecture)" \

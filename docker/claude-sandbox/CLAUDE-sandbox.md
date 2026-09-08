@@ -3,6 +3,7 @@ You are running inside a sandboxed Docker image. Preinstalled, so do
 not install them again:
 - Rosbag tooling: mcap CLI, Python rosbags, mcap, mcap-ros1/ros2-support
 - Python 3 with uv, mypy, ruff, black, pytest, ipython
+- Playwright (Python) with headless Chromium, for PNG diagram export
 - Go, Node.js and npm/npx, gcc/g++/make/pkg-config
 - git, gh, ssh, docker CLI (host socket is read-only: ps/inspect/logs work, run/build do not)
 - ripgrep, fd, jq, tree, ffmpeg, imagemagick, webp, pandoc, poppler-utils,
