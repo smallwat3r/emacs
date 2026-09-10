@@ -215,9 +215,9 @@ base_args() {
     --tmpfs "${CONTAINER_HOME}/.config:size=64m"
     --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
     --pids-limit=512
-    # Same value for swap, otherwise docker allows another 8g of swap on top
-    --memory=8g
-    --memory-swap=8g
+    # Same value for swap, otherwise docker allows another 16g of swap on top
+    --memory=16g
+    --memory-swap=16g
     --name "${CONTAINER_NAME}"
   )
 
