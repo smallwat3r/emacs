@@ -5,8 +5,8 @@
 
 ;;; Code:
 
-(defvar sw-org-directory "~/org"
-  "Directory for org files.")
+(defvar sw-org-directory "~/notes/org"
+  "Directory for org files, inside the ~/notes repo synced to the NAS.")
 
 (use-package org
   :ensure nil
@@ -67,7 +67,7 @@
 (use-package deft
   :commands deft
   :custom
-  (deft-directory sw-org-directory)
+  (deft-directory "~/notes") ; the whole notes repo, org, md and txt
   (deft-extensions '("org" "md" "txt"))
   (deft-default-extension "txt") ; prefer plain text for new notes
   (deft-recursive t)
