@@ -135,6 +135,45 @@ When deleting single space, also deletes trailing symbol and word."
   (require 'consult)
   (consult-line (thing-at-point 'symbol t)))
 
+;;; Find file commands
+
+(defun sw-find-file-in (dir)
+  "Pick a file under DIR, all files listed up front, matched with orderless."
+  (require 'consult)
+  (let* ((default-directory (file-name-as-directory (expand-file-name dir)))
+         ;; synchronous fd, fine for project sized trees, use consult-fd for huge ones
+         (files (apply #'process-lines (append consult-fd-args '("--type" "f")))))
+    (find-file (completing-read "File: " files nil t))))
+
+(defun sw-find-file-here ()
+  "Pick a file under the current directory."
+  (interactive)
+  (sw-find-file-in default-directory))
+
+;;; Notes commands
+;; Plain files in ~/notes, txt by default, found with fd and rg
+(defvar sw-notes-directory "~/notes"
+  "Directory holding notes.")
+
+(defun sw-notes-find ()
+  "Pick a note by file name."
+  (interactive)
+  (sw-find-file-in sw-notes-directory))
+
+(defun sw-notes-search ()
+  "Search note contents."
+  (interactive)
+  (require 'consult)
+  (consult-ripgrep sw-notes-directory))
+
+(defun sw-notes-new (title)
+  "Create a new txt note named after TITLE."
+  (interactive "sNote title: ")
+  (let ((slug (string-trim (replace-regexp-in-string "[^a-z0-9]+" "-" (downcase title)) "-" "-")))
+    (when (string-empty-p slug)
+      (user-error "Empty note title"))
+    (find-file (expand-file-name (concat slug ".txt") sw-notes-directory))))
+
 ;;; Window commands
 
 (defun sw-split-window-right ()

@@ -94,15 +94,6 @@
        (:package "dash" :fetcher github :repo "magnars/dash.el" :files ("dash.el" "dash.texi")
                  :source "elpaca-menu-lock-file" :id dash :type git :protocol https :inherit t
                  :depth treeless :ref "d746dd9edcb67a108818beb0cdc78dc1cb466832"))
- (deft :source "elpaca-menu-lock-file" :recipe
-       (:package "deft" :repo "jrblevin/deft" :fetcher github :files
-                 ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                  "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info" "docs/*.texi"
-                  "docs/*.texinfo"
-                  (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el" "LICENSE"
-                            "README*" "*-pkg.el"))
-                 :source "elpaca-menu-lock-file" :id deft :type git :protocol https :inherit t
-                 :depth treeless :ref "b369d7225d86551882568788a23c5497b232509c"))
  (diff-hl :source "elpaca-menu-lock-file" :recipe
           (:package "diff-hl" :fetcher github :repo "dgutov/diff-hl" :files
                     ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"

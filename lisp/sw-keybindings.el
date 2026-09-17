@@ -179,7 +179,7 @@ DEF is a command or nil (prefix-only label)."
     ;; Files
     ("f"   nil "File")
     ("f f" find-file "Find file")
-    ("f F" consult-find "Find file from here")
+    ("f F" sw-find-file-here "Find file from here")
     ("f d" dired-jump "Find directory")
     ("f r" consult-recent-file "Recent files")
     ("f s" save-buffer "Save file")
@@ -218,7 +218,7 @@ DEF is a command or nil (prefix-only label)."
     ("s i" consult-imenu "Imenu")
     ("s I" consult-imenu-multi "Imenu all")
     ("s r" consult-ripgrep "Ripgrep")
-    ("s f" consult-find "Find file")
+    ("s f" sw-find-file-here "Find file from here")
     ("s m" consult-mark "Marks")
     ("s o" consult-outline "Outline")
 
@@ -381,7 +381,9 @@ DEF is a command or nil (prefix-only label)."
 
     ;; Notes
     ("n"   nil "Notes")
-    ("n d" deft "Deft")
+    ("n n" sw-notes-new "New note")
+    ("n f" sw-notes-find "Find note")
+    ("n s" sw-notes-search "Search notes")
     ("n j" org-journal-new-entry "Journal entry")))
 
 ;; SPC m dispatches to the mode-local keymap via menu-item filter.
@@ -616,38 +618,6 @@ DEF is a command or nil (prefix-only label)."
   (evil-define-key* 'normal git-timemachine-mode-map
     (kbd "C-n") #'git-timemachine-show-previous-revision
     (kbd "C-a") #'git-timemachine-show-next-revision))
-
-;;; Deft mode bindings
-
-(with-eval-after-load 'deft
-  (defvar sw-deft-local-map (make-sparse-keymap)
-    "Local leader keymap for Deft mode.")
-
-  (sw-define-keys sw-deft-local-map
-    '(("a" deft-new-file "New file")
-      ("A" deft-new-file-named "New file (named)")
-      ("d" deft-delete-file "Delete file")
-      ("D" deft-archive-file "Archive file")
-      ("r" deft-rename-file "Rename file")
-      ("g" deft-refresh "Refresh")
-      ("q" kill-current-buffer "Quit")))
-
-  (push (cons 'deft-mode sw-deft-local-map)
-        sw-local-leader-alist)
-
-  (evil-define-key* 'normal deft-mode-map
-    (kbd "gr") #'deft-refresh
-    (kbd "a")  #'deft-new-file
-    (kbd "A")  #'deft-new-file-named
-    (kbd "d")  #'deft-delete-file
-    (kbd "D")  #'deft-archive-file
-    (kbd "r")  #'deft-rename-file
-    (kbd "q")  #'kill-current-buffer)
-
-  (evil-define-key* 'insert deft-mode-map
-    (kbd "C-n") #'deft-new-file
-    (kbd "C-d") #'deft-delete-file
-    (kbd "C-r") #'deft-rename-file))
 
 (provide 'sw-keybindings)
 ;;; sw-keybindings.el ends here

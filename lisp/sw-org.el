@@ -63,19 +63,5 @@
 (use-package toc-org
   :hook (org-mode . toc-org-mode))
 
-;; Deft - quick note browsing
-(use-package deft
-  :commands deft
-  :custom
-  (deft-directory "~/notes") ; the whole notes repo, org, md and txt
-  (deft-extensions '("txt" "org" "md")) ; first one is the default for new notes
-  (deft-recursive t)
-  (deft-use-filename-as-title t)
-  (deft-use-filter-string-for-filename t)
-  (deft-auto-save-interval -1.0)
-  (deft-file-naming-rules '((noslash . "-")
-                            (nospace . "-")
-                            (case-fn . downcase))))
-
 (provide 'sw-org)
 ;;; sw-org.el ends here
