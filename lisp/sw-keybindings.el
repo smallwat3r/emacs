@@ -340,11 +340,11 @@ DEF is a command or nil (prefix-only label)."
     ("T d" sw-tailscale-down "Down")
 
     ;; IVPN
-    ("V"   nil "IVPN")
-    ("V c" sw-ivpn-connect "Connect to server")
-    ("V l" sw-ivpn-connect-last "Connect last")
-    ("V d" sw-ivpn-disconnect "Disconnect")
-    ("V S" sw-ivpn-status "Status")
+    ("v"   nil "IVPN")
+    ("v c" sw-ivpn-connect "Connect to server")
+    ("v l" sw-ivpn-connect-last "Connect last")
+    ("v d" sw-ivpn-disconnect "Disconnect")
+    ("v S" sw-ivpn-status "Status")
 
     ;; AI/LSP
     ("r"   nil "AI/LSP")
