@@ -61,22 +61,17 @@ Runs after `treesit-major-mode-setup'."
 ;;; Formatting
 
 (use-package apheleia
-  :commands (apheleia-format-buffer apheleia-format-region)
+  :commands apheleia-format-buffer
   :config
   ;; Keep formatter flags in sync with `sw-region-formatters' below
-  ;; Python formatters (black/isort read pyproject.toml automatically)
-  (setf (alist-get 'black apheleia-formatters) '("black" "--quiet" "-"))
-  (setf (alist-get 'isort apheleia-formatters) '("isort" "--profile" "black" "-"))
-
-  ;; Other formatters
   (setf (alist-get 'shfmt apheleia-formatters)
         '("shfmt" "-i" "2" "-ci" "-bn" "-"))
   (setf (alist-get 'prettier-js apheleia-formatters)
         '("prettier" "--stdin-filepath" filepath "--print-width" "120"))
 
   ;; Mode associations
-  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(isort black))
-  (setf (alist-get 'python-mode apheleia-mode-alist) '(isort black))
+  (setf (alist-get 'python-ts-mode apheleia-mode-alist) '(ruff-isort ruff))
+  (setf (alist-get 'python-mode apheleia-mode-alist) '(ruff-isort ruff))
   (setf (alist-get 'bash-ts-mode apheleia-mode-alist) 'shfmt)
   (setf (alist-get 'sh-mode apheleia-mode-alist) 'shfmt))
 
@@ -86,7 +81,7 @@ Runs after `treesit-major-mode-setup'."
   (let (alist)
     (dolist (entry
              '(((python-mode python-ts-mode)
-                "black" "--quiet" "-")
+                "ruff" "format" "-")
                ((go-mode go-ts-mode)
                 "gofmt")
                ((sh-mode bash-ts-mode)
@@ -237,15 +232,10 @@ Handles combined prefixes like `rf' or `fr' correctly."
       (sw-toggle-window (get-buffer (format "*%s*" proc-name))
                         (lambda () (run-python nil 'project t)))))
 
-  (defun sw-python-isort ()
-    "Run isort on the current buffer."
+  (defun sw-python-sort-imports ()
+    "Sort imports in the current buffer with ruff."
     (interactive)
-    (let ((isort (or (executable-find "isort")
-                     (and (fboundp 'pet-executable-find)
-                          (pet-executable-find "isort")))))
-      (unless isort
-        (user-error "isort not found"))
-      (apheleia-format-buffer 'isort))))
+    (apheleia-format-buffer 'ruff-isort)))
 
 ;; Pytest integration
 (use-package python-pytest

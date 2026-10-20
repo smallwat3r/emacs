@@ -470,7 +470,7 @@ DEF is a command or nil (prefix-only label)."
     '(("f"   sw-python-toggle-fstring "Toggle f-string")
       ("r"   sw-python-repl-toggle "Toggle REPL")
       ("i"   nil "Import")
-      ("i o" sw-python-isort "Optimize (isort)")
+      ("i o" sw-python-sort-imports "Sort imports (ruff)")
       ("t"   nil "Test")
       ("t t" python-pytest-run-def-or-class-at-point
        "Test at point")
