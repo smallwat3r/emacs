@@ -336,15 +336,7 @@
                                "LICENSE" "README*" "*-pkg.el"))
                     :source "elpaca-menu-lock-file" :id hl-todo :type git :protocol https :inherit t
                     :depth treeless :ref "527d545b8c2f36243194cbe4a8d0e6ac9d50e6a7"))
- (imenu-list :source "elpaca-menu-lock-file" :recipe
-             (:package "imenu-list" :repo "bmag/imenu-list" :fetcher github :files
-                       ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                        "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info"
-                        "docs/*.texi" "docs/*.texinfo"
-                        (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                  "LICENSE" "README*" "*-pkg.el"))
-                       :source "elpaca-menu-lock-file" :id imenu-list :type git :protocol https
-                       :inherit t :depth treeless :ref "76f2335ee6f2f066d87fe4e4729219d70c9bc70d"))
+ 
  (inheritenv :source "elpaca-menu-lock-file" :recipe
              (:package "inheritenv" :fetcher github :repo "purcell/inheritenv" :files
                        ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"

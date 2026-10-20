@@ -50,14 +50,6 @@
 (use-package restclient
   :mode ("\\.http\\'" . restclient-mode))
 
-;;; Imenu list
-
-(use-package imenu-list
-  :custom
-  (imenu-list-focus-after-activation t)
-  (imenu-list-size 0.2)
-  :commands imenu-list-smart-toggle)
-
 ;;; Pinentry for GPG
 
 (use-package pinentry
