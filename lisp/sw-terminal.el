@@ -428,10 +428,6 @@ Sets TERM to xterm-256color on foot for remote compatibility."
   :ensure nil
   :defer t
   :custom
-  ;; scp transfers files >10KB (`tramp-copy-size-limit') out-of-band as raw
-  ;; bytes over the reused ControlMaster socket, instead of base64 through the
-  ;; shell. Small files still go inline. Big win for large files.
-  (tramp-default-method "scp")
   (tramp-verbose 1)
   (tramp-auto-save-directory
    (expand-file-name "tramp-autosave" user-emacs-directory))
