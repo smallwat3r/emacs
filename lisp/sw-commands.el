@@ -39,6 +39,16 @@
         (kill-buffer)
         (message "Deleted %s" file)))))
 
+(defun sw-sudo-edit ()
+  "Reopen the current file as root, or prompt for one. Local files only."
+  (interactive)
+  (let ((file (or buffer-file-name (read-file-name "Sudo find file: ")))
+        (pos (point)))
+    (when (file-remote-p file)
+      (user-error "Remote files not supported"))
+    (find-file (concat "/sudo::" (expand-file-name file)))
+    (goto-char pos)))
+
 (defun sw-kill-all-projects-and-buffers ()
   "Kill all buffers and close all workspaces except current.
 Preserves *scratch* and *Messages* buffers."

@@ -22,11 +22,6 @@
   (goto-address-url-face 'link)
   (goto-address-mail-face 'link))
 
-;;; Sudo edit
-
-(use-package sudo-edit
-  :commands (sudo-edit sudo-edit-find-file))
-
 ;;; PDF viewing
 
 (use-package pdf-tools
