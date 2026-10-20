@@ -67,7 +67,6 @@
 
 ;; Disable expensive GUI elements early
 (setq inhibit-startup-screen t
-      inhibit-startup-echo-area-message user-login-name
       initial-scratch-message nil
       initial-major-mode 'fundamental-mode)
 
@@ -127,8 +126,7 @@
             (setq file-name-handler-alist sw-file-name-handler-alist)))
 
 ;; Native compilation settings
-(setq native-comp-async-report-warnings-errors 'silent
-      native-comp-jit-compilation t)
+(setq native-comp-async-report-warnings-errors 'silent)
 
 ;; Prefer newer .el files over older .elc
 (setq load-prefer-newer t)
