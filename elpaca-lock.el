@@ -552,16 +552,7 @@
                                  "LICENSE" "README*" "*-pkg.el"))
                       :source "elpaca-menu-lock-file" :id sudo-edit :type git :protocol https
                       :inherit t :depth treeless :ref "74eb1e6986461baed9a9269566ff838530b4379b"))
- (symbol-overlay :source "elpaca-menu-lock-file" :recipe
-                 (:package "symbol-overlay" :fetcher github :repo "wolray/symbol-overlay" :files
-                           ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
-                            "doc/*.info" "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir"
-                            "docs/*.info" "docs/*.texi" "docs/*.texinfo"
-                            (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                      "LICENSE" "README*" "*-pkg.el"))
-                           :source "elpaca-menu-lock-file" :id symbol-overlay :type git :protocol
-                           https :inherit t :depth treeless :ref
-                           "85d100b0cca35b70cee1b260e09af8e1fb2fcc08"))
+
  (tablist :source "elpaca-menu-lock-file" :recipe
           (:package "tablist" :fetcher github :repo "emacsorphanage/tablist" :files
                     ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"

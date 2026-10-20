@@ -232,9 +232,8 @@ DEF is a command or nil (prefix-only label)."
     ("c i" eglot-find-implementation "Find impl")
     ("c t" eglot-find-typeDefinition "Find type def")
     ("c k" eldoc "Show docs")
-    ("c h" symbol-overlay-put "Highlight symbol")
-    ("c H" symbol-overlay-remove-all
-     "Clear highlights")
+    ("c h" highlight-symbol-at-point "Highlight symbol")
+    ("c H" sw-unhighlight-all "Clear highlights")
 
     ;; Git
     ("g"     nil "Git")

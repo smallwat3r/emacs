@@ -78,10 +78,6 @@ TTY still configures fonts when a GUI frame is created later."
 (use-package rainbow-delimiters
   :hook ((emacs-lisp-mode lisp-mode) . rainbow-delimiters-mode))
 
-;; Symbol overlay for manual highlighting
-(use-package symbol-overlay
-  :commands (symbol-overlay-put symbol-overlay-remove-all))
-
 ;; Warm colors for nighttime coding
 (use-package warm-mode
   :ensure (:host github :repo "smallwat3r/emacs-warm-mode")

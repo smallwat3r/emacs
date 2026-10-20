@@ -129,6 +129,11 @@ When deleting single space, also deletes trailing symbol and word."
 
 ;;; Search commands
 
+(defun sw-unhighlight-all ()
+  "Remove all hi-lock highlights in the current buffer."
+  (interactive)
+  (hi-lock-unface-buffer t))
+
 (defun sw-consult-line-symbol ()
   "Search for symbol at point in current buffer."
   (interactive)
