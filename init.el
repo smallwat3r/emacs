@@ -80,6 +80,7 @@
   (global-auto-revert-mode 1)
   (pixel-scroll-precision-mode 1)
   (repeat-mode 1)
+  (kill-ring-deindent-mode 1)
 
   ;; Deferred modes (via custom hooks from early-init.el)
   (add-hook 'sw-first-buffer-hook #'show-paren-mode)
@@ -98,7 +99,8 @@
                   help-mode-hook
                   Info-mode-hook
                   eww-mode-hook))
-    (add-hook hook #'visual-line-mode)))
+    (add-hook hook #'visual-line-mode)
+    (add-hook hook #'visual-wrap-prefix-mode)))
 
 ;;; Garbage collection during idle time
 
