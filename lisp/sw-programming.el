@@ -374,8 +374,7 @@ Works for both JS and TypeScript tree-sitter modes."
 (use-package sh-script
   :ensure nil
   :custom
-  (sh-basic-offset 2)
-  :hook (sh-mode . (lambda () (setq-local indent-tabs-mode nil))))
+  (sh-basic-offset 2))
 
 ;;; SQL
 
