@@ -146,7 +146,6 @@ DEF is a command or nil (prefix-only label)."
     ("x"   scratch-buffer "Scratch buffer")
     ("RET" bookmark-jump "Jump to bookmark")
     ("u"   universal-argument "Universal arg")
-    ("y"   sw-copy-dedented "Copy dedented")
 
     ;; Buffers
     ("b"   nil "Buffer")

@@ -129,14 +129,6 @@ When deleting single space, also deletes trailing symbol and word."
     (kill-region
      (sw--backward-kill-word-boundary start) start)))
 
-(defun sw-copy-dedented (beg end)
-  "Copy region between BEG and END with common indentation removed."
-  (interactive "r")
-  (let ((text (buffer-substring-no-properties beg end)))
-    (kill-new (sw-string-reindent text (sw-string-min-indent text) 0))
-    (deactivate-mark)
-    (message "Copied dedented text")))
-
 ;;; Search commands
 
 (defun sw-unhighlight-all ()
