@@ -359,8 +359,6 @@ DEF is a command or nil (prefix-only label)."
      "Send with context")
     ("r b" claude-code-send-buffer-file
      "Send buffer file")
-    ("r e" claude-code-fix-error-at-point
-     "Fix error at point")
     ("r m" claude-code-cycle-mode "Cycle mode")
     ("r M" claude-code-transient "Transient menu")
     ("r k" claude-code-kill "Kill session")
