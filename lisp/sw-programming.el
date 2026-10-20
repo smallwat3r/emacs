@@ -20,6 +20,7 @@
   ;; `treesit-install-language-grammar'
   (treesit-language-source-alist
    '((typst "https://github.com/uben0/tree-sitter-typst")
+     (lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
      (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")))
   :init
   ;; Set eagerly so the very first file opened remaps; treesit itself
@@ -412,7 +413,9 @@ Works for both JS and TypeScript tree-sitter modes."
 
 (use-package terraform-mode)
 
-(use-package lua-mode)
+(use-package lua-ts-mode
+  :ensure nil
+  :mode "\\.lua\\'")
 
 (use-package nginx-mode)
 
@@ -430,7 +433,7 @@ Works for both JS and TypeScript tree-sitter modes."
   :ensure (:host github :repo "smallwat3r/emacs-ros-face"))
 
 ;; Conky config files are Lua
-(add-to-list 'auto-mode-alist '("conky\\.conf\\'" . lua-mode))
+(add-to-list 'auto-mode-alist '("conky\\.conf\\'" . lua-ts-mode))
 
 ;; Djot (use markdown-mode as syntax is similar)
 (add-to-list 'auto-mode-alist '("\\.dj\\'" . markdown-mode))

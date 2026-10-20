@@ -369,11 +369,7 @@
         (:package "llama" :fetcher github :repo "tarsius/llama" :files ("llama.el" ".dir-locals.el")
                   :source "elpaca-menu-lock-file" :id llama :type git :protocol https :inherit t
                   :depth treeless :ref "4d4024048053b898a01521046e0f063ee47615b0"))
- (lua-mode :source "elpaca-menu-lock-file" :recipe
-           (:package "lua-mode" :repo "immerrr/lua-mode" :fetcher github :files
-                     (:defaults (:exclude "init-tryout.el")) :source "elpaca-menu-lock-file" :id
-                     lua-mode :type git :protocol https :inherit t :depth treeless :ref
-                     "2f6b8d7a6317e42c953c5119b0119ddb337e0a5f"))
+ 
  (magit :source "elpaca-menu-lock-file" :recipe
         (:package "magit" :fetcher github :repo "magit/magit" :files
                   ("lisp/magit*.el" "lisp/git-*.el" "docs/magit.texi" "docs/AUTHORS.md" "LICENSE"
