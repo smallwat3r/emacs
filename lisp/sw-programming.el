@@ -23,21 +23,20 @@
   :init
   ;; Set eagerly so the very first file opened remaps; treesit itself
   ;; loads on demand when a ts mode starts
+  ;; Only built-in modes can be remapped, the other ts modes register
+  ;; their own `auto-mode-alist' entries
   (setq major-mode-remap-alist
         '((c-mode . c-ts-mode)
           (c++-mode . c++-ts-mode)
-          (cmake-mode . cmake-ts-mode)
+          (c-or-c++-mode . c-or-c++-ts-mode)
           (css-mode . css-ts-mode)
-          (go-mode . go-ts-mode)
           (java-mode . java-ts-mode)
           (js-mode . js-ts-mode)
-          (json-mode . json-ts-mode)
+          (js-json-mode . json-ts-mode)
           (python-mode . python-ts-mode)
           (ruby-mode . ruby-ts-mode)
-          (rust-mode . rust-ts-mode)
           (sh-mode . bash-ts-mode)
-          (toml-mode . toml-ts-mode)
-          (yaml-mode . yaml-ts-mode)))
+          (conf-toml-mode . toml-ts-mode)))
   :config
   (defun sw-treesit-promote-font-lock-features ()
     "Promote select features to level 2 in all tree-sitter modes.
