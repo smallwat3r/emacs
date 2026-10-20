@@ -17,7 +17,8 @@
 
 (use-package goto-addr
   :ensure nil
-  :hook ((prog-mode text-mode) . goto-address-mode)
+  :hook ((prog-mode . goto-address-prog-mode)
+         (text-mode . goto-address-mode))
   :custom
   (goto-address-url-face 'link)
   (goto-address-mail-face 'link))
