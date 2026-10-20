@@ -326,17 +326,7 @@
                                "LICENSE" "README*" "*-pkg.el"))
                     :source "elpaca-menu-lock-file" :id helpful :type git :protocol https :inherit t
                     :depth treeless :ref "03756fa6ad4dcca5e0920622b1ee3f70abfc4e39"))
- (highlight-numbers :source "elpaca-menu-lock-file" :recipe
-                    (:package "highlight-numbers" :fetcher github :repo "Fanael/highlight-numbers"
-                              :old-names (number-font-lock-mode) :files
-                              ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
-                               "doc/*.info" "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir"
-                               "docs/*.info" "docs/*.texi" "docs/*.texinfo"
-                               (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el"
-                                         "*-tests.el" "LICENSE" "README*" "*-pkg.el"))
-                              :source "elpaca-menu-lock-file" :id highlight-numbers :type git
-                              :protocol https :inherit t :depth treeless :ref
-                              "8b4744c7f46c72b1d3d599d4fb75ef8183dee307"))
+ 
  (hl-todo :source "elpaca-menu-lock-file" :recipe
           (:package "hl-todo" :repo "tarsius/hl-todo" :fetcher github :files
                     ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
@@ -459,15 +449,7 @@
                          (:defaults "data" (:exclude "*flymake.el")) :source "elpaca-menu-lock-file"
                          :id package-lint :type git :protocol https :inherit t :depth treeless :ref
                          "1865be780a16098f972fef50a52b21ca6ee04df9"))
- (parent-mode :source "elpaca-menu-lock-file" :recipe
-              (:package "parent-mode" :fetcher github :repo "Fanael/parent-mode" :files
-                        ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"
-                         "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir" "docs/*.info"
-                         "docs/*.texi" "docs/*.texinfo"
-                         (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el" "*-tests.el"
-                                   "LICENSE" "README*" "*-pkg.el"))
-                        :source "elpaca-menu-lock-file" :id parent-mode :type git :protocol https
-                        :inherit t :depth treeless :ref "fbd49857ab2e4cd0c5611c0cc83f93711657b298"))
+ 
  (pass :source "elpaca-menu-lock-file" :recipe
        (:package "pass" :fetcher github :repo "NicolasPetton/pass" :files
                  ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir" "doc/*.info"

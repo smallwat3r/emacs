@@ -46,7 +46,7 @@ Runs after `treesit-major-mode-setup'."
     (when-let* ((flist treesit-font-lock-feature-list)
                 (upper (apply #'append (nthcdr 2 flist)))
                 (hit (seq-intersection
-                      '(escape-sequence string-interpolation)
+                      '(escape-sequence string-interpolation number literal)
                       upper)))
       (setq-local treesit-font-lock-feature-list
                   (mapcar (lambda (l)
