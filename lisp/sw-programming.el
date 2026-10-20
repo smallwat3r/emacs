@@ -19,7 +19,8 @@
   ;; Grammars not bundled with Emacs, install with
   ;; `treesit-install-language-grammar'
   (treesit-language-source-alist
-   '((typst "https://github.com/uben0/tree-sitter-typst")))
+   '((typst "https://github.com/uben0/tree-sitter-typst")
+     (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")))
   :init
   ;; Set eagerly so the very first file opened remaps; treesit itself
   ;; loads on demand when a ts mode starts
@@ -402,7 +403,9 @@ Works for both JS and TypeScript tree-sitter modes."
 ;; These packages register their extensions through autoloads, only
 ;; web-mode below needs an explicit :mode
 
-(use-package dockerfile-mode)
+(use-package dockerfile-ts-mode
+  :ensure nil
+  :mode "\\(?:Dockerfile\\(?:\\..*\\)?\\|\\.[Dd]ockerfile\\)\\'")
 
 (use-package docker
   :commands docker)

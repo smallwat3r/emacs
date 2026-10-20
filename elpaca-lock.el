@@ -136,16 +136,7 @@
                               "LICENSE" "README*" "*-pkg.el"))
                    :source "elpaca-menu-lock-file" :id docker :type git :protocol https :inherit t
                    :depth treeless :ref "e476b1bf73e917aaae43daab763696629d864425"))
- (dockerfile-mode :source "elpaca-menu-lock-file" :recipe
-                  (:package "dockerfile-mode" :fetcher github :repo "spotify/dockerfile-mode" :files
-                            ("*.el" "*.el.in" "dir" "*.info" "*.texi" "*.texinfo" "doc/dir"
-                             "doc/*.info" "doc/*.texi" "doc/*.texinfo" "lisp/*.el" "docs/dir"
-                             "docs/*.info" "docs/*.texi" "docs/*.texinfo"
-                             (:exclude ".dir-locals.el" "test.el" "tests.el" "*-test.el"
-                                       "*-tests.el" "LICENSE" "README*" "*-pkg.el"))
-                            :source "elpaca-menu-lock-file" :id dockerfile-mode :type git :protocol
-                            https :inherit t :depth treeless :ref
-                            "97733ce074b1252c1270fd5e8a53d178b66668ed"))
+ 
  (eat :source "elpaca-menu-lock-file" :recipe
       (:package "eat" :repo ("https://codeberg.org/akib/emacs-eat" . "eat") :tar "0.9.4" :host
                 nongnu :files ("*" (:exclude ".git")) :source "elpaca-menu-lock-file" :id eat :type
