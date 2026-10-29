@@ -83,7 +83,7 @@
 ;;; Font management
 
 ;; Primary font family (set early, before display is available)
-(defvar sw-font-family (if sw-is-mac "Monaco" "Ocrab Nerd Font Mono")
+(defvar sw-font-family (if sw-is-mac "Monaco" "MonacoB")
   "Primary monospace font for code and default text.")
 
 ;; Fallback font lists (resolved after display is available)
@@ -103,8 +103,12 @@
 (defvar sw-font-emoji nil
   "Font for emoji characters. Set after init.")
 
-(defvar sw-font-size (if sw-is-mac 13 10.5)
+(defvar sw-font-size (if sw-is-mac 13 11.5)
   "Default font size in points (may be fractional, e.g. 10.5).")
+
+;; Linux: family and size come from the dotfiles theme (`make theme` there)
+(unless sw-is-mac
+  (load (expand-file-name "~/.config/theme/font.el") t t))
 
 ;; Set primary font early to prevent random sizing
 (set-face-attribute 'default nil :family sw-font-family
