@@ -132,7 +132,14 @@ container_name() {
     name="${name}-${instance%\*}"
   fi
   name="${name//[^[:alnum:]_.-]/-}"
-  CONTAINER_NAME="${name%-}"
+  # Buffer names are only unique within one Emacs, so a second Emacs (or a
+  # plain shell) on the same project asks for a name that is already
+  # taken. Step past it rather than fail, the other session is still live.
+  local base="${name%-}" n=2
+  CONTAINER_NAME="${base}"
+  while docker container inspect "${CONTAINER_NAME}" >/dev/null 2>&1; do
+    CONTAINER_NAME="${base}-$((n++))"
+  done
 }
 
 sidecar_running() { # name
