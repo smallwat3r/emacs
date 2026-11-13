@@ -77,9 +77,7 @@ When PREFER-REMOTE is non-nil and in a remote directory, return that directly."
 Removes projects that no longer exist and re-scans `sw-project-directories'
 for new projects."
   (interactive)
-  (setq project--list nil)
-  (when (file-exists-p project-list-file)
-    (delete-file project-list-file))
+  (project-forget-zombie-projects)
   (sw-project-discover))
 
 (provide 'sw-project)
