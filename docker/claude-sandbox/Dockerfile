@@ -30,7 +30,7 @@ ARG MCAP_VERSION=v0.3.0
 ARG MCAP_SHA256_AMD64=5d4100573fab880f1c6400952466275bb3b32c3d230a54f7c380ee0d08e59eef
 ARG MCAP_SHA256_ARM64=be9734ef63ada9d0cc7a3aa41378ab65fd482601e5f5b3b52098d8e6553deabf
 # Claude Code: exact version from npm
-ARG CLAUDE_CODE_VERSION=2.1.261
+ARG CLAUDE_CODE_VERSION=2.1.323
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
