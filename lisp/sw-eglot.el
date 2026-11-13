@@ -15,7 +15,7 @@
           typescript-ts-mode
           tsx-ts-mode
           js-ts-mode
-          sh-mode
+          bash-ts-mode
           terraform-mode)
          . eglot-ensure)
   :init
