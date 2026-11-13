@@ -110,9 +110,8 @@
 (unless sw-is-mac
   (load (expand-file-name "~/.config/theme/font.el") t t))
 
-;; Set primary font early to prevent random sizing
-(set-face-attribute 'default nil :family sw-font-family
-                    :height (round (* sw-font-size 10)))
+;; Set the font as a frame parameter so the first frame is created with
+;; it, no face exists to touch this early
 (push `(font . ,(format "%s-%s" sw-font-family sw-font-size))
       default-frame-alist)
 
