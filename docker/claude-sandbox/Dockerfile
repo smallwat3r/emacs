@@ -86,6 +86,16 @@ RUN apt-get update \
     admesh \
     && rm -rf /var/lib/apt/lists/*
 
+# KiCad (kicad-cli, pcbnew Python bindings, symbol and footprint libraries).
+# Bookworm's own kicad is 6.x without kicad-cli, so take it from backports in
+# its own install so -t does not pull anything else from there. The 3D model
+# package (kicad-packages3d, several GB) is a recommend and deliberately left out.
+RUN echo "deb http://deb.debian.org/debian bookworm-backports main" \
+    > /etc/apt/sources.list.d/backports.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends -t bookworm-backports kicad \
+    && rm -rf /var/lib/apt/lists/*
+
 # Python package manager, copied from its official image (pinned)
 COPY --from=ghcr.io/astral-sh/uv:0.12.10 /uv /uvx /usr/local/bin/
 

@@ -8,6 +8,8 @@ not install them again:
 - git, gh, ssh, docker CLI (host socket is read-only: ps/inspect/logs work, run/build do not)
 - ripgrep, fd, jq, tree, ffmpeg, imagemagick, webp, pandoc, poppler-utils,
   qpdf, gnuplot, openscad, admesh, typst
+- KiCad 9 (kicad-cli, pcbnew Python module, symbol and footprint libraries,
+  no 3D models), headless only
 
 Constraints: the container is read-only (no sudo, no apt), writable space is
 /tmp, ~/.cache, ~/.npm and the mounted project. For extra Python packages
