@@ -89,8 +89,8 @@ If a workspace for the project already exists, switch to it."
         (tab-bar-new-tab)
         (tab-bar-rename-tab name)
         (delete-other-windows)
-        (setq default-directory root)
-        (project-find-file)))))
+        (let ((default-directory root))
+          (project-find-file))))))
 
 (defun sw-workspace-find-in-directory (dir name)
   "Find file in DIR, switching to or creating workspace NAME."
@@ -130,14 +130,10 @@ If a workspace for the project already exists, switch to it."
       (message "%s | Closed workspace, killed %d buffer(s)"
                (sw-workspace--tabline) (or count 0)))))
 
-(dolist (fn '(tab-bar-new-tab
-              tab-bar-switch-to-tab
-              tab-bar-switch-to-next-tab
-              tab-bar-switch-to-prev-tab
-              tab-bar-select-tab
-              tab-bar-rename-tab))
-  (advice-add fn :after #'sw-workspace--display-after))
-
+;; Open and select have native hooks, rename and close do not
+(add-hook 'tab-bar-tab-post-open-functions #'sw-workspace--display-after)
+(add-hook 'tab-bar-tab-post-select-functions #'sw-workspace--display-after)
+(advice-add 'tab-bar-rename-tab :after #'sw-workspace--display-after)
 (advice-add 'tab-bar-close-tab :after #'sw-workspace--display-after-close)
 
 (defun sw-workspace--rename-buffer-list (fn name &optional tab-number)
@@ -205,18 +201,17 @@ Intended for use in `kill-buffer-hook'."
         (cl-incf count)))
     count))
 
-(defun sw-workspace--kill-buffers-on-close (&optional tab-number &rest _)
-  "Kill buffers associated with the workspace being closed.
-TAB-NUMBER is the 1-based tab number, or nil for current tab."
-  (let* ((tabs (funcall tab-bar-tabs-function))
-         (idx (if tab-number (1- tab-number) (tab-bar--current-tab-index tabs)))
-         (name (alist-get 'name (nth idx tabs)))
+(defun sw-workspace--kill-buffers-on-close (tab &optional _last)
+  "Kill buffers associated with workspace TAB, which is being closed.
+For `tab-bar-tab-pre-close-functions', so it also runs from
+`tab-bar-close-other-tabs'."
+  (let* ((name (alist-get 'name tab))
          (buffers (alist-get name sw-workspace-buffer-alist nil nil #'equal)))
     (setq sw-workspace--last-kill-count (sw-workspace--kill-buffers buffers))
     (setq sw-workspace-buffer-alist
           (assoc-delete-all name sw-workspace-buffer-alist #'equal))))
 
-(advice-add 'tab-bar-close-tab :before #'sw-workspace--kill-buffers-on-close)
+(add-hook 'tab-bar-tab-pre-close-functions #'sw-workspace--kill-buffers-on-close)
 
 (defun sw-workspace--track-buffer (frame)
   "Track the buffers shown in FRAME's windows in its workspace.
