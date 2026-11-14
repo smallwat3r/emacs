@@ -235,9 +235,9 @@ loop is free, a synchronous call would deadlock until gpg gives up."
       (progn
         (require 'pinentry)
         (pinentry-start 'quiet)
-        (sw-run-async '("git" "rebase"
-                        "--exec" "git commit --amend --no-edit -n -S"
-                        "@{upstream}")
+        ;; git-sign-unpushed (dotfiles) aborts the rebase when signing
+        ;; fails, so a missed passphrase prompt never leaves HEAD detached
+        (sw-run-async '("git" "sign-unpushed")
                       (lambda ()
                         (message "claude-commit done, commits signed"))))
     (message "claude-commit done, no upstream so commits left unsigned")))
