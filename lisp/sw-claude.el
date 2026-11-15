@@ -2,17 +2,22 @@
 
 ;;; Commentary:
 ;; Integration with claude-code CLI for AI-assisted coding.
-;; Claude runs inside a Docker sandbox (see docker/claude-sandbox/)
-;; via a wrapper script (bin/claude-docker) that mounts the project
+;; Claude runs inside a Docker sandbox via the claude-docker wrapper
+;; script (from the claude-sandbox repository) that mounts the project
 ;; directory and forwards auth, git config, and SSH agent.
 
 ;;; Code:
 
 (require 'sw-lib)
 
-(defconst sw-claude-docker-script
-  (expand-file-name "bin/claude-docker" user-emacs-directory)
-  "Path to the Docker wrapper script for sandboxed Claude.")
+(defcustom sw-claude-docker-script
+  (or (executable-find "claude-docker")
+      (expand-file-name "~/code/claude-sandbox/bin/claude-docker"))
+  "Path to the Docker wrapper script for sandboxed Claude.
+It lives in the claude-sandbox repository, found on `exec-path'
+or at its usual checkout."
+  :type 'file
+  :group 'tools)
 
 (defun sw-claude-notify (title message)
   "Display a Linux notification with TITLE and MESSAGE using notify-send."
@@ -32,8 +37,11 @@ If in a split view, display in the current window."
   "Refresh the pinned versions in the Claude Docker sandbox Dockerfile.
 Run `sw-claude-rebuild-sandbox' afterwards to build the new image."
   (interactive)
-  (let ((default-directory user-emacs-directory))
-    (compile "docker/claude-sandbox/update-pins.py")))
+  (compile (shell-quote-argument
+            (expand-file-name
+             "../docker/claude-sandbox/update-pins.py"
+             (file-name-directory
+              (file-truename sw-claude-docker-script))))))
 
 (defun sw-claude-rebuild-sandbox ()
   "Force rebuild the Claude Docker sandbox image."
@@ -99,7 +107,7 @@ scrollback appear stuck."
 
 (add-hook 'eat-mode-hook #'sw-claude--setup-eat-buffer)
 
-;; Same trick as bin/claude-docker: keep Claude's TUI off the
+;; Same trick as claude-docker: keep Claude's TUI off the
 ;; alternate screen so eat scrollback works when running `claude'
 ;; from a plain eat shell.  Inherited by every Emacs subprocess,
 ;; harmless outside Claude.
@@ -223,7 +231,7 @@ successful run, with `default-directory' set to the run directory."
 (defun sw-claude--resign-commits ()
   "Re-sign the unpushed commits on the host, where gpg lives.
 The sandbox has no gpg, so its commits are made unsigned (see
-bin/claude-docker); rewrite everything since upstream with real
+claude-docker); rewrite everything since upstream with real
 signatures.  Skipped when the branch has no upstream, everything
 would be unpushed and rewriting from the root is not worth it.
 

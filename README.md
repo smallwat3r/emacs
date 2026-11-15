@@ -36,28 +36,14 @@ $ make
 
 ## Claude Code sandbox
 
-Claude Code runs inside a Docker container for sandboxing. The setup lives in
-`docker/claude-sandbox/` (Dockerfile) and `bin/claude-docker` (wrapper script).
+Claude Code runs inside a Docker container for sandboxing. The wrapper script
+and image live in their own repository,
+[claude-sandbox](https://github.com/smallwat3r/claude-sandbox), checked out at
+`~/code/claude-sandbox` (see its README for what the sandbox does). `lisp/sw-claude.el` finds
+`claude-docker` on the `PATH`, falling back to that checkout.
 
-The wrapper script builds the image on first use, then runs Claude with the
-project directory mounted read-write. Security hardening includes read-only
-root filesystem, all capabilities dropped, no-new-privileges, and a PID limit.
-A Docker socket proxy (tecnativa/docker-socket-proxy) gives the sandbox
-read-only visibility into the host's Docker daemon, so Claude can list and
-inspect other project containers and read their logs (e.g. to debug a running
-dev service). Every write operation is blocked (run, exec, build, network and
-volume changes): a write to the root daemon would let the sandbox spawn a
-sibling container that mounts the host filesystem and escape entirely.
-
-Secrets stay on the host: `.env`, `.env.*` and `.envrc` files in the mounted
-directories are shadowed with `/dev/null` (templates such as `.env.example`
-remain readable). Extra project directories can be mounted with
-`--add-dir DIR` or `CLAUDE_DOCKER_EXTRA_DIRS=a:b` (`M-x sw-claude-with-dirs`
-in Emacs), `~/claude-shared` is always mounted when it exists. The home
-directory, its parents and the filesystem root are refused as mounts.
-
-To upgrade the pinned versions in the Dockerfile, then rebuild the image
-(`bin/claude-docker --rebuild` from a shell):
+Extra project directories can be mounted with `M-x sw-claude-with-dirs`. To
+upgrade the pinned versions in the Dockerfile, then rebuild the image:
 
 ```
 M-x sw-claude-upgrade-sandbox
