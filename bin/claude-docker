@@ -217,7 +217,7 @@ base_args() {
     --read-only
     # exec where builds and test binaries run; sized so a runaway process
     # cannot eat host RAM through an unbounded tmpfs (default: half of RAM)
-    --tmpfs /tmp:exec,size=1g
+    --tmpfs /tmp:exec,size=4g
     --tmpfs "${CONTAINER_HOME}/.cache:exec,size=2g"
     --tmpfs "${CONTAINER_HOME}/.config:size=64m"
     --tmpfs "${CONTAINER_HOME}/.npm:exec,size=1g"
