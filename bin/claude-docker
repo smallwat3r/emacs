@@ -6,6 +6,12 @@
 #
 #   claude-docker [--add-dir DIR]... [claude args]...
 #   claude-docker --rebuild        force a clean image rebuild, then exit
+#   claude-docker --worktree [NAME]   second session on its own checkout
+#
+# --worktree is claude's own flag, forwarded like any other claude arg: it
+# creates a git worktree and branch under .claude/worktrees/ in the project,
+# which the project mount already covers, so parallel sessions do not share
+# a working tree or index.
 #
 # Extra project directories (e.g. the frontend repo next to this backend)
 # are mounted read-write at their host path, get their .env files shadowed
