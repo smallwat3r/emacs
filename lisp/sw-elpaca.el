@@ -10,8 +10,12 @@
 (defvar elpaca-lock-file (expand-file-name "elpaca-lock.el" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-sources-directory (expand-file-name "sources/" elpaca-directory))
+;; Full clone (no :depth): elpaca-use-package lives in this same checkout
+;; and the lock file pins it to an older commit, which a shallow clone of
+;; elpaca's current HEAD does not contain, so its install fails and every
+;; `:ensure (:wait t)' after it errors out.
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1 :inherit ignore
+                              :ref nil :depth nil :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca-activate)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-sources-directory))
