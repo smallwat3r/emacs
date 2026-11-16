@@ -345,7 +345,7 @@ DEF is a command or nil (prefix-only label)."
     ;; AI/LSP
     ("r"   nil "AI/LSP")
     ("r c" claude-code "Claude chat")
-    ("r a" sw-claude-with-dirs "Claude with extra dirs")
+    ("r a" sw-claude-with-options "Claude with options")
     ("r C" claude-code-continue "Claude continue")
     ("r R" claude-code-resume "Claude resume")
     ("r n" claude-code-new-instance "New instance")
@@ -363,6 +363,10 @@ DEF is a command or nil (prefix-only label)."
     ("r M" claude-code-transient "Transient menu")
     ("r k" claude-code-kill "Kill session")
     ("r g" sw-claude-commit "Build commits")
+    ("r l" sw-claude-trace-menu "Trace sessions")
+    ("r f" sw-claude-trace-follow "Follow sessions")
+    ("r $" sw-claude-shell "Sandbox shell")
+    ("r S" sw-claude-sandbox-menu "Sandbox menu")
     ("r w" eglot-reconnect "Reconnect Eglot")
 
     ;; Insert

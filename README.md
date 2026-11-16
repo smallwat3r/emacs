@@ -42,8 +42,17 @@ and image live in their own repository,
 `~/code/claude-sandbox` (see its README for what the sandbox does). `lisp/sw-claude.el` finds
 `claude-docker` on the `PATH`, falling back to that checkout.
 
-Extra project directories can be mounted with `M-x sw-claude-with-dirs`. To
-upgrade the pinned versions in the Dockerfile, then rebuild the image:
+The launcher's features are on `SPC r`, and all of them in one menu on
+`SPC r S` (`sw-claude-sandbox-menu`): sessions with options of their own, a
+shell in the sandbox, the trace of a session, the image and the egress filter.
+
+Ending a session, with `SPC r k` or by killing its buffer, does not kill the
+launcher: it is told to end, stops the container and runs its checks (files
+that can run commands on the host, what the session reached on the network).
+The buffer goes once it is done, and what it reports is kept in
+`*claude-sandbox*`. Killing the buffer a second time forces it.
+
+To upgrade the pinned versions of the image, then rebuild it:
 
 ```
 M-x sw-claude-upgrade-sandbox
