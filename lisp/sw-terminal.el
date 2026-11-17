@@ -87,6 +87,29 @@ magenta, cyan and white, then their bright variants.")
 
 ;;; Eat - Emulate A Terminal
 
+(defvar eat-terminal)
+(defvar eat--synchronize-scroll-function)
+(declare-function eat--synchronize-scroll-windows "eat"
+                  (&optional force-selected))
+(declare-function eat--adjust-process-window-size "eat" (process windows))
+(declare-function eat-term-send-string "eat" (terminal string))
+
+(defun sw-eat--follow-cursor ()
+  "Put point and the selected window back on the terminal cursor.
+eat only keeps following the cursor in a window whose point is
+already on it, and forces it for keys it sends itself.  Anything
+else that leaves point elsewhere, evil's normal state or a string
+sent with `eat-term-send-string', makes it stop following."
+  (when (bound-and-true-p eat-terminal)
+    (funcall eat--synchronize-scroll-function
+             (eat--synchronize-scroll-windows 'force-selected))))
+
+(defun sw-eat--send (string)
+  "Send STRING to the terminal as typed input, following the cursor."
+  (when (bound-and-true-p eat-terminal)
+    (sw-eat--follow-cursor)
+    (eat-term-send-string eat-terminal string)))
+
 (use-package eat
   :commands (eat eat-project eat-other-window)
   :custom
@@ -110,15 +133,18 @@ magenta, cyan and white, then their bright variants.")
 
   ;; Evil integration: switch eat modes based on evil state
   (defun sw-eat-evil-insert-enter ()
-    "Switch to semi-char mode when entering insert state in eat."
+    "Switch to semi-char mode when entering insert state in eat.
+Point goes back to the terminal cursor, normal state leaves it
+wherever it was moved to."
     (when (and (derived-mode-p 'eat-mode)
                ;; eat-mode-hook enters insert state before the
                ;; process starts, eat errors without a terminal
-               (bound-and-true-p eat-terminal)
-               (not (bound-and-true-p eat--semi-char-mode))
-               ;; leave char mode (passthrough) alone
-               (not (bound-and-true-p eat--char-mode)))
-      (eat-semi-char-mode)))
+               (bound-and-true-p eat-terminal))
+      (unless (or (bound-and-true-p eat--semi-char-mode)
+                  ;; leave char mode (passthrough) alone
+                  (bound-and-true-p eat--char-mode))
+        (eat-semi-char-mode))
+      (sw-eat--follow-cursor)))
 
   (defun sw-eat-evil-insert-exit ()
     "Switch to emacs mode when exiting insert state in eat."
@@ -142,14 +168,12 @@ magenta, cyan and white, then their bright variants.")
   (defun sw-eat-yank ()
     "Yank the last killed text into eat terminal."
     (interactive)
-    (when eat-terminal
-      (eat-term-send-string eat-terminal (current-kill 0))))
+    (sw-eat--send (current-kill 0)))
 
   (defun sw-eat-backward-kill-word ()
     "Send backward-kill-word (M-backspace / ESC DEL) to terminal."
     (interactive)
-    (when eat-terminal
-      (eat-term-send-string eat-terminal "\e\C-?")))
+    (sw-eat--send "\e\C-?"))
 
   (defun sw-eat-passthrough-toggle ()
     "Toggle full key passthrough, for SSH, screen and remote vim.
@@ -166,8 +190,7 @@ toggle back."
   (defun sw-eat-interrupt ()
     "Send interrupt (C-c) to the eat terminal."
     (interactive)
-    (when (bound-and-true-p eat-terminal)
-      (eat-term-send-string eat-terminal "\C-c")))
+    (sw-eat--send "\C-c"))
 
   ;; TRAMP integration: rename buffer, inject `e` function to open remote files
   (defun sw-eat-find-file-handler (path)
@@ -188,13 +211,15 @@ printf '\\033]51;e;M;%%s;%%s\\033\\\\' \"$(printf 'find-file' | base64)\" \
 clear\n" prefix))
 
   (defun sw-eat--send-tramp-init (proc prefix)
-    "Size the terminal and send the TRAMP shell init for PREFIX to PROC."
+    "Size the terminal and send the TRAMP shell init for PREFIX to PROC.
+The size goes through eat, so that its screen and the remote pty
+agree on it: a pty one column wider than the screen breaks the
+wrapping of long lines."
     (when (process-live-p proc)
-      (let* ((win (get-buffer-window (current-buffer)))
-             (rows (if win (window-body-height win) 24))
-             (cols (if win (window-body-width win) 80)))
-        (set-process-window-size proc rows cols)
-        (process-send-string proc (sw-eat--tramp-init-string prefix)))))
+      (when-let* ((size (eat--adjust-process-window-size
+                         proc (get-buffer-window-list nil nil t))))
+        (set-process-window-size proc (cdr size) (car size)))
+      (process-send-string proc (sw-eat--tramp-init-string prefix))))
 
   (defun sw-eat-setup-tramp (proc)
     "Configure eat for TRAMP: rename buffer, set TERM, inject `e` file opener.
@@ -228,16 +253,12 @@ Remote directories use format `*eat@<remote>*', local use `*eat:<path>*'."
       (format "*eat@%s*" (file-remote-p dir))
     (format "*eat:%s*" (abbreviate-file-name dir))))
 
-(defun sw-eat--get-buffer (dir)
-  "Get existing or create new eat buffer for DIR.
-Returns existing buffer if one exists for DIR, otherwise creates a new one."
-  (require 'eat)
-  (let ((buf-name (sw-eat--buffer-for-dir dir)))
-    (or (get-buffer buf-name)
-        (sw-eat--new-buffer dir buf-name))))
-
-(defun sw-eat--new-buffer (dir &optional name)
-  "Create a new eat terminal buffer for DIR with optional NAME.
+(defun sw-eat--new-buffer (dir display &optional name)
+  "Create and show a new eat terminal buffer for DIR with optional NAME.
+DISPLAY is called with the buffer to show it, before the shell
+starts: eat sizes the terminal from the window of its buffer, and
+without one the shell starts at 80x24 and draws its first prompt
+for the wrong width.
 For remote directories, uses TRAMP to connect.
 For local directories, uses the user's default shell."
   (require 'eat)
@@ -252,7 +273,9 @@ For local directories, uses the user's default shell."
          (buffer (get-buffer-create buf-name)))
     (with-current-buffer buffer
       (unless (eq major-mode 'eat-mode)
-        (eat-mode))
+        (eat-mode)))
+    (funcall display buffer)
+    (with-current-buffer buffer
       (unless (and (bound-and-true-p eat-terminal)
                    (eat-term-parameter eat-terminal 'eat--process))
         (eat-exec buffer buf-name shell nil nil)))
@@ -273,7 +296,7 @@ If HERE is non-nil, open at current buffer's directory.
 For remote directories, opens a shell on the remote host."
   (interactive "P")
   (require 'eat)
-  (switch-to-buffer (sw-eat--new-buffer (sw-eat--determine-directory here))))
+  (sw-eat--new-buffer (sw-eat--determine-directory here) #'switch-to-buffer))
 
 (defun sw-eat--send-cd (buf dir)
   "Send a cd command to eat BUF to change to DIR.
@@ -296,11 +319,12 @@ current buffer's directory, otherwise cd to project root."
   (require 'eat)
   (let* ((root (sw-eat--project-root))
          (dir (sw-eat--determine-directory here))
-         (existing (get-buffer (sw-eat--buffer-for-dir root)))
-         (b (sw-eat--get-buffer root)))
-    (pop-to-buffer b)
-    (when existing
-      (sw-eat--send-cd b dir))))
+         (name (sw-eat--buffer-for-dir root))
+         (existing (get-buffer name)))
+    (if (not existing)
+        (sw-eat--new-buffer root #'pop-to-buffer name)
+      (pop-to-buffer existing)
+      (sw-eat--send-cd existing dir))))
 
 (defun sw-eat-here-current-buffer ()
   "Open an eat buffer from the current directory."
@@ -367,9 +391,7 @@ Current input becomes a prefix filter (^pattern)."
            (sw--zsh-history-collection history)
            nil nil
            (if input (concat "^" input) ""))))
-    (when input
-      (eat-term-send-string eat-terminal "\C-u"))
-    (eat-term-send-string eat-terminal choice)))
+    (sw-eat--send (concat (and input "\C-u") choice))))
 
 (defun sw-eat--kill-buffers (&optional keep-current)
   "Kill eat buffers in the current workspace.
