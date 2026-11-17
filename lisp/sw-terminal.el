@@ -6,6 +6,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'seq)
 (require 'sw-lib)
 
 ;;; SSH config files
@@ -57,6 +58,33 @@ LIMIT defaults to 10000."
   (interactive)
   (find-file (read-file-name "SSH target: " "/scp:")))
 
+;;; The 16 ANSI colours
+
+(defconst sw-terminal-palette
+  ["#000000" "#aa0000" "#00aa00" "#aa5500"
+   "#0000aa" "#aa00aa" "#00aaaa" "#555555"
+   "#444444" "#cc0000" "#00cc00" "#cc7700"
+   "#0000cc" "#cc00cc" "#00cccc" "#333333"]
+  "The 16 ANSI colours, picked to read well on a light background.
+In the order of the escape codes: black, red, green, yellow, blue,
+magenta, cyan and white, then their bright variants.")
+
+;; The stock faces are made for a dark background, their yellow, green
+;; and cyan wash out on a light one.  They colour every buffer that
+;; goes through ansi-color: compilation, Magit processes, the output
+;; of the Claude sandbox launcher.
+(with-eval-after-load 'ansi-color
+  (let ((names '("black" "red" "green" "yellow"
+                 "blue" "magenta" "cyan" "white")))
+    (seq-do-indexed
+     (lambda (colour index)
+       (let ((face (intern (format "ansi-color-%s%s"
+                                   (if (< index 8) "" "bright-")
+                                   (nth (mod index 8) names)))))
+         (set-face-attribute face nil
+                             :foreground colour :background colour)))
+     sw-terminal-palette)))
+
 ;;; Eat - Emulate A Terminal
 
 (use-package eat
@@ -74,24 +102,11 @@ LIMIT defaults to 10000."
                       ("sshx"   . "/bin/bash")
                       ("docker" . "/bin/sh")))
   :config
-  ;; Terminal colors optimized for light backgrounds
-  (dolist (spec '((eat-term-color-0  . "#000000")
-                  (eat-term-color-1  . "#aa0000")
-                  (eat-term-color-2  . "#00aa00")
-                  (eat-term-color-3  . "#aa5500")
-                  (eat-term-color-4  . "#0000aa")
-                  (eat-term-color-5  . "#aa00aa")
-                  (eat-term-color-6  . "#00aaaa")
-                  (eat-term-color-7  . "#555555")
-                  (eat-term-color-8  . "#444444")
-                  (eat-term-color-9  . "#cc0000")
-                  (eat-term-color-10 . "#00cc00")
-                  (eat-term-color-11 . "#cc7700")
-                  (eat-term-color-12 . "#0000cc")
-                  (eat-term-color-13 . "#cc00cc")
-                  (eat-term-color-14 . "#00cccc")
-                  (eat-term-color-15 . "#333333")))
-    (set-face-attribute (car spec) nil :foreground (cdr spec)))
+  (seq-do-indexed
+   (lambda (colour index)
+     (set-face-attribute (intern (format "eat-term-color-%d" index)) nil
+                         :foreground colour))
+   sw-terminal-palette)
 
   ;; Evil integration: switch eat modes based on evil state
   (defun sw-eat-evil-insert-enter ()
