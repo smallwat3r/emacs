@@ -351,13 +351,16 @@ The same container a Claude session gets, to look around in it."
          ;; `sw-claude--session-ended' kills the buffer instead, after
          ;; it took what the launcher said
          (eat-kill-buffer-on-exit nil)
-         (fresh (not (get-buffer-process (format "*%s*" name))))
-         (buffer (eat-make name sw-claude-docker-script nil "--shell")))
+         (buffer (get-buffer-create (format "*%s*" name)))
+         (fresh (not (get-buffer-process buffer))))
+    ;; Shown before the shell starts, eat sizes the terminal from the
+    ;; window of its buffer and starts at 80x24 without one
+    (pop-to-buffer buffer)
+    (eat-make name sw-claude-docker-script nil "--shell")
     (when fresh
       (with-current-buffer buffer
         (sw-claude--watch-session)
-        (setq sw-claude--kill-on-exit t)))
-    (pop-to-buffer buffer)))
+        (setq sw-claude--kill-on-exit t)))))
 
 (defconst sw-claude-session-options
   '(("extra-dirs" . dirs)
