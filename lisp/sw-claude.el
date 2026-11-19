@@ -714,6 +714,10 @@ during the startup delay."
       (when (and (string-prefix-p "*claude:" (buffer-name buf))
                  (not (get-buffer-process buf)))
         (kill-buffer buf)))
+    ;; Declared here too, use-package evaluates :config outside the
+    ;; scope of the file level declaration. Without it the binding is
+    ;; lexical and eat fails to load under it.
+    (defvar eat-kill-buffer-on-exit)
     (let ((eat-kill-buffer-on-exit nil))
       (apply orig-fn args)))
 
