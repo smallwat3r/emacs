@@ -366,7 +366,7 @@ DEF is a command or nil (prefix-only label)."
     ("r l" sw-claude-trace-menu "Trace sessions")
     ("r f" sw-claude-trace-follow "Follow sessions")
     ("r $" sw-claude-shell "Sandbox shell")
-    ("r S" sw-claude-sandbox-menu "Sandbox menu")
+    ("r S" sw-claude-airlock-menu "Sandbox menu")
     ("r w" eglot-reconnect "Reconnect Eglot")
 
     ;; Insert

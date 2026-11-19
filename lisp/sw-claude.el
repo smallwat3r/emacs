@@ -2,8 +2,8 @@
 
 ;;; Commentary:
 ;; Integration with claude-code CLI for AI-assisted coding.
-;; Claude runs inside a Docker sandbox via the claude-docker launcher
-;; (from the claude-sandbox repository), which mounts the project
+;; Claude runs inside a Docker sandbox via the claude-airlock launcher
+;; (from the claude-airlock repository), which mounts the project
 ;; directory, shares the login and the git config, and keeps a record
 ;; of what each session did.  On top of the sessions themselves this
 ;; covers the launcher's own features: opening doors for one session
@@ -18,11 +18,11 @@
 (require 'ansi-color)
 (require 'transient)
 
-(defcustom sw-claude-docker-script
-  (or (executable-find "claude-docker")
-      (expand-file-name "~/code/claude-sandbox/bin/claude-docker"))
+(defcustom sw-claude-airlock-script
+  (or (executable-find "claude-airlock")
+      (expand-file-name "~/code/claude-airlock/bin/claude-airlock"))
   "Path to the Docker wrapper script for sandboxed Claude.
-It lives in the claude-sandbox repository, found on `exec-path'
+It lives in the claude-airlock repository, found on `exec-path'
 or at its usual checkout."
   :type 'file
   :group 'tools)
@@ -44,10 +44,10 @@ If in a split view, display in the current window."
 ;;; The launcher
 
 (defun sw-claude--sandbox-root ()
-  "Return the claude-sandbox checkout the launcher belongs to."
+  "Return the claude-airlock checkout the launcher belongs to."
   (file-name-directory
    (directory-file-name
-    (file-name-directory (file-truename sw-claude-docker-script)))))
+    (file-name-directory (file-truename sw-claude-airlock-script)))))
 
 (defun sw-claude--project-dir ()
   "Return the directory a session of the current buffer runs in."
@@ -58,7 +58,7 @@ If in a split view, display in the current window."
 (defun sw-claude--launcher-compile (&rest args)
   "Run the launcher with ARGS in a compilation buffer."
   (compile (mapconcat #'shell-quote-argument
-                      (cons sw-claude-docker-script args) " ")))
+                      (cons sw-claude-airlock-script args) " ")))
 
 (defvar-local sw-claude--output-args nil
   "Launcher arguments that produced the output of this buffer.")
@@ -73,7 +73,7 @@ If in a split view, display in the current window."
                               sw-claude--output-follow))
 
 (define-derived-mode sw-claude-output-mode special-mode "Claude-Sandbox"
-  "Major mode for the output of the claude-docker launcher.
+  "Major mode for the output of the claude-airlock launcher.
 \\[revert-buffer] runs the command again, \\[quit-window] leaves."
   (setq truncate-lines t)
   (setq-local ansi-color-context-region nil)
@@ -121,9 +121,9 @@ buffer scroll along."
             sw-claude--output-args args
             sw-claude--output-follow follow)
       (make-process
-       :name "claude-docker"
+       :name "claude-airlock"
        :buffer buffer
-       :command (cons sw-claude-docker-script args)
+       :command (cons sw-claude-airlock-script args)
        :connection-type 'pipe
        :noquery t
        :filter #'sw-claude--output-filter
@@ -165,7 +165,7 @@ Run `sw-claude-rebuild-sandbox' afterwards to build the new image."
   "Restart the egress filter, so that it reads its allowlist again.
 The connections of the filtered sessions drop for a moment."
   (interactive)
-  (sw-run-async (list sw-claude-docker-script "--net-reload")))
+  (sw-run-async (list sw-claude-airlock-script "--net-reload")))
 
 (defun sw-claude-edit-allowed-domains ()
   "Visit the allowlist of the egress filter.
@@ -181,7 +181,7 @@ The connections of the filtered sessions drop for a moment."
   (let* ((default-directory (sw-claude--project-dir))
          (sessions
           (condition-case nil
-              (process-lines sw-claude-docker-script "--trace" "list")
+              (process-lines sw-claude-airlock-script "--trace" "list")
             (error (user-error "No session recorded for %s"
                                default-directory))))
          ;; The launcher lists the latest first, keep its order
@@ -258,7 +258,7 @@ which indents what it shows, has nothing."
   (save-excursion
     (goto-char (point-max))
     (forward-line (- sw-claude--report-lines))
-    (when (re-search-forward "^claude-docker: " nil t)
+    (when (re-search-forward "^claude-airlock: " nil t)
       (let ((text (buffer-substring-no-properties (match-beginning 0)
                                                   (point-max))))
         (string-trim
@@ -268,7 +268,7 @@ which indents what it shows, has nothing."
 
 (defun sw-claude--show-report (session report)
   "Show REPORT, what the launcher said when SESSION ended."
-  (let ((buffer (get-buffer-create "*claude-sandbox*")))
+  (let ((buffer (get-buffer-create "*claude-airlock*")))
     (with-current-buffer buffer
       (unless (derived-mode-p 'special-mode)
         (special-mode))
@@ -356,7 +356,7 @@ The same container a Claude session gets, to look around in it."
     ;; Shown before the shell starts, eat sizes the terminal from the
     ;; window of its buffer and starts at 80x24 without one
     (pop-to-buffer buffer)
-    (eat-make name sw-claude-docker-script nil "--shell")
+    (eat-make name sw-claude-airlock-script nil "--shell")
     (when fresh
       (with-current-buffer buffer
         (sw-claude--watch-session)
@@ -366,18 +366,18 @@ The same container a Claude session gets, to look around in it."
   '(("extra-dirs" . dirs)
     ("extra-dirs-read-only" . dirs-ro)
     ("worktree" . worktree)
-    ("net-filter" . "CLAUDE_DOCKER_NET_FILTER=1")
-    ("ssh-agent" . "CLAUDE_DOCKER_SSH_AGENT=1")
+    ("net-filter" . "CLAUDE_AIRLOCK_NET_FILTER=1")
+    ("ssh-agent" . "CLAUDE_AIRLOCK_SSH_AGENT=1")
     ;; Ahead of the plain socket: of two settings of one variable the
     ;; first counts, and full includes the other
-    ("docker-socket-full" . "CLAUDE_DOCKER_SOCKET=full")
-    ("docker-socket" . "CLAUDE_DOCKER_SOCKET=1")
-    ("writable-config" . "CLAUDE_DOCKER_RW_CONFIG=1")
-    ("shared-history" . "CLAUDE_DOCKER_SHARED_HISTORY=1")
-    ("telemetry" . "CLAUDE_DOCKER_TELEMETRY=1")
-    ("no-net-log" . "CLAUDE_DOCKER_NET_LOG=0")
-    ("no-proc-log" . "CLAUDE_DOCKER_PROC_LOG=0")
-    ("no-cache" . "CLAUDE_DOCKER_CACHE=0"))
+    ("docker-socket-full" . "CLAUDE_AIRLOCK_DOCKER_SOCKET=full")
+    ("docker-socket" . "CLAUDE_AIRLOCK_DOCKER_SOCKET=1")
+    ("writable-config" . "CLAUDE_AIRLOCK_RW_CONFIG=1")
+    ("shared-history" . "CLAUDE_AIRLOCK_SHARED_HISTORY=1")
+    ("telemetry" . "CLAUDE_AIRLOCK_TELEMETRY=1")
+    ("no-net-log" . "CLAUDE_AIRLOCK_NET_LOG=0")
+    ("no-proc-log" . "CLAUDE_AIRLOCK_PROC_LOG=0")
+    ("no-cache" . "CLAUDE_AIRLOCK_CACHE=0"))
   "What `sw-claude-with-options' offers for one session.
 Each name comes with the setting of the launcher it stands for, or
 with a symbol for what is asked for next.")
@@ -400,7 +400,7 @@ with a symbol for what is asked for next.")
 They hold for this one session: directories mounted next to the
 project, a git worktree of its own, and the doors of the sandbox
 that are closed unless asked for.  What every session should get
-belongs in ~/.config/claude-sandbox/config instead."
+belongs in ~/.config/claude-airlock/config instead."
   (interactive
    (list (completing-read-multiple
           "Session options (comma separated): "
@@ -411,11 +411,11 @@ belongs in ~/.config/claude-sandbox/config instead."
       (when (member (car option) options)
         (pcase (cdr option)
           ('dirs
-           (push (concat "CLAUDE_DOCKER_EXTRA_DIRS="
+           (push (concat "CLAUDE_AIRLOCK_EXTRA_DIRS="
                          (sw-claude--read-dirs "Extra directory: "))
                  env))
           ('dirs-ro
-           (push (concat "CLAUDE_DOCKER_EXTRA_DIRS_RO="
+           (push (concat "CLAUDE_AIRLOCK_EXTRA_DIRS_RO="
                          (sw-claude--read-dirs "Read-only directory: "))
                  env))
           ('worktree
@@ -429,7 +429,7 @@ belongs in ~/.config/claude-sandbox/config instead."
            (append (nreverse env) process-environment)))
       (claude-code--start nil switches))))
 
-(transient-define-prefix sw-claude-sandbox-menu ()
+(transient-define-prefix sw-claude-airlock-menu ()
   "The Claude sandbox: its sessions, its image and its egress filter."
   [["Sessions"
     ("o" "Start with options" sw-claude-with-options)
@@ -506,7 +506,7 @@ scrollback appear stuck."
 
 (add-hook 'eat-mode-hook #'sw-claude--setup-eat-buffer)
 
-;; Same trick as claude-docker: keep Claude's TUI off the
+;; Same trick as claude-airlock: keep Claude's TUI off the
 ;; alternate screen so eat scrollback works when running `claude'
 ;; from a plain eat shell.  Inherited by every Emacs subprocess,
 ;; harmless outside Claude.
@@ -599,7 +599,7 @@ successful run, with `default-directory' set to the run directory."
      ;; A pty, the launcher then gives the container a TTY as in an
      ;; interactive session
      :connection-type 'pty
-     :command (append (list sw-claude-docker-script
+     :command (append (list sw-claude-airlock-script
                             "--dangerously-skip-permissions")
                       (when model (list "--model" model))
                       (list "-p" prompt))
@@ -632,7 +632,7 @@ successful run, with `default-directory' set to the run directory."
 (defun sw-claude--resign-commits ()
   "Re-sign the unpushed commits on the host, where gpg lives.
 The sandbox has no gpg, so its commits are made unsigned (see
-claude-docker); rewrite everything since upstream with real
+claude-airlock); rewrite everything since upstream with real
 signatures.  Skipped when the branch has no upstream, everything
 would be unpushed and rewriting from the root is not worth it.
 
@@ -670,10 +670,10 @@ credits itself.  Once done, the new commits are re-signed on the host."
 (use-package claude-code
   :ensure (:host github :repo "stevemolitor/claude-code.el")
   :when (and (executable-find "docker")
-             (file-executable-p sw-claude-docker-script))
+             (file-executable-p sw-claude-airlock-script))
   :after inheritenv
   :init
-  (setq claude-code-program sw-claude-docker-script
+  (setq claude-code-program sw-claude-airlock-script
         claude-code-program-switches
         '("--dangerously-skip-permissions")
         claude-code-terminal-backend 'eat
